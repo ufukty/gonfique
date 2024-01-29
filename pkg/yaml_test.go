@@ -9,6 +9,23 @@ import (
 	"testing"
 )
 
+func TestCreatation(t *testing.T) {
+	tcs := []string{"tc1", "tc2"}
+
+	for _, tc := range tcs {
+		t.Run(tc, func(t *testing.T) {
+			cts, err := GetTypeSpecForConfig(filepath.Join("testdata", tc, "config.yml"))
+			if err != nil {
+				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
+			}
+
+			if err := WriteConfigTypeSpecIntoFile(os.DevNull, cts, "config"); err != nil {
+				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
+			}
+		})
+	}
+}
+
 func copyFile(src, dst string) error {
 	srcFile, err := os.Open(src)
 	if err != nil {
@@ -42,7 +59,7 @@ func TestCreatationAndDecodingInto(t *testing.T) {
 		t.Run(tc, func(t *testing.T) {
 			cts, err := GetTypeSpecForConfig(filepath.Join("testdata", tc, "config.yml"))
 			if err != nil {
-				t.Fatal(fmt.Errorf("act: %w", err))
+				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
 
 			t.Run("writing", func(t *testing.T) {
