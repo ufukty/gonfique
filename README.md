@@ -88,8 +88,8 @@ For existing Visual Studio Code users:
 
 ## Known issues
 
--   Doesn't work for slices. (Fallbacks to `any` type) See `pkg/testdata/tc2/config.yml`
--   Doesn't escape keys of YAML file that collide with Go keywords (like `type`, start with capitalized letters)
+-   Doesn't work for slices. (Fallbacks to `any` type) See `pkg/testdata/tc2/config.yml`. You are not supposed to use them though. Just use dynamic keys for everything, make everything `dict`/`map`.
+-   Doesn't escape keys of YAML file that collide with Go keywords (like `type`) Workaround, start YAML keys with capitalized letters.
 
 ## License
 
