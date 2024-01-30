@@ -49,7 +49,7 @@ func main() {
 ## Install
 
 ```sh
-go get -u github.com/ufukty/gonfique
+go install github.com/ufukty/gonfique
 ```
 
 ## Usage
