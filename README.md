@@ -2,7 +2,7 @@
 
 ![Gonfique logo](assets/Gonfique@400w.png)
 
-`gonfique` is tool that creates a Go struct type definitions for given YAML files which has custom schemas. Since `gonfique` makes it easier to use custom schemas, developers can levarage dynamic-keyed configs to access information with autocomplete and without searching through items' values. Also existing Makefile users can get instantly notified when and where a config change breaks Go code (See [Serving suggestion](#serving-suggestions)).
+`gonfique` is a tool that creates Go struct type definitions for given YAML file which has custom schemas. Since `gonfique` makes it easier to use custom schemas, developers can levarage dynamic-keyed configs to access information with autocomplete and without searching through items' values. Also existing Makefile users can get instantly notified when and where a config change breaks Go code (See [Serving suggestion](#serving-suggestions)).
 
 Before `gonfique`
 
