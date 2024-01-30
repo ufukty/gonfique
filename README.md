@@ -1,8 +1,8 @@
-# `gonfic` Type checked, dynamic keyed configs for Go programs
+# `gonfique` Type checked, dynamic keyed configs for Go programs
 
-`gonfic` is tool that creates a Go struct type definitions for given YAML files which has custom schemas. Since `gonfic` makes it easier to use custom schemas, developers can levarage dynamic-keyed configs to access information with autocomplete and without searching through items' values. Also existing Makefile users can get instantly notified when and where a config change breaks Go code (See [Serving suggestion](#serving-suggestions)).
+`gonfique` is tool that creates a Go struct type definitions for given YAML files which has custom schemas. Since `gonfique` makes it easier to use custom schemas, developers can levarage dynamic-keyed configs to access information with autocomplete and without searching through items' values. Also existing Makefile users can get instantly notified when and where a config change breaks Go code (See [Serving suggestion](#serving-suggestions)).
 
-Before `gonfic`
+Before `gonfique`
 
 ```yaml
 Services:
@@ -25,7 +25,7 @@ func main() {
 }
 ```
 
-After `gonfic`
+After `gonfique`
 
 ```yaml
 Services:
@@ -47,13 +47,13 @@ func main() {
 ## Install
 
 ```sh
-go get -u github.com/ufukty/gonfic
+go get -u github.com/ufukty/gonfique
 ```
 
 ## Usage
 
 ```sh
-gonfic -in config.yml -out gonfic.go -pkg main
+gonfique -in config.yml -out gonfique.go -pkg main
 ```
 
 ## Serving suggestions
@@ -61,10 +61,10 @@ gonfic -in config.yml -out gonfic.go -pkg main
 For existing Makefile users:
 
 ```Makefile
-gonfic.go: config.yml
-    gonfic -in config.yml -out gonfic.go -pkg main
+gonfique.go: config.yml
+    gonfique -in config.yml -out gonfique.go -pkg main
 
-all: gonfic.go
+all: gonfique.go
     ...
 ```
 
@@ -75,7 +75,7 @@ For existing Visual Studio Code users:
     "runOnSave.commands": [
         {
             "match": "^config.yml$",
-            "command": "cd '${fileDirname}' && gonfic"
+            "command": "cd '${fileDirname}' && gonfique"
         }
     ]
 }

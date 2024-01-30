@@ -1,4 +1,4 @@
-module github.com/ufukty/gonfic
+module github.com/ufukty/gonfique
 
 go 1.21.5
 

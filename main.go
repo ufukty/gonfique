@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ufukty/gonfic/pkg"
+	"github.com/ufukty/gonfique/pkg"
 )
 
 type Args struct {
