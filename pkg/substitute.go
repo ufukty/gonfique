@@ -5,8 +5,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"log"
-	"reflect"
 
 	"golang.org/x/exp/maps"
 
@@ -14,7 +12,6 @@ import (
 )
 
 func compare(a, b any) bool {
-	log.Println(reflect.TypeOf(a), reflect.TypeOf(b))
 	switch a := a.(type) {
 	case *ast.Ident:
 		if b, ok := b.(*ast.Ident); ok {
@@ -62,8 +59,6 @@ func compare(a, b any) bool {
 		if b, ok := b.(*ast.StructType); ok {
 			return compare(a.Fields, b.Fields)
 		}
-		// default:
-		// 	log.Println(fmt.Sprintln("unhandled ast type", reflect.TypeOf(a), reflect.TypeOf(b)))
 	}
 	return false
 }
@@ -92,9 +87,7 @@ func Substitute(produced *ast.TypeSpec, existing []*ast.TypeSpec) {
 	// substitute on dfs traceback
 	astutil.Apply(produced.Type, nil, func(c *astutil.Cursor) bool {
 		for _, e := range existing {
-			// fmt.Println(reflect.TypeOf(c.Node()), c.Node())
 			if c.Node() != nil && compare(c.Node(), e.Type) {
-				fmt.Println("vola")
 				c.Replace(e.Name)
 			}
 		}
