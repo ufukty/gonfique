@@ -56,6 +56,9 @@ go install github.com/ufukty/gonfique
 
 ```sh
 gonfique -in config.yml -out config.go -pkg main
+
+# (optional) if there are partial models of the config type spec:
+gonfique -in config.yml -out config.go -pkg main -use models.go
 ```
 
 ## Serving suggestions
@@ -115,9 +118,18 @@ Gitlab:
     Domain: gitlab.com
 ```
 
+```go
+// (optional) models.go
+package main
+
+type Endpoint struct {
+    Method string
+    Path   string
+}
+```
+
 ```sh
-# Run
-gonfique -in config.yml -out config.go -pkg main
+gonfique -in config.yml -out config.go -pkg main -use models.go
 ```
 
 ```go
@@ -140,32 +152,20 @@ type Config struct {
 					Document struct {
 						Path      string `yaml:"Path"`
 						Endpoints struct {
-							List struct {
-								Method string `yaml:"Method"`
-								Path   string `yaml:"Path"`
-							} `yaml:"List"`
+							List Endpoint `yaml:"List"` // here
 						} `yaml:"Endpoints"`
 					} `yaml:"Document"`
 					Objectives struct {
 						Path      string `yaml:"Path"`
 						Endpoints struct {
-							Create struct {
-								Method string `yaml:"Method"`
-								Path   string `yaml:"Path"`
-							} `yaml:"Create"`
+							Create Endpoint `yaml:"Create"` // here
 						} `yaml:"Endpoints"`
 					} `yaml:"Objectives"`
 					Tags struct {
 						Path      string `yaml:"Path"`
 						Endpoints struct {
-							Creation struct {
-								Path   string `yaml:"Path"`
-								Method string `yaml:"Method"`
-							} `yaml:"Creation"`
-							Assign struct {
-								Method string `yaml:"Method"`
-								Path   string `yaml:"Path"`
-							} `yaml:"Assign"`
+							Creation Endpoint `yaml:"Creation"` // here
+							Assign   Endpoint `yaml:"Assign"` // here
 						} `yaml:"Endpoints"`
 					} `yaml:"Tags"`
 				} `yaml:"Services"`
@@ -192,10 +192,16 @@ func ReadConfig(path string) (Config, error) {
 ```
 
 ```go
-// main.go
+// usage "main.go"
 package main
 
 import "fmt"
+
+func RegisterEndpoints(eps []Endpoint) {
+    for _, ep := range eps {
+        fmt.Println(ep.Method, ep.Path)
+    }
+}
 
 func main() {
     cfg, err := ReadConfig("config.yml")
@@ -203,11 +209,11 @@ func main() {
         //
     }
     // fields are suggested as typing by IDE
-    fmt.Println(cfg.Github.
-        Gateways.Public.
-        Services.Document.
-        Endpoints.List.Method,
-    )
+
+    endpoints := Github.Gateways.Public.Services.Tags.Endpoints
+    RegisterEndpoints([]Endpoint{
+        endpoints.Creation, endpoints.Assign,
+    })
 }
 ```
 
