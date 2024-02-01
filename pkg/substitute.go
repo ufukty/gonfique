@@ -1,0 +1,103 @@
+package pkg
+
+import (
+	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"log"
+	"reflect"
+
+	"golang.org/x/exp/maps"
+
+	"golang.org/x/tools/go/ast/astutil"
+)
+
+func compare(a, b any) bool {
+	log.Println(reflect.TypeOf(a), reflect.TypeOf(b))
+	switch a := a.(type) {
+	case *ast.Ident:
+		if b, ok := b.(*ast.Ident); ok {
+			return a.Name == b.Name
+		}
+	case *ast.ArrayType:
+		if b, ok := b.(*ast.ArrayType); ok {
+			return (a.Len == b.Len) && (a.Elt != nil && b.Elt != nil && compare(a.Elt, b.Elt))
+		}
+	case *ast.MapType:
+		if b, ok := b.(*ast.MapType); ok {
+			return compare(a.Key, b.Key) && compare(a.Value, b.Value)
+		}
+	case *ast.FieldList:
+		if b, ok := b.(*ast.FieldList); ok {
+			if a.NumFields() != b.NumFields() {
+				return false
+			}
+			af := map[*ast.Ident]ast.Expr{}
+			bf := map[*ast.Ident]ast.Expr{}
+
+			for i := 0; i < a.NumFields(); i++ {
+				for _, id := range a.List[i].Names {
+					af[id] = a.List[i].Type
+				}
+				for _, id := range b.List[i].Names {
+					bf[id] = b.List[i].Type
+				}
+			}
+			afk := maps.Keys(af)
+			bfk := maps.Keys(bf)
+			if len(afk) != len(bfk) {
+				return false
+			}
+			sort(afk)
+			sort(bfk)
+			for i := 0; i < len(afk); i++ {
+				if !compare(afk[i], bfk[i]) {
+					return false
+				}
+			}
+			return true
+		}
+	case *ast.StructType:
+		if b, ok := b.(*ast.StructType); ok {
+			return compare(a.Fields, b.Fields)
+		}
+		// default:
+		// 	log.Println(fmt.Sprintln("unhandled ast type", reflect.TypeOf(a), reflect.TypeOf(b)))
+	}
+	return false
+}
+
+func ReadTypes(path string) ([]*ast.TypeSpec, error) {
+	f, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.AllErrors)
+	if err != nil {
+		return nil, fmt.Errorf("parsing %q: %w", path, err)
+	}
+	tss := []*ast.TypeSpec{}
+	for _, decl := range f.Decls {
+		if gd, ok := decl.(*ast.GenDecl); ok {
+			if gd.Tok == token.TYPE {
+				for _, spec := range gd.Specs {
+					if ts, ok := spec.(*ast.TypeSpec); ok {
+						tss = append(tss, ts)
+					}
+				}
+			}
+		}
+	}
+	return tss, nil
+}
+
+func Substitute(produced *ast.TypeSpec, existing []*ast.TypeSpec) {
+	// substitute on dfs traceback
+	astutil.Apply(produced.Type, nil, func(c *astutil.Cursor) bool {
+		for _, e := range existing {
+			// fmt.Println(reflect.TypeOf(c.Node()), c.Node())
+			if c.Node() != nil && compare(c.Node(), e.Type) {
+				fmt.Println("vola")
+				c.Replace(e.Name)
+			}
+		}
+		return true
+	})
+}

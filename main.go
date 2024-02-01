@@ -13,6 +13,7 @@ type Args struct {
 	In  string
 	Out string
 	Pkg string
+	Use string
 }
 
 func getArgs() Args {
@@ -20,6 +21,7 @@ func getArgs() Args {
 	flag.StringVar(&args.In, "in", "", "input file path (yml or yaml)")
 	flag.StringVar(&args.Out, "out", "", "output file path (go)")
 	flag.StringVar(&args.Pkg, "pkg", "", "package name that will be inserted into the generated file")
+	flag.StringVar(&args.Use, "use", "", "(optional) use type definitions found in <file>")
 	flag.Parse()
 	return args
 }
@@ -50,12 +52,21 @@ func main() {
 
 	cfgts, err := pkg.ReadConfigYaml(args.In)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		fmt.Println(fmt.Errorf("reading input file: %w", err))
+		os.Exit(2)
+	}
+
+	if args.Use != "" {
+		tss, err := pkg.ReadTypes(args.Use)
+		if err != nil {
+			fmt.Println(fmt.Errorf("reading -use file %q: %w", args.Use, err))
+			os.Exit(3)
+		}
+		pkg.Substitute(cfgts, tss)
 	}
 
 	if err := pkg.WriteConfigGo(args.Out, cfgts, args.Pkg); err != nil {
-		fmt.Println(err)
+		fmt.Println(fmt.Errorf("creating %q: %w", args.Out, err))
 		os.Exit(1)
 	}
 }
