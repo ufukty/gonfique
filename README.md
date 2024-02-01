@@ -8,14 +8,14 @@ Before `gonfique`
 
 ```yaml
 Config:
-  - Name: A
-    Details:
-      X:
-      Y:
-  - Name: B
-    Details:
-      X:
-      Y:
+    - Name: A
+      Details:
+          X:
+          Y:
+    - Name: B
+      Details:
+          X:
+          Y:
 ```
 
 ```go
@@ -32,11 +32,11 @@ After `gonfique`
 
 ```yaml
 A:
-  X:
-  Y:
+    X:
+    Y:
 B:
-  X:
-  Y:
+    X:
+    Y:
 ```
 
 ```go
@@ -93,26 +93,26 @@ For existing Visual Studio Code users:
 ```yml
 # config.yml
 Github:
-  Domain: github.com
-  Gateways:
-    Public:
-      Path: /api/v1.0.0
-      Services:
-        Document:
-          Path: document
-          Endpoints:
-            List: { Method: "GET", Path: "list/{root}" }
-        Objectives:
-          Path: tasks
-          Endpoints:
-            Create: { Method: "POST", Path: "task" }
-        Tags:
-          Path: tags
-          Endpoints:
-            Creation: { Method: "POST", Path: "" }
-            Assign: { Method: "POST", Path: "assign" }
+    Domain: github.com
+    Gateways:
+        Public:
+            Path: /api/v1.0.0
+            Services:
+                Document:
+                    Path: document
+                    Endpoints:
+                        List: { Method: "GET", Path: "list/{root}" }
+                Objectives:
+                    Path: tasks
+                    Endpoints:
+                        Create: { Method: "POST", Path: "task" }
+                Tags:
+                    Path: tags
+                    Endpoints:
+                        Creation: { Method: "POST", Path: "" }
+                        Assign: { Method: "POST", Path: "assign" }
 Gitlab:
-  Domain: gitlab.com
+    Domain: gitlab.com
 ```
 
 ```sh
