@@ -12,11 +12,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func rec(v reflect.Value) ast.Expr {
+// reconstructs a reflect-value's type in ast.TypeSpec.
+// limited with types used by YAML decoder.
+func toAst(v reflect.Value) ast.Expr {
 	t := v.Type()
 	switch t.Kind() {
 	case reflect.Interface:
-		return rec(v.Elem())
+		return toAst(v.Elem())
 	case reflect.Map:
 		st := &ast.StructType{
 			Fields: &ast.FieldList{
@@ -29,7 +31,7 @@ func rec(v reflect.Value) ast.Expr {
 			iv := iter.Value()
 			st.Fields.List = append(st.Fields.List, &ast.Field{
 				Names: []*ast.Ident{ast.NewIdent(ik.String())},
-				Type:  rec(iv),
+				Type:  toAst(iv),
 				Tag: &ast.BasicLit{
 					Kind:  token.STRING,
 					Value: fmt.Sprintf("`yaml:%q`", ik.String()),
@@ -65,7 +67,7 @@ func rec(v reflect.Value) ast.Expr {
 	return nil
 }
 
-func GetTypeSpecForConfig(src string) (*ast.TypeSpec, error) {
+func ReadConfigYaml(src string) (*ast.TypeSpec, error) {
 	f, err := os.Open(src)
 	if err != nil {
 		return nil, fmt.Errorf("opening input file: %w", err)
@@ -77,11 +79,11 @@ func GetTypeSpecForConfig(src string) (*ast.TypeSpec, error) {
 	}
 	return &ast.TypeSpec{
 		Name: ast.NewIdent("Config"),
-		Type: rec(reflect.ValueOf(y)),
+		Type: toAst(reflect.ValueOf(y)),
 	}, nil
 }
 
-func WriteConfigTypeSpecIntoFile(dst string, cfg *ast.TypeSpec, pkgname string) error {
+func WriteConfigGo(dst string, cfg *ast.TypeSpec, pkgname string) error {
 	f := &ast.File{
 		Name: ast.NewIdent(pkgname),
 		Decls: []ast.Decl{

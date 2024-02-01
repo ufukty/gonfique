@@ -24,7 +24,7 @@ func getArgs() Args {
 	return args
 }
 
-func checkMissingValues(args Args) error {
+func checkMissingArgs(args Args) error {
 	ms := []string{}
 	if args.In == "" {
 		ms = append(ms, "-in")
@@ -43,18 +43,18 @@ func checkMissingValues(args Args) error {
 
 func main() {
 	args := getArgs()
-	if err := checkMissingValues(args); err != nil {
+	if err := checkMissingArgs(args); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	cfgts, err := pkg.GetTypeSpecForConfig(args.In)
+	cfgts, err := pkg.ReadConfigYaml(args.In)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	if err := pkg.WriteConfigTypeSpecIntoFile(args.Out, cfgts, args.Pkg); err != nil {
+	if err := pkg.WriteConfigGo(args.Out, cfgts, args.Pkg); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}

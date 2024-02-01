@@ -14,12 +14,12 @@ func TestCreatation(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			cts, err := GetTypeSpecForConfig(filepath.Join("testdata", tc, "config.yml"))
+			cts, err := ReadConfigYaml(filepath.Join("testdata", tc, "config.yml"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
 
-			if err := WriteConfigTypeSpecIntoFile(os.DevNull, cts, "config"); err != nil {
+			if err := WriteConfigGo(os.DevNull, cts, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 		})
@@ -57,7 +57,7 @@ func TestCreatationAndDecodingInto(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			cts, err := GetTypeSpecForConfig(filepath.Join("testdata", tc, "config.yml"))
+			cts, err := ReadConfigYaml(filepath.Join("testdata", tc, "config.yml"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
@@ -78,7 +78,7 @@ func TestCreatationAndDecodingInto(t *testing.T) {
 					}
 				}
 
-				if err := WriteConfigTypeSpecIntoFile(filepath.Join(testloc, "config.go"), cts, "config"); err != nil {
+				if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, "config"); err != nil {
 					t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 				}
 
