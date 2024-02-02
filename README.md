@@ -237,7 +237,7 @@ func main() {
 ## Todo
 
 -   [x] Use user provided types for pieces of YAML when schemas match. (`-use <file>` flag)
--   [ ] Stable field order in produced type spec
+-   [x] Stable field order in produced type spec
 
 ## Contribution
 
