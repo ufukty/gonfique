@@ -58,6 +58,18 @@ go install github.com/ufukty/gonfique
 gonfique -in config.yml -out config.go -pkg main
 ```
 
+```
+Usage of gonfique:
+  -in string
+        input file path (yml or yaml)
+  -out string
+        output file path (go)
+  -pkg string
+        package name that will be inserted into the generated file
+  -use string
+        (optional) use type definitions found in <file>
+```
+
 ## Serving suggestions
 
 For existing Makefile users:
@@ -118,9 +130,18 @@ Gitlab:
     Domain: gitlab.com
 ```
 
+```go
+// (optional) models.go
+package main
+
+type Endpoint struct {
+    Method string
+    Path   string
+}
+```
+
 ```sh
-# Run
-gonfique -in config.yml -out config.go -pkg main
+gonfique -in config.yml -out config.go -pkg main -use models.go
 ```
 
 ```go
@@ -143,32 +164,20 @@ type Config struct {
 					Document struct {
 						Path      string `yaml:"Path"`
 						Endpoints struct {
-							List struct {
-								Method string `yaml:"Method"`
-								Path   string `yaml:"Path"`
-							} `yaml:"List"`
+							List Endpoint `yaml:"List"` // here
 						} `yaml:"Endpoints"`
 					} `yaml:"Document"`
 					Objectives struct {
 						Path      string `yaml:"Path"`
 						Endpoints struct {
-							Create struct {
-								Method string `yaml:"Method"`
-								Path   string `yaml:"Path"`
-							} `yaml:"Create"`
+							Create Endpoint `yaml:"Create"` // here
 						} `yaml:"Endpoints"`
 					} `yaml:"Objectives"`
 					Tags struct {
 						Path      string `yaml:"Path"`
 						Endpoints struct {
-							Creation struct {
-								Path   string `yaml:"Path"`
-								Method string `yaml:"Method"`
-							} `yaml:"Creation"`
-							Assign struct {
-								Method string `yaml:"Method"`
-								Path   string `yaml:"Path"`
-							} `yaml:"Assign"`
+							Creation Endpoint `yaml:"Creation"` // here
+							Assign   Endpoint `yaml:"Assign"` // here
 						} `yaml:"Endpoints"`
 					} `yaml:"Tags"`
 				} `yaml:"Services"`
@@ -195,10 +204,16 @@ func ReadConfig(path string) (Config, error) {
 ```
 
 ```go
-// main.go
+// usage "main.go"
 package main
 
 import "fmt"
+
+func RegisterEndpoints(eps []Endpoint) {
+    for _, ep := range eps {
+        fmt.Println(ep.Method, ep.Path)
+    }
+}
 
 func main() {
     cfg, err := ReadConfig("config.yml")
@@ -206,11 +221,11 @@ func main() {
         //
     }
     // fields are suggested as typing by IDE
-    fmt.Println(cfg.Github.
-        Gateways.Public.
-        Services.Document.
-        Endpoints.List.Method,
-    )
+
+    endpoints := Github.Gateways.Public.Services.Tags.Endpoints
+    RegisterEndpoints([]Endpoint{
+        endpoints.Creation, endpoints.Assign,
+    })
 }
 ```
 
@@ -221,6 +236,7 @@ func main() {
 
 ## Todo
 
+-   [x] Use user provided types for pieces of YAML when schemas match. (`-use <file>` flag)
 -   [ ] Stable field order in produced type spec
 
 ## Contribution
