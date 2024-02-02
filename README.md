@@ -56,9 +56,18 @@ go install github.com/ufukty/gonfique
 
 ```sh
 gonfique -in config.yml -out config.go -pkg main
+```
 
-# (optional) if there are partial models of the config type spec:
-gonfique -in config.yml -out config.go -pkg main -use models.go
+```
+Usage of gonfique:
+  -in string
+        input file path (yml or yaml)
+  -out string
+        output file path (go)
+  -pkg string
+        package name that will be inserted into the generated file
+  -use string
+        (optional) use type definitions found in <file>
 ```
 
 ## Serving suggestions
