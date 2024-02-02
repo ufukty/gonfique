@@ -1,8 +1,7 @@
 package config
 
 type Endpoint struct {
-	Method string
-	Path   string
+	Method, Path string
 }
 
 type Service struct {
