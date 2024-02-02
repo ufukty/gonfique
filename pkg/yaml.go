@@ -8,9 +8,22 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"slices"
 
 	"gopkg.in/yaml.v3"
 )
+
+func sortFieldList(fl *ast.FieldList) {
+	slices.SortFunc(fl.List, func(a, b *ast.Field) int {
+		if a.Names[0].Name < b.Names[0].Name {
+			return -1
+		} else if a.Names[0].Name > b.Names[0].Name {
+			return 1
+		} else {
+			return 0
+		}
+	})
+}
 
 // reconstructs a reflect-value's type in ast.TypeSpec.
 // limited with types used by YAML decoder.
@@ -37,6 +50,7 @@ func toAst(v reflect.Value) ast.Expr {
 					Value: fmt.Sprintf("`yaml:%q`", ik.String()),
 				},
 			})
+			sortFieldList(st.Fields)
 		}
 		return st
 	case reflect.Slice:
