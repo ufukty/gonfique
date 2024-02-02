@@ -50,7 +50,7 @@ func compare(a, b any) bool {
 			sort(afk)
 			sort(bfk)
 			for i := 0; i < len(afk); i++ {
-				if !compare(afk[i], bfk[i]) {
+				if !compare(afk[i], bfk[i]) || !compare(af[afk[i]], bf[bfk[i]]) {
 					return false
 				}
 			}
