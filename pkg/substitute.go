@@ -11,6 +11,16 @@ import (
 	"golang.org/x/tools/go/ast/astutil"
 )
 
+func linearizeFieldList(fl *ast.FieldList) map[*ast.Ident]ast.Expr {
+	l := map[*ast.Ident]ast.Expr{}
+	for _, f := range fl.List {
+		for _, id := range f.Names {
+			l[id] = f.Type
+		}
+	}
+	return l
+}
+
 func compare(a, b any) bool {
 	switch a := a.(type) {
 	case *ast.Ident:
@@ -30,17 +40,8 @@ func compare(a, b any) bool {
 			if a.NumFields() != b.NumFields() {
 				return false
 			}
-			af := map[*ast.Ident]ast.Expr{}
-			bf := map[*ast.Ident]ast.Expr{}
-
-			for i := 0; i < a.NumFields(); i++ {
-				for _, id := range a.List[i].Names {
-					af[id] = a.List[i].Type
-				}
-				for _, id := range b.List[i].Names {
-					bf[id] = b.List[i].Type
-				}
-			}
+			af := linearizeFieldList(a)
+			bf := linearizeFieldList(b)
 			afk := maps.Keys(af)
 			bfk := maps.Keys(bf)
 			if len(afk) != len(bfk) {
