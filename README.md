@@ -8,23 +8,23 @@ Before `gonfique`
 
 ```yaml
 Config:
-    - Name: A
-      Details:
-          X:
-          Y:
-    - Name: B
-      Details:
-          X:
-          Y:
+  - Name: A
+    Details:
+      X:
+      Y:
+  - Name: B
+    Details:
+      X:
+      Y:
 ```
 
 ```go
 func main() {
-    // ...
-    fmt.Println(
-        cfg.Find("A").Details.Get("X"),
-        cfg[0].Details.Get("Y"),
-    )
+  // ...
+  fmt.Println(
+    cfg.Find("A").Details.Get("X"),
+    cfg[0].Details.Get("Y"),
+  )
 }
 ```
 
@@ -32,17 +32,17 @@ After `gonfique`
 
 ```yaml
 A:
-    X:
-    Y:
+  X:
+  Y:
 B:
-    X:
-    Y:
+  X:
+  Y:
 ```
 
 ```go
 func main() {
-    // ...
-    fmt.Println(cfg.A.X, cfg.A.Y)
+  // ...
+  fmt.Println(cfg.A.X, cfg.A.Y)
 }
 ```
 
@@ -86,12 +86,12 @@ For existing Visual Studio Code users:
 
 ```json
 {
-    "runOnSave.commands": [
-        {
-            "match": "^config.yml$",
-            "command": "cd '${fileDirname}' && make config.go"
-        }
-    ]
+  "runOnSave.commands": [
+    {
+      "match": "^config.yml$",
+      "command": "cd '${fileDirname}' && make config.go"
+    }
+  ]
 }
 ```
 
@@ -108,26 +108,26 @@ gonfique is necessary because of there are not many reliable and sustainable alt
 ```yml
 # config.yml
 Github:
-    Domain: github.com
-    Gateways:
-        Public:
-            Path: /api/v1.0.0
-            Services:
-                Document:
-                    Path: document
-                    Endpoints:
-                        List: { Method: "GET", Path: "list/{root}" }
-                Objectives:
-                    Path: tasks
-                    Endpoints:
-                        Create: { Method: "POST", Path: "task" }
-                Tags:
-                    Path: tags
-                    Endpoints:
-                        Creation: { Method: "POST", Path: "" }
-                        Assign: { Method: "POST", Path: "assign" }
+  Domain: github.com
+  Gateways:
+    Public:
+      Path: /api/v1.0.0
+      Services:
+        Document:
+          Path: document
+          Endpoints:
+            List: { Method: "GET", Path: "list/{root}" }
+        Objectives:
+          Path: tasks
+          Endpoints:
+            Create: { Method: "POST", Path: "task" }
+        Tags:
+          Path: tags
+          Endpoints:
+            Creation: { Method: "POST", Path: "" }
+            Assign: { Method: "POST", Path: "assign" }
 Gitlab:
-    Domain: gitlab.com
+  Domain: gitlab.com
 ```
 
 ```go
@@ -135,8 +135,8 @@ Gitlab:
 package main
 
 type Endpoint struct {
-    Method string
-    Path   string
+  Method string
+  Path   string
 }
 ```
 
@@ -149,57 +149,57 @@ gonfique -in config.yml -out config.go -pkg main -use models.go
 package main
 
 import (
-	"fmt"
-	"os"
-	"gopkg.in/yaml.v3"
+  "fmt"
+  "os"
+  "gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	Github struct {
-		Domain   string `yaml:"Domain"`
-		Gateways struct {
-			Public struct {
-				Path     string `yaml:"Path"`
-				Services struct {
-					Document struct {
-						Path      string `yaml:"Path"`
-						Endpoints struct {
-							List Endpoint `yaml:"List"` // here
-						} `yaml:"Endpoints"`
-					} `yaml:"Document"`
-					Objectives struct {
-						Path      string `yaml:"Path"`
-						Endpoints struct {
-							Create Endpoint `yaml:"Create"` // here
-						} `yaml:"Endpoints"`
-					} `yaml:"Objectives"`
-					Tags struct {
-						Path      string `yaml:"Path"`
-						Endpoints struct {
-							Creation Endpoint `yaml:"Creation"` // here
-							Assign   Endpoint `yaml:"Assign"` // here
-						} `yaml:"Endpoints"`
-					} `yaml:"Tags"`
-				} `yaml:"Services"`
-			} `yaml:"Public"`
-		} `yaml:"Gateways"`
-	} `yaml:"Github"`
-	Gitlab struct {
-		Domain string `yaml:"Domain"`
-	} `yaml:"Gitlab"`
+  Github struct {
+    Domain   string `yaml:"Domain"`
+    Gateways struct {
+      Public struct {
+        Path     string `yaml:"Path"`
+        Services struct {
+          Document struct {
+            Path      string `yaml:"Path"`
+            Endpoints struct {
+              List Endpoint `yaml:"List"` // here
+            } `yaml:"Endpoints"`
+          } `yaml:"Document"`
+          Objectives struct {
+            Path      string `yaml:"Path"`
+            Endpoints struct {
+              Create Endpoint `yaml:"Create"` // here
+            } `yaml:"Endpoints"`
+          } `yaml:"Objectives"`
+          Tags struct {
+            Path      string `yaml:"Path"`
+            Endpoints struct {
+              Creation Endpoint `yaml:"Creation"` // here
+              Assign   Endpoint `yaml:"Assign"` // here
+            } `yaml:"Endpoints"`
+          } `yaml:"Tags"`
+        } `yaml:"Services"`
+      } `yaml:"Public"`
+    } `yaml:"Gateways"`
+  } `yaml:"Github"`
+  Gitlab struct {
+    Domain string `yaml:"Domain"`
+  } `yaml:"Gitlab"`
 }
 
 func ReadConfig(path string) (Config, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return Config{}, fmt.Errorf("opening config file: %w", err)
-	}
-	cfg := Config{}
-	err = yaml.NewDecoder(f).Decode(&cfg)
-	if err != nil {
-		return Config{}, fmt.Errorf("decoding config file: %w", err)
-	}
-	return cfg, nil
+  f, err := os.Open(path)
+  if err != nil {
+    return Config{}, fmt.Errorf("opening config file: %w", err)
+  }
+  cfg := Config{}
+  err = yaml.NewDecoder(f).Decode(&cfg)
+  if err != nil {
+    return Config{}, fmt.Errorf("decoding config file: %w", err)
+  }
+  return cfg, nil
 }
 ```
 
@@ -210,22 +210,22 @@ package main
 import "fmt"
 
 func RegisterEndpoints(eps []Endpoint) {
-    for _, ep := range eps {
-        fmt.Println(ep.Method, ep.Path)
-    }
+  for _, ep := range eps {
+    fmt.Println(ep.Method, ep.Path)
+  }
 }
 
 func main() {
-    cfg, err := ReadConfig("config.yml")
-    if err != nil {
-        //
-    }
-    // fields are suggested as typing by IDE
+  cfg, err := ReadConfig("config.yml")
+  if err != nil {
+    //
+  }
+  // fields are suggested as typing by IDE
 
-    endpoints := Github.Gateways.Public.Services.Tags.Endpoints
-    RegisterEndpoints([]Endpoint{
-        endpoints.Creation, endpoints.Assign,
-    })
+  endpoints := Github.Gateways.Public.Services.Tags.Endpoints
+  RegisterEndpoints([]Endpoint{
+    endpoints.Creation, endpoints.Assign,
+  })
 }
 ```
 
