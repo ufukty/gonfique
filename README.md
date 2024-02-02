@@ -85,8 +85,11 @@ For existing Visual Studio Code users:
 
 ## Motivation
 
--   Using dynamic keys in config files is not problematic as using them in server-client communication. Because all keys are final before compilation starts.
--   Having to search to get a piece of config is error-prone, makes harder to notice breaking changes. Also creates ugly code.
+gonfique is necessary because of there are not many reliable and sustainable alternatives.
+
+-   Accessing config data through hardcoded strings is risky. So, defining types to marshall into is necessary.
+-   Manually defining types is also risky because they will get outdated eventually.
+-   Config complexity is inevitable when there are multiple services/binaries that needs their config to stay in sync, eg. kubernetes config.
 
 ## Full example
 
