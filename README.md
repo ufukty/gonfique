@@ -231,13 +231,8 @@ func main() {
 
 ## Limitations
 
--   Slices are not supported as using dynamic keys makes accessin information easier.
--   YAML file can not have Go keywords as keys, eg. `type: user`
-
-## Todo
-
--   [x] Use user provided types for pieces of YAML when schemas match. (`-use <file>` flag)
--   [x] Stable field order in produced type spec
+-   Slices are not supported as using dynamic keys makes accessing information easier.
+-   Multidocument YAML files are not supported.
 
 ## Contribution
 
