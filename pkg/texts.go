@@ -6,22 +6,6 @@ import (
 	"unicode"
 )
 
-// func startCapsAtEachSegment(s string, pattern string) string {
-// 	s2 := ""
-// 	for _, w := range strings.Split(s, pattern) {
-// 		w2 := ""
-// 		for i, r := range w {
-// 			if i == 0 {
-// 				w2 += strings.ToUpper(string(r))
-// 			} else {
-// 				w2 += strings.ToLower(string(r))
-// 			}
-// 		}
-// 		s2 += w2
-// 	}
-// 	return s2
-// }
-
 var smallcaps = regexp.MustCompile("[a-z]+")
 
 // Best effort on creating Go var/field names out of YAML keys idiomatically
