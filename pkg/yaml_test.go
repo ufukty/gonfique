@@ -52,8 +52,8 @@ func copyFile(src, dst string) error {
 	return os.Chmod(dst, srcInfo.Mode())
 }
 
-func TestCreatationAndDecodingInto(t *testing.T) {
-	tcs := []string{"tc1", "tc2"}
+func TestCreationConfigTypeDefinitionAndDecodingInto(t *testing.T) {
+	tcs := []string{"tc1", "tc2", "tc5-k8s"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
