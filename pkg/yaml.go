@@ -43,7 +43,7 @@ func toAst(v reflect.Value) ast.Expr {
 			ik := iter.Key()
 			iv := iter.Value()
 			st.Fields.List = append(st.Fields.List, &ast.Field{
-				Names: []*ast.Ident{ast.NewIdent(ik.String())},
+				Names: []*ast.Ident{ast.NewIdent(safeFieldName(ik.String()))},
 				Type:  toAst(iv),
 				Tag: &ast.BasicLit{
 					Kind:  token.STRING,
