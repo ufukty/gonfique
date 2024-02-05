@@ -54,7 +54,7 @@ func toAst(v reflect.Value) ast.Expr {
 		}
 		return st
 	case reflect.Slice:
-		return ast.NewIdent("any")
+		return arrayType(v)
 	case reflect.Bool:
 		return ast.NewIdent("bool")
 	case reflect.String:

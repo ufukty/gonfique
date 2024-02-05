@@ -18,9 +18,29 @@ type Config struct {
 		Namespace string `yaml:"namespace"`
 	} `yaml:"metadata"`
 	Spec struct {
-		Ports    any `yaml:"ports"`
+		Ports []struct {
+			Port       int    `yaml:"port"`
+			Protocol   string `yaml:"protocol"`
+			TargetPort int    `yaml:"targetPort"`
+		} `yaml:"ports"`
 		Replicas int `yaml:"replicas"`
-		Rules    any `yaml:"rules"`
+		Rules    []struct {
+			Host string `yaml:"host"`
+			Http struct {
+				Paths []struct {
+					Backend struct {
+						Service struct {
+							Name string `yaml:"name"`
+							Port struct {
+								Number int `yaml:"number"`
+							} `yaml:"port"`
+						} `yaml:"service"`
+					} `yaml:"backend"`
+					Path     string `yaml:"path"`
+					PathType string `yaml:"pathType"`
+				} `yaml:"paths"`
+			} `yaml:"http"`
+		} `yaml:"rules"`
 		Selector struct {
 			MatchLabels struct {
 				App string `yaml:"app"`
@@ -33,7 +53,21 @@ type Config struct {
 				} `yaml:"labels"`
 			} `yaml:"metadata"`
 			Spec struct {
-				Containers any `yaml:"containers"`
+				Containers []struct {
+					EnvFrom []struct {
+						ConfigMapRef struct {
+							Name string `yaml:"name"`
+						} `yaml:"configMapRef"`
+						SecretRef struct {
+							Name string `yaml:"name"`
+						} `yaml:"secretRef"`
+					} `yaml:"envFrom"`
+					Image string `yaml:"image"`
+					Name  string `yaml:"name"`
+					Ports []struct {
+						ContainerPort int `yaml:"containerPort"`
+					} `yaml:"ports"`
+				} `yaml:"containers"`
 			} `yaml:"spec"`
 		} `yaml:"template"`
 	} `yaml:"spec"`
