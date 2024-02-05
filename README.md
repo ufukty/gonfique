@@ -2,7 +2,7 @@
 
 ![Gonfique logo](assets/Gonfique@400w.png)
 
-`gonfique` is a tool that creates Go struct type definitions for given YAML file which has custom schemas. Since `gonfique` makes it easier to use custom schemas, developers can levarage dynamic-keyed configs to access information with autocomplete and without searching through items' values. Also existing Makefile users can get instantly notified when and where a config change breaks Go code (See [Serving suggestion](#serving-suggestions)).
+`gonfique` is a CLI tool for Go developers to automatically build exact struct definitions in Go that will match the provided YAML config. Designed to get all config accesses under type check. Makes breaking changes instant to notice when and where they happen. Since `gonfique` makes keeping the type definitions up-to-date easier, using more dynamic keys instead arrays is more practical. So, developers can access config data through field names instead error-prone array lookups.
 
 Before `gonfique`
 
@@ -46,19 +46,27 @@ func main() {
 }
 ```
 
-## Install
+## Motivation
 
-```sh
-go install github.com/ufukty/gonfique
-```
+`gonfique` is necessary because of there are not many reliable and sustainable alternatives.
+
+-   Accessing config data through hardcoded strings is risky. So, defining types to marshall into is necessary.
+-   Manually defining types is also risky because they will get outdated eventually.
+-   Config complexity is inevitable when there are multiple services/binaries that needs their config to stay in sync, eg. kubernetes config.
 
 ## Usage
 
+### Install
+
 ```sh
-gonfique -in config.yml -out config.go -pkg main
+go install github.com/ufukty/gonfique@v1.0.0
 ```
 
-```
+> [!IMPORTANT]
+> Installing the latest version in `main` branch is not suggested as it is used for active development. Use [version flags](tags) as shown above for stable versions or download compiled binaries from [Releases](releases).
+
+```sh
+gonfique -h
 Usage of gonfique:
   -in string
         input file path (yml or yaml)
@@ -70,7 +78,13 @@ Usage of gonfique:
         (optional) use type definitions found in <file>
 ```
 
-## Serving suggestions
+### Generation
+
+```sh
+gonfique -in config.yml -out config.go -pkg main
+```
+
+### Serving suggestions
 
 For existing Makefile users:
 
@@ -95,144 +109,64 @@ For existing Visual Studio Code users:
 }
 ```
 
-## Motivation
+## Features
 
-gonfique is necessary because of there are not many reliable and sustainable alternatives.
-
--   Accessing config data through hardcoded strings is risky. So, defining types to marshall into is necessary.
--   Manually defining types is also risky because they will get outdated eventually.
--   Config complexity is inevitable when there are multiple services/binaries that needs their config to stay in sync, eg. kubernetes config.
-
-## Full example
-
-```yml
-# config.yml
-Github:
-  Domain: github.com
-  Gateways:
-    Public:
-      Path: /api/v1.0.0
-      Services:
-        Document:
-          Path: document
-          Endpoints:
-            List: { Method: "GET", Path: "list/{root}" }
-        Objectives:
-          Path: tasks
-          Endpoints:
-            Create: { Method: "POST", Path: "task" }
-        Tags:
-          Path: tags
-          Endpoints:
-            Creation: { Method: "POST", Path: "" }
-            Assign: { Method: "POST", Path: "assign" }
-Gitlab:
-  Domain: gitlab.com
-```
+### Using existing type definitions
 
 ```go
-// (optional) models.go
 package main
 
 type Endpoint struct {
-  Method string
-  Path   string
+    Path, Method string
 }
 ```
 
 ```sh
-gonfique -in config.yml -out config.go -pkg main -use models.go
+gonfique -in config.yml -out config.go -pkg main -use use.go
+```
+
+## Considerations
+
+### Arrays
+
+`gonfique` assignes slice type to arrays. It works best when all items of array possess the same or at least compatible schema. Type assignment for compatible approach such as:
+
+```yaml
+# input
+- action: foo 
+  foo-details: ""
+- action: bar 
+  bar-details: ""
 ```
 
 ```go
-// Produced file "config.go"
-package main
-
-import (
-  "fmt"
-  "os"
-  "gopkg.in/yaml.v3"
-)
-
-type Config struct {
-  Github struct {
-    Domain   string `yaml:"Domain"`
-    Gateways struct {
-      Public struct {
-        Path     string `yaml:"Path"`
-        Services struct {
-          Document struct {
-            Path      string `yaml:"Path"`
-            Endpoints struct {
-              List Endpoint `yaml:"List"` // here
-            } `yaml:"Endpoints"`
-          } `yaml:"Document"`
-          Objectives struct {
-            Path      string `yaml:"Path"`
-            Endpoints struct {
-              Create Endpoint `yaml:"Create"` // here
-            } `yaml:"Endpoints"`
-          } `yaml:"Objectives"`
-          Tags struct {
-            Path      string `yaml:"Path"`
-            Endpoints struct {
-              Creation Endpoint `yaml:"Creation"` // here
-              Assign   Endpoint `yaml:"Assign"` // here
-            } `yaml:"Endpoints"`
-          } `yaml:"Tags"`
-        } `yaml:"Services"`
-      } `yaml:"Public"`
-    } `yaml:"Gateways"`
-  } `yaml:"Github"`
-  Gitlab struct {
-    Domain string `yaml:"Domain"`
-  } `yaml:"Gitlab"`
-}
-
-func ReadConfig(path string) (Config, error) {
-  f, err := os.Open(path)
-  if err != nil {
-    return Config{}, fmt.Errorf("opening config file: %w", err)
-  }
-  cfg := Config{}
-  err = yaml.NewDecoder(f).Decode(&cfg)
-  if err != nil {
-    return Config{}, fmt.Errorf("decoding config file: %w", err)
-  }
-  return cfg, nil
+// output
+[]struct {
+  Action     string
+  FooDetails string
+  BarDetails string
 }
 ```
 
-```go
-// usage "main.go"
-package main
+> [!IMPORTANT]
+> Slice type gets defined as `[]any` if shared keys have different type values. Like `detail` has given `int` and `string` values below:
+> ```yaml
+> - action: ""
+>   detail: 0
+> - action: ""
+>   detail: ""
+> ```
 
-import "fmt"
 
-func RegisterEndpoints(eps []Endpoint) {
-  for _, ep := range eps {
-    fmt.Println(ep.Method, ep.Path)
-  }
-}
+## Full example
 
-func main() {
-  cfg, err := ReadConfig("config.yml")
-  if err != nil {
-    //
-  }
-  // fields are suggested as typing by IDE
-
-  endpoints := Github.Gateways.Public.Services.Tags.Endpoints
-  RegisterEndpoints([]Endpoint{
-    endpoints.Creation, endpoints.Assign,
-  })
-}
-```
+-   Kubernetes example [Input YAML file](/examples/k8s/input.yml) > [Generated Go file](/examples/k8s/output.go)
 
 ## Limitations
 
--   Slices are not supported as using dynamic keys makes accessing information easier.
 -   Multidocument YAML files are not supported.
+-   `gonfique` only creates inline type definitions. [See issue](issues/1) for discussion.
+
 
 ## Contribution
 
