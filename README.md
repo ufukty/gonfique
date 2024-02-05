@@ -129,7 +129,7 @@ gonfique -in config.yml -out config.go -pkg main -use use.go
 
 ### Arrays
 
-`gonfique` assignes slice type to arrays. It works best when all items of array possess the same or at least compatible schema. Type assignment for compatible approach such as:
+`gonfique` assignes the necessary slice type to arrays. It works best when all items of an array possess the same schema or at least compatible schemas. Type assignment occurs as below when items have not same but compatible schemas:
 
 ```yaml
 # input
