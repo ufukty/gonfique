@@ -5,81 +5,11 @@ import (
 	"go/ast"
 	"go/format"
 	"go/token"
-	"log"
 	"os"
 	"reflect"
-	"slices"
 
 	"gopkg.in/yaml.v3"
 )
-
-func sortFieldList(fl *ast.FieldList) {
-	slices.SortFunc(fl.List, func(a, b *ast.Field) int {
-		if a.Names[0].Name < b.Names[0].Name {
-			return -1
-		} else if a.Names[0].Name > b.Names[0].Name {
-			return 1
-		} else {
-			return 0
-		}
-	})
-}
-
-// reconstructs a reflect-value's type in ast.TypeSpec.
-// limited with types used by YAML decoder.
-func toAst(v reflect.Value) ast.Expr {
-	t := v.Type()
-	switch t.Kind() {
-	case reflect.Interface:
-		return toAst(v.Elem())
-	case reflect.Map:
-		st := &ast.StructType{
-			Fields: &ast.FieldList{
-				List: []*ast.Field{},
-			},
-		}
-		iter := v.MapRange()
-		for iter.Next() {
-			ik := iter.Key()
-			iv := iter.Value()
-			st.Fields.List = append(st.Fields.List, &ast.Field{
-				Names: []*ast.Ident{ast.NewIdent(safeFieldName(ik.String()))},
-				Type:  toAst(iv),
-				Tag: &ast.BasicLit{
-					Kind:  token.STRING,
-					Value: fmt.Sprintf("`yaml:%q`", ik.String()),
-				},
-			})
-			sortFieldList(st.Fields)
-		}
-		return st
-	case reflect.Slice:
-		return arrayType(v)
-	case reflect.Bool:
-		return ast.NewIdent("bool")
-	case reflect.String:
-		return ast.NewIdent("string")
-	case reflect.Int:
-		return ast.NewIdent("int")
-	case reflect.Int32:
-		return ast.NewIdent("int32")
-	case reflect.Int64:
-		return ast.NewIdent("int64")
-	case reflect.Uint:
-		return ast.NewIdent("uint")
-	case reflect.Uint32:
-		return ast.NewIdent("uint32")
-	case reflect.Uint64:
-		return ast.NewIdent("uint64")
-	case reflect.Float32:
-		return ast.NewIdent("float32")
-	case reflect.Float64:
-		return ast.NewIdent("float64")
-	default:
-		log.Println("unhandled reflect kind", t)
-	}
-	return nil
-}
 
 func ReadConfigYaml(src string) (*ast.TypeSpec, error) {
 	f, err := os.Open(src)
@@ -93,7 +23,7 @@ func ReadConfigYaml(src string) (*ast.TypeSpec, error) {
 	}
 	return &ast.TypeSpec{
 		Name: ast.NewIdent("Config"),
-		Type: toAst(reflect.ValueOf(y)),
+		Type: Transform(reflect.ValueOf(y)),
 	}, nil
 }
 

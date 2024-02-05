@@ -5,11 +5,24 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"slices"
 
 	"golang.org/x/exp/maps"
 
 	"golang.org/x/tools/go/ast/astutil"
 )
+
+func sort(idts []*ast.Ident) {
+	slices.SortFunc(idts, func(x, y *ast.Ident) int {
+		if x.Name > y.Name {
+			return 1
+		} else if x.Name < y.Name {
+			return -1
+		} else {
+			return 0
+		}
+	})
+}
 
 func linearizeFieldList(fl *ast.FieldList) map[*ast.Ident]ast.Expr {
 	l := map[*ast.Ident]ast.Expr{}
