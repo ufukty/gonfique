@@ -63,7 +63,7 @@ go install github.com/ufukty/gonfique@v1.0.0
 ```
 
 > [!IMPORTANT]
-> Installing the latest version in `main` branch is not suggested as it is used for active development. Use [version flags](tags) as shown above for stable versions or download compiled binaries from [Releases](releases).
+> Installing the latest version in `main` branch is not suggested as it is used for active development. Use [version tags](https://github.com/ufukty/gonfique/tags) as shown above for stable versions or download compiled binaries from [Releases](https://github.com/ufukty/gonfique/releases).
 
 ```sh
 gonfique -h
