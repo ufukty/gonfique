@@ -59,7 +59,7 @@ func main() {
 ### Install
 
 ```sh
-go install github.com/ufukty/gonfique@v1.0.0
+go install github.com/ufukty/gonfique@v1.1.0
 ```
 
 > [!IMPORTANT]
@@ -160,7 +160,10 @@ gonfique -in config.yml -out config.go -pkg main -use use.go
 
 ## Full example
 
--   Kubernetes example [Input YAML file](/examples/k8s/input.yml) > [Generated Go file](/examples/k8s/output.go)
+-   Kubernetes example [Input config for all](/examples/k8s/input.yml)
+    -   [Generated Go file](/examples/k8s/output.go) when only `-in`, `-out` and `-pkg` flags are set
+    -   [Generated Go file](/examples/k8s-organize/output.go) when also `-organize` flag is set
+    -   [Generated Go file](/examples/k8s-organize-and-use/output.go) when both `-organize` and `-use <file>` flag are set
 
 ## Limitations
 
