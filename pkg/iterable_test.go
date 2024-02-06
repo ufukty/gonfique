@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-func TestSubstitute(t *testing.T) {
-	tcs := []string{"tc3", "tc4"}
+func TestIterators(t *testing.T) {
+	tcs := []string{"tc7-iterables"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
@@ -24,7 +24,7 @@ func TestSubstitute(t *testing.T) {
 			}
 			fmt.Println("using tmp dir:", testloc)
 
-			files := []string{"go.mod", "go.sum", "config_test.go", "config.yml", "use.go"}
+			files := []string{"go.mod", "go.sum", "config_test.go", "config.yml"}
 			for _, file := range files {
 				src := filepath.Join("testdata", tc, file)
 				dst := filepath.Join(testloc, file)
@@ -33,20 +33,19 @@ func TestSubstitute(t *testing.T) {
 				}
 			}
 
-			etss, err := ReadTypes(filepath.Join("testdata", tc, "use.go"))
+			gds := Organize(cts)
+			its, err := Iterators(cts, gds)
 			if err != nil {
-				t.Fatal(fmt.Errorf("reading types to use in substitution: %w", err))
+				t.Fatal(fmt.Errorf("generating iterators for all-same-type-field structs: %w", err))
 			}
 
-			Substitute(cts, etss)
-
-			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, nil, "config"); err != nil {
+			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, gds, its, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 
 			cmd := exec.Command("/usr/local/go/bin/go", "test",
 				"-timeout", "10s",
-				"-run", "^TestConfig$",
+				"-run", "^TestIterators$",
 				"test",
 				"-v", "-count=1",
 			)
@@ -59,5 +58,6 @@ func TestSubstitute(t *testing.T) {
 			}
 
 		})
+
 	}
 }

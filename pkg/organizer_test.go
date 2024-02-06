@@ -9,7 +9,7 @@ import (
 )
 
 func TestOrganizer(t *testing.T) {
-	tcs := []string{"tc6-iterables"}
+	tcs := []string{"tc6-organize"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
@@ -33,13 +33,13 @@ func TestOrganizer(t *testing.T) {
 				}
 			}
 
-			if err := WriteOrganizedConfigGo(filepath.Join(testloc, "config.go"), Organize(cts), "config"); err != nil {
+			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, Organize(cts), nil, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 
 			cmd := exec.Command("/usr/local/go/bin/go", "test",
 				"-timeout", "10s",
-				"-run", "^TestConfig$",
+				"-run", "^TestOrganize$",
 				"test",
 				"-v", "-count=1",
 			)

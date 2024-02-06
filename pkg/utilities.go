@@ -1,7 +1,9 @@
 package pkg
 
 import (
+	"fmt"
 	"go/ast"
+	"regexp"
 	"slices"
 )
 
@@ -27,4 +29,14 @@ func bijective26(i int) string {
 		i /= q
 	}
 	return s
+}
+
+var yamlKeyStripper = regexp.MustCompile("`yaml:\"(.*)\"`")
+
+func stripKeyname(tag string) (string, error) {
+	matches := yamlKeyStripper.FindStringSubmatch(tag)
+	if len(matches) < 2 {
+		return "", fmt.Errorf("key not found")
+	}
+	return matches[1], nil
 }
