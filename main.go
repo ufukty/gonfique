@@ -14,6 +14,7 @@ type Args struct {
 	Out string
 	Pkg string
 	Use string
+	Org bool
 }
 
 func getArgs() Args {
@@ -22,6 +23,7 @@ func getArgs() Args {
 	flag.StringVar(&args.Out, "out", "", "output file path (go)")
 	flag.StringVar(&args.Pkg, "pkg", "", "package name that will be inserted into the generated file")
 	flag.StringVar(&args.Use, "use", "", "(optional) use type definitions found in <file>")
+	flag.BoolVar(&args.Org, "organize", false, "(optional) defines the types of struct fields that are also structs separately instead inline, with auto generated UNSTABLE names.")
 	flag.Parse()
 	return args
 }
@@ -43,30 +45,46 @@ func checkMissingArgs(args Args) error {
 	return nil
 }
 
-func main() {
+func perform() error {
 	args := getArgs()
 	if err := checkMissingArgs(args); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return fmt.Errorf("checking args: %w", err)
 	}
 
 	cfgts, err := pkg.ReadConfigYaml(args.In)
 	if err != nil {
-		fmt.Println(fmt.Errorf("reading input file: %w", err))
-		os.Exit(2)
+		return fmt.Errorf("reading input file: %w", err)
 	}
 
 	if args.Use != "" {
 		tss, err := pkg.ReadTypes(args.Use)
 		if err != nil {
-			fmt.Println(fmt.Errorf("reading -use file %q: %w", args.Use, err))
-			os.Exit(3)
+			return fmt.Errorf("reading -use file %q: %w", args.Use, err)
 		}
 		pkg.Substitute(cfgts, tss)
 	}
 
-	if err := pkg.WriteConfigGo(args.Out, cfgts, args.Pkg); err != nil {
-		fmt.Println(fmt.Errorf("creating %q: %w", args.Out, err))
+	if !args.Org {
+		if err := pkg.WriteConfigGo(args.Out, cfgts, nil, nil, args.Pkg); err != nil {
+			return fmt.Errorf("creating %q: %w", args.Out, err)
+		}
+	} else {
+		isolated := pkg.Organize(cfgts)
+		iterators, err := pkg.Iterators(cfgts, isolated)
+		if err != nil {
+			return fmt.Errorf("creating iterators: %w", err)
+		}
+		if err := pkg.WriteConfigGo(args.Out, cfgts, isolated, iterators, args.Pkg); err != nil {
+			return fmt.Errorf("creating %q: %w", args.Out, err)
+		}
+	}
+
+	return nil
+}
+
+func main() {
+	if err := perform(); err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 }
