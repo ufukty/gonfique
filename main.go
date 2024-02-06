@@ -14,6 +14,7 @@ type Args struct {
 	Out string
 	Pkg string
 	Use string
+	Org bool
 }
 
 func getArgs() Args {
@@ -22,6 +23,7 @@ func getArgs() Args {
 	flag.StringVar(&args.Out, "out", "", "output file path (go)")
 	flag.StringVar(&args.Pkg, "pkg", "", "package name that will be inserted into the generated file")
 	flag.StringVar(&args.Use, "use", "", "(optional) use type definitions found in <file>")
+	flag.BoolVar(&args.Org, "organize", false, "(optional) defines the types of struct fields that are also structs separately instead inline, with auto generated UNSTABLE names.")
 	flag.Parse()
 	return args
 }
@@ -65,8 +67,15 @@ func main() {
 		pkg.Substitute(cfgts, tss)
 	}
 
-	if err := pkg.WriteConfigGo(args.Out, cfgts, args.Pkg); err != nil {
-		fmt.Println(fmt.Errorf("creating %q: %w", args.Out, err))
-		os.Exit(1)
+	if args.Org {
+		if err := pkg.WriteOrganizedConfigGo(args.Out, pkg.Organize(cfgts), args.Pkg); err != nil {
+			fmt.Println(fmt.Errorf("creating %q: %w", args.Out, err))
+			os.Exit(1)
+		}
+	} else {
+		if err := pkg.WriteConfigGo(args.Out, cfgts, args.Pkg); err != nil {
+			fmt.Println(fmt.Errorf("creating %q: %w", args.Out, err))
+			os.Exit(1)
+		}
 	}
 }
