@@ -46,13 +46,18 @@ func main() {
 }
 ```
 
-## Motivation
-
 `gonfique` is necessary because of there are not many reliable and sustainable alternatives.
 
 -   Accessing config data through hardcoded strings is risky. So, defining types to marshall into is necessary.
 -   Manually defining types is also risky because they will get outdated eventually.
 -   Config complexity is inevitable when there are multiple services/binaries that needs their config to stay in sync, eg. kubernetes config.
+
+## Full example
+
+-   Kubernetes example [Input config for all](/examples/k8s/input.yml)
+    -   [Generated Go file](/examples/k8s/output.go) when only `-in`, `-out` and `-pkg` flags are set
+    -   [Generated Go file](/examples/k8s-organize/output.go) when also `-organize` flag is set
+    -   [Generated Go file](/examples/k8s-organize-and-use/output.go) when both `-organize` and `-use <file>` flag are set
 
 ## Usage
 
@@ -63,13 +68,22 @@ go install github.com/ufukty/gonfique@v1.1.0
 ```
 
 > [!IMPORTANT]
-> Installing the latest version in `main` branch is not suggested as it is used for active development. Use [version tags](https://github.com/ufukty/gonfique/tags) as shown above for stable versions or download compiled binaries from [Releases](https://github.com/ufukty/gonfique/releases).
+> Do not install code from `main` branch. Use [Version tags](https://github.com/ufukty/gonfique/tags) as shown above for stable versions or download from [Releases](https://github.com/ufukty/gonfique/releases).
+
+
+### Generation
 
 ```sh
-gonfique -h
+gonfique -in config.yml -out config.go -pkg main [-use <file>] [-organize] 
+```
+
+```sh
+$ gonfique -h
 Usage of gonfique:
   -in string
         input file path (yml or yaml)
+  -organize
+        (optional) defines the types of struct fields that are also structs separately instead inline, with auto generated UNSTABLE names.
   -out string
         output file path (go)
   -pkg string
@@ -78,11 +92,6 @@ Usage of gonfique:
         (optional) use type definitions found in <file>
 ```
 
-### Generation
-
-```sh
-gonfique -in config.yml -out config.go -pkg main
-```
 
 ### Serving suggestions
 
@@ -157,13 +166,6 @@ gonfique -in config.yml -out config.go -pkg main -use use.go
 >   detail: ""
 > ```
 
-
-## Full example
-
--   Kubernetes example [Input config for all](/examples/k8s/input.yml)
-    -   [Generated Go file](/examples/k8s/output.go) when only `-in`, `-out` and `-pkg` flags are set
-    -   [Generated Go file](/examples/k8s-organize/output.go) when also `-organize` flag is set
-    -   [Generated Go file](/examples/k8s-organize-and-use/output.go) when both `-organize` and `-use <file>` flag are set
 
 ## Limitations
 
