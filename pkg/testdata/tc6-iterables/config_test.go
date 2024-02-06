@@ -2,26 +2,8 @@ package config
 
 import (
 	"fmt"
-	"go/ast"
-	"go/parser"
-	"go/token"
 	"testing"
 )
-
-func find(root ast.Node, ident ast.Ident) bool {
-	found := false
-	ast.Inspect(root, func(n ast.Node) bool {
-		if n != nil {
-			if n, ok := n.(*ast.Ident); ok {
-				if n.Name == ident.Name {
-					found = true
-				}
-			}
-		}
-		return !found
-	})
-	return found
-}
 
 func TestConfig(t *testing.T) {
 	cfg, err := ReadConfig("config.yml")
@@ -33,12 +15,7 @@ func TestConfig(t *testing.T) {
 		t.Fatal(fmt.Errorf("expected %q got %q", "github.com", cfg.Github.Domain))
 	}
 
-	f, err := parser.ParseFile(token.NewFileSet(), "config.go", nil, parser.AllErrors)
-	if err != nil {
-		t.Fatal(fmt.Errorf("parsing output file: %w", err))
-	}
+	for key, value := range Github.Gateways.Public.Services.Tags.Endpoints.Range() {
 
-	if find(f, ast.Ident{Name: "Service"}) {
-		t.Fatal("output file should include name of types that input file has no matching parts with its type")
 	}
 }

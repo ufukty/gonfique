@@ -4,18 +4,12 @@ Github:
     Public:
       Path: /api/v1.0.0
       Services:
-        Document:
-          Path: document
-          Endpoints:
-            List: { Method: "GET", Path: "list/{root}" }
-        Objectives:
-          Path: tasks
-          Endpoints:
-            Create: { Method: "POST", Path: "task" }
         Tags:
           Path: tags
           Endpoints:
-            Creation: { Method: "POST", Path: "" }
+            List: { Method: "GET", Path: "list/{root}" }
+            Create: { Method: "POST", Path: "task" }
             Assign: { Method: "POST", Path: "assign" }
+            Delete: { Method: "DELETE", Path: "" }
 Gitlab:
   Domain: gitlab.com
