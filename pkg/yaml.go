@@ -123,3 +123,27 @@ func WriteConfigGo(dst string, cfg *ast.TypeSpec, pkgname string) error {
 
 	return nil
 }
+
+func WriteOrganizedConfigGo(dst string, gds []*ast.GenDecl, pkgname string) error {
+	f := &ast.File{
+		Name:  ast.NewIdent(pkgname),
+		Decls: []ast.Decl{imports},
+	}
+	for _, gd := range gds {
+		f.Decls = append(f.Decls, gd)
+	}
+	f.Decls = append(f.Decls, readerFunc)
+
+	o, err := os.Create(dst)
+	if err != nil {
+		return fmt.Errorf("creating output file: %w", err)
+	}
+	defer o.Close()
+
+	err = format.Node(o, token.NewFileSet(), f)
+	if err != nil {
+		return fmt.Errorf("writing into output file: %w", err)
+	}
+
+	return nil
+}

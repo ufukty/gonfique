@@ -15,7 +15,7 @@ func TestConfig(t *testing.T) {
 		t.Fatal(fmt.Errorf("expected %q got %q", "github.com", cfg.Github.Domain))
 	}
 
-	for key, value := range Github.Gateways.Public.Services.Tags.Endpoints.Range() {
-
+	for key, value := range cfg.Github.Gateways.Public.Services.Tags.Endpoints.Range() {
+		fmt.Println(key, value.Method) // enough to not have syntax or runtime error
 	}
 }
