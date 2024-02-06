@@ -40,7 +40,7 @@ func TestSubstitute(t *testing.T) {
 
 			Substitute(cts, etss)
 
-			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, "config"); err != nil {
+			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, nil, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 

@@ -2,58 +2,14 @@ package pkg
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
 )
 
-func TestCreatation(t *testing.T) {
-	tcs := []string{"tc1", "tc2"}
-
-	for _, tc := range tcs {
-		t.Run(tc, func(t *testing.T) {
-			cts, err := ReadConfigYaml(filepath.Join("testdata", tc, "config.yml"))
-			if err != nil {
-				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
-			}
-
-			if err := WriteConfigGo(os.DevNull, cts, nil, nil, "config"); err != nil {
-				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
-			}
-		})
-	}
-}
-
-func copyFile(src, dst string) error {
-	srcFile, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer srcFile.Close()
-
-	dstFile, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer dstFile.Close()
-
-	_, err = io.Copy(dstFile, srcFile)
-	if err != nil {
-		return err
-	}
-
-	srcInfo, err := srcFile.Stat()
-	if err != nil {
-		return err
-	}
-
-	return os.Chmod(dst, srcInfo.Mode())
-}
-
-func TestCreationConfigTypeDefinitionAndDecodingInto(t *testing.T) {
-	tcs := []string{"tc1", "tc2", "tc5-k8s"}
+func TestIterators(t *testing.T) {
+	tcs := []string{"tc7-iterables"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
@@ -77,13 +33,19 @@ func TestCreationConfigTypeDefinitionAndDecodingInto(t *testing.T) {
 				}
 			}
 
-			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, nil, "config"); err != nil {
+			gds := Organize(cts)
+			its, err := Iterators(cts, gds)
+			if err != nil {
+				t.Fatal(fmt.Errorf("generating iterators for all-same-type-field structs: %w", err))
+			}
+
+			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, gds, its, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 
 			cmd := exec.Command("/usr/local/go/bin/go", "test",
 				"-timeout", "10s",
-				"-run", "^TestConfig$",
+				"-run", "^TestIterators$",
 				"test",
 				"-v", "-count=1",
 			)
