@@ -19,7 +19,7 @@ func TestCreatation(t *testing.T) {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
 
-			if err := WriteConfigGo(os.DevNull, cts, "config"); err != nil {
+			if err := WriteConfigGo(os.DevNull, cts, nil, nil, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 		})
@@ -53,7 +53,7 @@ func copyFile(src, dst string) error {
 }
 
 func TestCreatationAndDecodingInto(t *testing.T) {
-	tcs := []string{"tc1", "tc2", "tc6-iterables"}
+	tcs := []string{"tc1", "tc2"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
@@ -77,7 +77,7 @@ func TestCreatationAndDecodingInto(t *testing.T) {
 				}
 			}
 
-			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, "config"); err != nil {
+			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, nil, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 

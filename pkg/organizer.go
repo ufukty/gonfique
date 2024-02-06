@@ -8,13 +8,12 @@ import (
 	"golang.org/x/tools/go/ast/astutil"
 )
 
-func Organize(ts *ast.TypeSpec) []*ast.GenDecl {
+func Organize(ts *ast.TypeSpec) *ast.GenDecl {
 	store := map[*ast.StructType]*ast.Ident{}
 	prevs := []*ast.StructType{}
 	astutil.Apply(ts.Type, nil, func(c *astutil.Cursor) bool {
 		if c.Node() != nil && c.Node() != ts.Type {
 			if st, ok := c.Node().(*ast.StructType); ok {
-
 				i := slices.IndexFunc(prevs, func(prev *ast.StructType) bool {
 					return compare(prev, st)
 				})
@@ -31,25 +30,23 @@ func Organize(ts *ast.TypeSpec) []*ast.GenDecl {
 		}
 		return true
 	})
-	gds := []*ast.GenDecl{}
-	if len(prevs) > 0 {
-		var ags = &ast.GenDecl{
-			Doc: &ast.CommentGroup{[]*ast.Comment{
-				{Text: "// IMPORTANT:"},
-				{Text: "// Types are defined only for internal purposes."},
-				{Text: "// Do not refer auto generated type names from outside."},
-				{Text: "// Because they will change as config schema changes."}}},
-			Tok:   token.TYPE,
-			Specs: []ast.Spec{},
-		}
-		for _, st := range prevs {
-			ags.Specs = append(ags.Specs, &ast.TypeSpec{
-				Name: store[st],
-				Type: st,
-			})
-		}
-		gds = append(gds, ags)
+	if len(prevs) == 0 {
+		return nil
 	}
-	gds = append(gds, &ast.GenDecl{Tok: token.TYPE, Specs: []ast.Spec{ts}})
-	return gds
+	var gd = &ast.GenDecl{
+		Doc: &ast.CommentGroup{[]*ast.Comment{
+			{Text: "// IMPORTANT:"},
+			{Text: "// Types are defined only for internal purposes."},
+			{Text: "// Do not refer auto generated type names from outside."},
+			{Text: "// Because they will change as config schema changes."}}},
+		Tok:   token.TYPE,
+		Specs: []ast.Spec{},
+	}
+	for _, st := range prevs {
+		gd.Specs = append(gd.Specs, &ast.TypeSpec{
+			Name: store[st],
+			Type: st,
+		})
+	}
+	return gd
 }

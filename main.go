@@ -45,37 +45,46 @@ func checkMissingArgs(args Args) error {
 	return nil
 }
 
-func main() {
+func perform() error {
 	args := getArgs()
 	if err := checkMissingArgs(args); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return fmt.Errorf("checking args: %w", err)
 	}
 
 	cfgts, err := pkg.ReadConfigYaml(args.In)
 	if err != nil {
-		fmt.Println(fmt.Errorf("reading input file: %w", err))
-		os.Exit(2)
+		return fmt.Errorf("reading input file: %w", err)
 	}
 
 	if args.Use != "" {
 		tss, err := pkg.ReadTypes(args.Use)
 		if err != nil {
-			fmt.Println(fmt.Errorf("reading -use file %q: %w", args.Use, err))
-			os.Exit(3)
+			return fmt.Errorf("reading -use file %q: %w", args.Use, err)
 		}
 		pkg.Substitute(cfgts, tss)
 	}
 
-	if args.Org {
-		if err := pkg.WriteOrganizedConfigGo(args.Out, pkg.Organize(cfgts), args.Pkg); err != nil {
-			fmt.Println(fmt.Errorf("creating %q: %w", args.Out, err))
-			os.Exit(1)
+	if !args.Org {
+		if err := pkg.WriteConfigGo(args.Out, cfgts, nil, nil, args.Pkg); err != nil {
+			return fmt.Errorf("creating %q: %w", args.Out, err)
 		}
 	} else {
-		if err := pkg.WriteConfigGo(args.Out, cfgts, args.Pkg); err != nil {
-			fmt.Println(fmt.Errorf("creating %q: %w", args.Out, err))
-			os.Exit(1)
+		isolated := pkg.Organize(cfgts)
+		iterators, err := pkg.Iterators(cfgts, isolated)
+		if err != nil {
+			return fmt.Errorf("creating iterators: %w", err)
 		}
+		if err := pkg.WriteConfigGo(args.Out, cfgts, isolated, iterators, args.Pkg); err != nil {
+			return fmt.Errorf("creating %q: %w", args.Out, err)
+		}
+	}
+
+	return nil
+}
+
+func main() {
+	if err := perform(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }
