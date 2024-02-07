@@ -1,6 +1,6 @@
 # `gonfique` - Type checked configs for Go programs
 
-![Gonfique logo](assets/Gonfique.png | width=300)
+<img src="assets/Gonfique.png" alt="Gonfique logo" height="300px">
 
 `gonfique` is a CLI tool for Go developers to automatically build exact **struct definitions** in Go that will match the provided YAML config. Designed to get all config accesses under **type check**. Makes breaking changes instant to notice when and where they happen. 
 
