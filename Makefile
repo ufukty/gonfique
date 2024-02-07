@@ -2,16 +2,6 @@
 
 VERSION := $(shell git describe --tags --always --dirty)
 
-.PHONY: update-examples
-update-examples:
-	@for example in examples/*; do \
-        if [ -d "$$example" ]; then \
-            echo "Making in $$example"; \
-            $(MAKE) -C $$example output.go; \
-        fi \
-    done
-
-
 build:
 	@echo "Version $(VERSION)..."
 	mkdir -p "build/$(VERSION)"
