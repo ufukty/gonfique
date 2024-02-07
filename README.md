@@ -55,9 +55,9 @@ func main() {
 ## Full example
 
 -   Kubernetes example [Input config for all](/examples/k8s/input.yml)
-    -   [Generated Go file](/examples/k8s/output.go) when only `-in`, `-out` and `-pkg` flags are set
-    -   [Generated Go file](/examples/k8s-organize/output.go) when also `-organize` flag is set
-    -   [Generated Go file](/examples/k8s-organize-and-use/output.go) when both `-organize` and `-use <file>` flag are set
+    -   [Generated Go file](/examples/k8s/basic/output.go) when only `-in`, `-out` and `-pkg` flags are set
+    -   [Generated Go file](/examples/k8s/organized/output.go) when also `-organize` flag is set
+    -   [Generated Go file](/examples/k8s/organized-used/output.go) when both `-organize` and `-use <file>` flag are set
 
 ## Usage
 
