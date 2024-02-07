@@ -1,63 +1,125 @@
 # `gonfique` - Type checked configs for Go programs
 
-![Gonfique logo](assets/Gonfique@400w.png)
+![Gonfique logo](assets/Gonfique.png | width=300)
 
-`gonfique` is a CLI tool for Go developers to automatically build exact struct definitions in Go that will match the provided YAML config. Designed to get all config accesses under type check. Makes breaking changes instant to notice when and where they happen. Since `gonfique` makes keeping the type definitions up-to-date easier, using more dynamic keys instead arrays is more practical. So, developers can access config data through field names instead error-prone array lookups.
+`gonfique` is a CLI tool for Go developers to automatically build exact **struct definitions** in Go that will match the provided YAML config. Designed to get all config accesses under **type check**. Makes breaking changes instant to notice when and where they happen. 
 
-Before `gonfique`
+Since `gonfique` makes **keeping the type definitions up-to-date** easier, using more dynamic keys instead arrays is more practical. So, developers can access config data through field names instead error-prone array lookups.
 
-```yaml
-Config:
-  - Name: A
-    Details:
-      X:
-      Y:
-  - Name: B
-    Details:
-      X:
-      Y:
-```
-
-```go
-func main() {
-  // ...
-  fmt.Println(
-    cfg.Find("A").Details.Get("X"),
-    cfg[0].Details.Get("Y"),
-  )
-}
-```
-
-After `gonfique`
-
-```yaml
-A:
-  X:
-  Y:
-B:
-  X:
-  Y:
-```
-
-```go
-func main() {
-  // ...
-  fmt.Println(cfg.A.X, cfg.A.Y)
-}
-```
 
 `gonfique` is necessary because of there are not many reliable and sustainable alternatives.
 
--   Accessing config data through hardcoded strings is risky. So, defining types to marshall into is necessary.
--   Manually defining types is also risky because they will get outdated eventually.
--   Config complexity is inevitable when there are multiple services/binaries that needs their config to stay in sync, eg. kubernetes config.
+-   Accessing config data through **hardcoded strings are risky**. So, defining types to marshall into is necessary.
+-   Manually defining types is also risky because they will **get outdated** eventually.
+-   Config **complexity is inevitable** when there are multiple services/binaries that needs their config to stay in sync, eg. kubernetes config.
+
+## Your config file 
+
+### Before `gonfique`
+
+Currently, you are storing multiple items **in arrays** like this
+
+```yaml
+github:
+  domain: github.com
+  path: /api/v1.0.0
+  services:
+    tags:
+      path: tags
+      endpoints:
+        - name: list
+          method: GET
+          path: "list/{root}"
+        - name: create
+          method: POST
+          path: "task"
+        - name: assign
+          method: POST
+          path: "assign"
+        - name: delete
+          method: DELETE
+          path: ""
+gitlab:
+  domain: gitlab.com
+```
+
+Then, you define `Config` type:
+
+```go
+type Config struct {
+  Github struct {
+    Domain   int
+    Path     int
+    Services []Service
+  } `yaml:"github.com"`
+}
+```
+
+And check again & again, if you made a mistake...
+
+Lastly, access items **by lookups** with **hardcoded strings**. Compiler won't catch if the information gets outdated. Which leads you notice problems in **runtime**. 
+
+```go
+func main() {
+  // ...
+  list, found := cfg.Github.Services.Tags.Endpoints.Lookup("list")
+  if found {
+    fmt.Println(list.Path)
+  }
+}
+```
+
+### After `gonfique`
+
+You don't have to worry anymore about storing part of the config information in schema, since type definitions are **automatically generated**, **instantly updated** and accesses are **re-verified by compiler** as config changed.
+
+```yaml
+github:
+  domain: github.com  
+  path: /api/v1.0.0
+  services:
+    tags:
+      path: tags
+      endpoints:
+        list: { method: "GET", path: "tags" }
+        create: { method: "POST", path: "tag" }
+        assign: { method: "POST", path: "assign" }
+        delete: { method: "DELETE", path: "tag" }
+gitlab:
+  domain: gitlab.com
+```
+
+Access items through fields instead hardcoded strings. Always under type-check, and easily updated as config changes.
+
+```go
+func main() {
+  // ...
+  fmt.Println(cfg.Github.Services.Tags.Endpoints.List.Path)
+}
+```
+
+Arrays and dictionaries are still **iteratable** via `.Range` method (if the `-organize` flag provided):
+
+```go
+func main() {
+  // ...
+  for key, ep := range cfg.Github.Services.Tags.Endpoints.Range() { 
+    fmt.Println(key, ep.Path) 
+  }
+}
+```
+
 
 ## Full example
 
--   Kubernetes example [Input config for all](/examples/k8s/input.yml) [Usage for each](/examples/k8s/usage_test.go)
+### Kubernetes
+
+-   [Input config for all](/examples/k8s/input.yml)
+-   Different flag combinations:
     -   [Generated Go file](/examples/k8s/basic/output.go) when only `-in`, `-out` and `-pkg` flags are set
     -   [Generated Go file](/examples/k8s/organized/output.go) when also `-organize` flag is set
     -   [Generated Go file](/examples/k8s/organized-used/output.go) when both `-organize` and `-use <file>` flag are set
+-   [Usage for each](/examples/k8s/usage_test.go)
 
 ## Usage
 
@@ -126,7 +188,7 @@ For existing Visual Studio Code users:
 package main
 
 type Endpoint struct {
-    Path, Method string
+  Path, Method string
 }
 ```
 
