@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"fmt"
+	"go/ast"
 	"reflect"
 	"slices"
 	"strings"
@@ -34,4 +35,22 @@ func PrintPathways(v reflect.Value, anc []string) {
 	default:
 		fmt.Printf("%s: %s\n", strings.Join(anc, "."), v.String())
 	}
+}
+
+func nodeString(n ast.Node) string {
+	switch n := n.(type) {
+	case *ast.Field:
+		return fmt.Sprintf("%s (%p)", n.Names[0].Name, n)
+	case *ast.TypeSpec:
+		return fmt.Sprintf("%s (%p)", n.Name.Name, n)
+	}
+	return fmt.Sprintf("anonymous (%p)", n)
+}
+
+func nodeSliceString(ns []ast.Node) string {
+	s := []string{}
+	for _, n := range ns {
+		s = append(s, nodeString(n))
+	}
+	return strings.Join(s, ", ")
 }

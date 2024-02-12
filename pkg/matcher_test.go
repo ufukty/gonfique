@@ -3,13 +3,12 @@ package pkg
 import (
 	"go/ast"
 	"slices"
-	"strings"
 	"testing"
 
 	"github.com/ufukty/gonfique/pkg/testdata"
 )
 
-func TestMatcher(t *testing.T) {
+func TestMatch(t *testing.T) {
 	var (
 		k8sFile  = testdata.KubernetesExampleOutput
 		k8sCfg   = k8sFile.Decls[1].(*ast.GenDecl)
@@ -26,9 +25,10 @@ func TestMatcher(t *testing.T) {
 		specTemplateMetadataLabels    = specTemplateMetadata.Type.(*ast.StructType).Fields.List[0]
 		specTemplateMetadataLabelsApp = specTemplateMetadataLabels.Type.(*ast.StructType).Fields.List[0]
 
-		specTemplateSpec          = specTemplate.Type.(*ast.StructType).Fields.List[1]
-		specTemplateSpecContainer = specTemplateSpec.Type.(*ast.StructType).Fields.List[0]
-		specTemplateSpecContainerItem = specTemplateSpecContainer.Type.(*ast.ArrayType).Elt
+		specTemplateSpec                   = specTemplate.Type.(*ast.StructType).Fields.List[1]
+		specTemplateSpecContainers         = specTemplateSpec.Type.(*ast.StructType).Fields.List[0]
+		specTemplateSpecContainersItem     = specTemplateSpecContainers.Type.(*ast.ArrayType).Elt
+		specTemplateSpecContainersItemName = specTemplateSpecContainersItem.(*ast.StructType).Fields.List[2]
 
 		specSelector               = spec.Type.(*ast.StructType).Fields.List[3]
 		specSelectorMatchLabels    = specSelector.Type.(*ast.StructType).Fields.List[0]
@@ -48,16 +48,23 @@ func TestMatcher(t *testing.T) {
 		{"spec.template.*.labels.app", []ast.Node{specTemplateMetadataLabelsApp}},
 		{"spec.*.*.labels.app", []ast.Node{specTemplateMetadataLabelsApp}},
 
-		{"spec.**.app", []ast.Node{specTemplateMetadataLabelsApp, specSelectorMatchLabelsApp}},
+		{"spec.**.app", []ast.Node{specSelectorMatchLabelsApp, specTemplateMetadataLabelsApp}},
 
-		{"spec.template.spec.container.[*].", []ast.Node{specTemplateMetadataLabelsApp}}, // for array-type parents in keypath
+		{"spec.template.spec.containers", []ast.Node{specTemplateSpecContainers}},
+		{"spec.template.spec.containers.[]", []ast.Node{specTemplateSpecContainersItem}},
+		{"spec.template.spec.containers.[].name", []ast.Node{specTemplateSpecContainersItemName}},
 	}
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			got := match(k8sCfgTs.Type, strings.Split(tc.input, "."), []string{})
-			if d := slices.Compare(tc.want, got); d != 0 {
-				t.Fatalf("want %#v got %#v", got, tc.want)
+			got := Match(k8sCfgTs, tc.input)
+			if d := slices.CompareFunc(tc.want, got, func(i, j ast.Node) int {
+				if i != j {
+					return 1
+				}
+				return 0
+			}); d != 0 {
+				t.Fatalf("want %#v got %#v", nodeSliceString(tc.want), nodeSliceString(got))
 			}
 		})
 	}
