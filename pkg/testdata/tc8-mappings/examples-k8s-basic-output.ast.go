@@ -1,4 +1,4 @@
-package testdata
+package tc8
 
 import (
 	"go/ast"
