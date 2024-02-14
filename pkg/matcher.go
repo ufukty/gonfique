@@ -1,15 +1,12 @@
 package pkg
 
 import (
-	"fmt"
 	"go/ast"
 	"log"
 	"reflect"
 	"slices"
 	"strings"
 )
-
-var ErrNoResult = fmt.Errorf("no result")
 
 func degraded(keys []string) []string {
 	keys2 := slices.Clone(keys)
@@ -40,8 +37,6 @@ func match(n ast.Node, keys []string) []ast.Node {
 	default:
 		log.Fatalln("unhandled type", reflect.TypeOf(n))
 	}
-
-	fmt.Println(strings.Join(keys, "."))
 
 	matches := []ast.Node{}
 
