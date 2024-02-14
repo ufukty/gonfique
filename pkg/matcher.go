@@ -14,13 +14,10 @@ func degraded(keys []string) []string {
 	return keys2
 }
 
-type node struct {
-	i *ast.Ident
-	v reflect.Value // to let owner able to put another node to its place in AST
-}
-
-func match(n ast.Node, keys []string) []ast.Node {
-	if len(keys) == 0 {
+// return items are either *ast.Field or *ast.ArrayType.
+// use a typeswitch to replace .Type or .Elt fields.
+func match(n ast.Node, rule []string) []ast.Node {
+	if len(rule) == 0 {
 		return []ast.Node{}
 	}
 
@@ -40,28 +37,29 @@ func match(n ast.Node, keys []string) []ast.Node {
 
 	matches := []ast.Node{}
 
-	switch key := keys[0]; key {
+	switch segment := rule[0]; segment {
 	case "**": // works like Levenshtein (DP)
 		if st, ok := t.(*ast.StructType); ok {
 			for _, f := range st.Fields.List {
-				matches = append(matches, match(f, keys)...)
-				matches = append(matches, match(f, degraded(keys))...)
+				matches = append(matches, match(f, rule)...)
+				matches = append(matches, match(f, degraded(rule))...)
+				// TODO: add call to check "[]" appended rule
 			}
 		}
 
 	case "*":
 		if st, ok := t.(*ast.StructType); ok {
 			for _, f := range st.Fields.List {
-				matches = append(matches, match(f, keys[1:])...)
+				matches = append(matches, match(f, rule[1:])...)
 			}
 		}
 
 	case "[]": // other selectors like [birthday], [photo,email] are reserved for later use
 		if at, ok := t.(*ast.ArrayType); ok {
-			if len(keys) == 1 { // should be leaf
+			if len(rule) == 1 { // should be leaf
 				matches = append(matches, at.Elt)
 			} else {
-				matches = append(matches, match(at, keys[1:])...)
+				matches = append(matches, match(at, rule[1:])...)
 			}
 		}
 
@@ -72,11 +70,11 @@ func match(n ast.Node, keys []string) []ast.Node {
 				if err != nil {
 					log.Fatalf("could not get the key name out of field tag for %s", f.Tag.Value)
 				}
-				if ckey == key {
-					if len(keys) == 1 { // should be leaf
+				if ckey == segment {
+					if len(rule) == 1 { // should be leaf
 						matches = append(matches, f)
 					} else {
-						matches = append(matches, match(f, keys[1:])...)
+						matches = append(matches, match(f, rule[1:])...)
 					}
 				}
 			}
@@ -88,15 +86,13 @@ func match(n ast.Node, keys []string) []ast.Node {
 // accepts processed form of Config type AST which:
 //   - should not have multiple names per ast.Field
 //   - array types should be defined by combining compatible item fields
-func Match(cfg *ast.TypeSpec, keypath string) []ast.Node {
-	keys := strings.Split(keypath, ".")
-	if len(keys) == 0 {
+func Match(cfg *ast.TypeSpec, rule string) []ast.Node {
+	segments := strings.Split(rule, ".")
+	if len(segments) == 0 {
 		return []ast.Node{}
-	} else if l := keys[len(keys)-1]; l == "*" || l == "**" {
+	} else if l := segments[len(segments)-1]; l == "*" || l == "**" {
 		return []ast.Node{}
 	}
-
-	cds := match(cfg, keys)
-
+	cds := match(cfg, segments)
 	return cds
 }
