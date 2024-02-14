@@ -1,0 +1,5 @@
+apiVersion: ApiVersion
+metadata.name: Name
+spec.**.containers: SpecContainers
+spec.**.containers.[]: SpecContainer
+spec.**.containers.[].name: ContainerName
