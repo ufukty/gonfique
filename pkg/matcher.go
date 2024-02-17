@@ -32,11 +32,29 @@ func degraded(keys []string) []string {
 //   } `yaml:"http"`
 // }
 
+type matchitem struct {
+	holder  ast.Node
+	pathway []string
+}
+
+// b can be longer
+func containsPathway(a, b []string) bool {
+	if len(a) < len(b) {
+		return false
+	}
+	for i := 0; i < len(b); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // return items are either *ast.Field or *ast.ArrayType.
 // use a typeswitch to replace .Type or .Elt fields.
-func match(n ast.Node, rule []string) []ast.Node {
+func match(n ast.Node, rule []string, pathway []string) []matchitem {
 	if len(rule) == 0 {
-		return []ast.Node{}
+		return []matchitem{}
 	}
 
 	var t ast.Expr
@@ -45,22 +63,24 @@ func match(n ast.Node, rule []string) []ast.Node {
 		t = n.Type
 	case *ast.Field:
 		t = n.Type
-	// case *ast.Ident:
-	// 	log.Fatalln("to implement 2")
 	case *ast.ArrayType: // only when the rule was "[]" previously
 		t = n.Elt
 	default:
 		log.Fatalln("unhandled type", reflect.TypeOf(n))
 	}
 
-	matches := []ast.Node{}
+	matches := []matchitem{}
 
 	switch segment := rule[0]; segment {
 	case "**": // works like Levenshtein (DP)
 		if st, ok := t.(*ast.StructType); ok {
 			for _, f := range st.Fields.List {
-				matches = append(matches, match(f, rule)...)
-				matches = append(matches, match(f, degraded(rule))...)
+				ckey, err := stripKeyname(f.Tag.Value)
+				if err != nil {
+					log.Fatalf("could not get the key name out of field tag for %s", f.Tag.Value)
+				}
+				matches = append(matches, match(f, rule, append(pathway, ckey))...)
+				matches = append(matches, match(f, degraded(rule), append(pathway, ckey))...)
 				// TODO: add call to check "[]" appended rule
 			}
 		}
@@ -69,16 +89,20 @@ func match(n ast.Node, rule []string) []ast.Node {
 		switch t := t.(type) {
 		case *ast.StructType:
 			for _, f := range t.Fields.List {
-				matches = append(matches, match(f, rule[1:])...)
+				ckey, err := stripKeyname(f.Tag.Value)
+				if err != nil {
+					log.Fatalf("could not get the key name out of field tag for %s", f.Tag.Value)
+				}
+				matches = append(matches, match(f, rule[1:], append(pathway, ckey))...)
 			}
 		}
 
 	case "[]": // other selectors like [birthday], [photo,email] are reserved for later use
 		if at, ok := t.(*ast.ArrayType); ok {
 			if len(rule) == 1 { // should be leaf
-				matches = append(matches, n)
+				matches = append(matches, matchitem{n, append(pathway, "[]")})
 			} else {
-				matches = append(matches, match(at, rule[1:])...)
+				matches = append(matches, match(at, rule[1:], append(pathway, "[]"))...)
 			}
 		}
 
@@ -91,9 +115,9 @@ func match(n ast.Node, rule []string) []ast.Node {
 				}
 				if ckey == segment {
 					if len(rule) == 1 { // should be leaf
-						matches = append(matches, f)
+						matches = append(matches, matchitem{f, append(pathway, ckey)})
 					} else {
-						matches = append(matches, match(f, rule[1:])...)
+						matches = append(matches, match(f, rule[1:], append(pathway, ckey))...)
 					}
 				}
 			}
@@ -105,13 +129,12 @@ func match(n ast.Node, rule []string) []ast.Node {
 // accepts processed form of Config type AST which:
 //   - should not have multiple names per ast.Field
 //   - array types should be defined by combining compatible item fields
-func Match(cfg *ast.TypeSpec, rule string) []ast.Node {
+func Match(cfg *ast.TypeSpec, rule string) []matchitem {
 	segments := strings.Split(rule, ".")
 	if len(segments) == 0 {
-		return []ast.Node{}
+		return []matchitem{}
 	} else if l := segments[len(segments)-1]; l == "*" || l == "**" {
-		return []ast.Node{}
+		return []matchitem{}
 	}
-	cds := match(cfg, segments)
-	return cds
+	return match(cfg, segments, []string{})
 }
