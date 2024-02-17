@@ -14,6 +14,24 @@ func degraded(keys []string) []string {
 	return keys2
 }
 
+// type Config struct { NOTE: spec
+//   Host string `yaml:"host"`
+//   Http struct { NOTE: field
+//     Paths []struct { NOTE: field -> arrayType
+//       Backend struct {
+//         Service struct {
+//           Name string `yaml:"name"`
+//           Port struct {
+//             Number int `yaml:"number"`
+//           } `yaml:"port"`
+//         } `yaml:"service"`
+//       } `yaml:"backend"`
+//       Path     string `yaml:"path"`
+//       PathType string `yaml:"pathType"`
+//     } `yaml:"paths"`
+//   } `yaml:"http"`
+// }
+
 // return items are either *ast.Field or *ast.ArrayType.
 // use a typeswitch to replace .Type or .Elt fields.
 func match(n ast.Node, rule []string) []ast.Node {
@@ -27,9 +45,9 @@ func match(n ast.Node, rule []string) []ast.Node {
 		t = n.Type
 	case *ast.Field:
 		t = n.Type
-	case *ast.Ident:
-		log.Fatalln("to implement 2")
-	case *ast.ArrayType:
+	// case *ast.Ident:
+	// 	log.Fatalln("to implement 2")
+	case *ast.ArrayType: // only when the rule was "[]" previously
 		t = n.Elt
 	default:
 		log.Fatalln("unhandled type", reflect.TypeOf(n))
@@ -48,8 +66,9 @@ func match(n ast.Node, rule []string) []ast.Node {
 		}
 
 	case "*":
-		if st, ok := t.(*ast.StructType); ok {
-			for _, f := range st.Fields.List {
+		switch t := t.(type) {
+		case *ast.StructType:
+			for _, f := range t.Fields.List {
 				matches = append(matches, match(f, rule[1:])...)
 			}
 		}
@@ -57,7 +76,7 @@ func match(n ast.Node, rule []string) []ast.Node {
 	case "[]": // other selectors like [birthday], [photo,email] are reserved for later use
 		if at, ok := t.(*ast.ArrayType); ok {
 			if len(rule) == 1 { // should be leaf
-				matches = append(matches, at.Elt)
+				matches = append(matches, n)
 			} else {
 				matches = append(matches, match(at, rule[1:])...)
 			}

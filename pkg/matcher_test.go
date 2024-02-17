@@ -5,12 +5,12 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/ufukty/gonfique/pkg/testdata/tc8-mappings"
+	"github.com/ufukty/gonfique/pkg/testdata/appendix"
 )
 
 func TestMatch(t *testing.T) {
 	var (
-		k8sFile  = tc8.KubernetesExampleOutput
+		k8sFile  = appendix.KubernetesExampleOutput
 		k8sCfg   = k8sFile.Decls[1].(*ast.GenDecl)
 		k8sCfgTs = k8sCfg.Specs[0].(*ast.TypeSpec)
 		k8sCfgFs = k8sCfgTs.Type.(*ast.StructType).Fields.List
