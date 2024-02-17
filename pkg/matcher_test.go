@@ -2,11 +2,31 @@ package pkg
 
 import (
 	"go/ast"
-	"slices"
+	"strings"
 	"testing"
 
 	"github.com/ufukty/gonfique/pkg/testdata/appendix"
 )
+
+func compareMatchs(got []matchitem, want []ast.Node) bool {
+	if len(got) != len(want) {
+		return false
+	}
+	for i := 0; i < len(got); i++ {
+		if got[i].holder != want[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func matchitemsToString(mis []matchitem) string {
+	s := []string{}
+	for _, mi := range mis {
+		s = append(s, nodeString(mi.holder))
+	}
+	return strings.Join(s, ", ")
+}
 
 func TestMatch(t *testing.T) {
 	var (
@@ -27,8 +47,8 @@ func TestMatch(t *testing.T) {
 
 		specTemplateSpec                   = specTemplate.Type.(*ast.StructType).Fields.List[1]
 		specTemplateSpecContainers         = specTemplateSpec.Type.(*ast.StructType).Fields.List[0]
-		specTemplateSpecContainersItem     = specTemplateSpecContainers.Type.(*ast.ArrayType).Elt
-		specTemplateSpecContainersItemName = specTemplateSpecContainersItem.(*ast.StructType).Fields.List[2]
+		specTemplateSpecContainersItem     = specTemplateSpecContainers.Type.(*ast.ArrayType)
+		specTemplateSpecContainersItemName = specTemplateSpecContainersItem.Elt.(*ast.StructType).Fields.List[2]
 
 		specSelector               = spec.Type.(*ast.StructType).Fields.List[3]
 		specSelectorMatchLabels    = specSelector.Type.(*ast.StructType).Fields.List[0]
@@ -58,13 +78,8 @@ func TestMatch(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
 			got := Match(k8sCfgTs, tc.input)
-			if d := slices.CompareFunc(tc.want, got, func(i, j ast.Node) int {
-				if i != j {
-					return 1
-				}
-				return 0
-			}); d != 0 {
-				t.Fatalf("want %#v got %#v", nodeSliceString(tc.want), nodeSliceString(got))
+			if !compareMatchs(got, tc.want) {
+				t.Fatalf("want %#v got %#v", nodeSliceString(tc.want), matchitemsToString(got))
 			}
 		})
 	}

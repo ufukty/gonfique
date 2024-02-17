@@ -6,7 +6,10 @@ import (
 	"go/token"
 	"log"
 	"os"
+	"slices"
+	"strings"
 
+	"golang.org/x/exp/maps"
 	"gopkg.in/yaml.v3"
 )
 
@@ -29,40 +32,52 @@ func ReadMappings(src string) (map[Pathway]TypeName, error) {
 }
 
 func Mappings(cts *ast.TypeSpec, mappings map[Pathway]TypeName) *ast.GenDecl {
-	mss := map[*ast.Ident][]ast.Node{}
-	for pw, tn := range mappings {
-		i := ast.NewIdent(tn)
-		fmt.Printf("%-30s %s\n", pw, tn)
-		mss[i] = Match(cts, pw)
+	idents := map[TypeName]*ast.Ident{}
+	for _, tn := range mappings {
+		idents[tn] = ast.NewIdent(tn)
 	}
 
-	produced := map[*ast.Ident]ast.Expr{}
-	for i, ms := range mss {
-		for _, n := range ms {
-			fmt.Println("> match")
-			switch n := n.(type) {
-			case *ast.Field:
-				if t, ok := produced[i]; ok && !compare(t, n.Type) {
-					log.Fatalf("conflicting schemas found for type name %q\n", i.Name)
-				}
-				produced[i] = n.Type
-				n.Type = i
-			case *ast.ArrayType:
-				if t, ok := produced[i]; ok && !compare(t, n.Elt) {
-					log.Fatalf("conflicting schemas found for type name %q\n", i.Name)
-				}
-				produced[i] = n.Elt
-				n.Elt = i
-			}
+	mis := map[*matchitem]*ast.Ident{}
+	for pw, tn := range mappings {
+		for _, m := range Match(cts, pw) {
+			mis[&m] = idents[tn]
 		}
 	}
 
-	fmt.Println("|||")
+	miskeys := maps.Keys(mis)
+	slices.SortFunc(miskeys, func(l, r *matchitem) int {
+		if containsPathway(l.pathway, r.pathway) {
+			return -1
+		} else {
+			return +1
+		}
+	})
+
+	products := map[*ast.Ident]ast.Expr{}
+	for _, mi := range miskeys {
+		fmt.Println(strings.Join(mi.pathway, "."))
+		i := mis[mi]
+		switch holder := mi.holder.(type) {
+		case *ast.Field:
+			if t, ok := products[i]; ok && !compare(t, holder.Type) {
+				log.Fatalf("conflicting schemas found for type name %q\n", i.Name)
+			}
+			products[i] = holder.Type
+			holder.Type = i
+		case *ast.ArrayType:
+			if t, ok := products[i]; ok && !compare(t, holder.Elt) {
+				log.Fatalf("conflicting schemas found for type name %q\n", i.Name)
+			}
+			products[i] = holder.Elt
+			holder.Elt = i
+		}
+	}
+
 	gd := &ast.GenDecl{
 		Tok:   token.TYPE,
 		Specs: []ast.Spec{},
 	}
-	for i, t := range produced {
+	for i, t := range products {
 		gd.Specs = append(gd.Specs, &ast.TypeSpec{
 			Name: i,
 			Type: t,
