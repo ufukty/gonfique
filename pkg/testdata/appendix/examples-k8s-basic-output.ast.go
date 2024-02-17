@@ -1,4 +1,4 @@
-package tc8
+package appendix
 
 import (
 	"go/ast"
