@@ -39,7 +39,7 @@ func Mappings(cts *ast.TypeSpec, mappings map[Pathway]TypeName) *ast.GenDecl {
 
 	mis := map[*matchitem]*ast.Ident{}
 	for pw, tn := range mappings {
-		for _, m := range Match(cts, pw) {
+		for _, m := range MatchTypeDefinitionHolder(cts, pw) {
 			mis[&m] = idents[tn]
 		}
 	}

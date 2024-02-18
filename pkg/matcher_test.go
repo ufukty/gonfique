@@ -77,7 +77,7 @@ func TestMatch(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			got := Match(k8sCfgTs, tc.input)
+			got := MatchTypeDefinitionHolder(k8sCfgTs, tc.input)
 			if !compareMatchs(got, tc.want) {
 				t.Fatalf("want %#v got %#v", nodeSliceString(tc.want), matchitemsToString(got))
 			}
