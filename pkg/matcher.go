@@ -93,7 +93,11 @@ func matchTypeDefHolder(n ast.Node, rule []string, pathway []string) []matchitem
 				if err != nil {
 					log.Fatalf("could not get the key name out of field tag for %s", f.Tag.Value)
 				}
-				matches = append(matches, matchTypeDefHolder(f, rule[1:], append(pathway, ckey))...)
+				if len(rule) == 1 {
+					matches = append(matches, matchitem{f, append(pathway, ckey)})
+				} else {
+					matches = append(matches, matchTypeDefHolder(f, rule[1:], append(pathway, ckey))...)
+				}
 			}
 		}
 
@@ -132,8 +136,6 @@ func matchTypeDefHolder(n ast.Node, rule []string, pathway []string) []matchitem
 func MatchTypeDefinitionHolder(cfg *ast.TypeSpec, rule string) []matchitem {
 	segments := strings.Split(rule, ".")
 	if len(segments) == 0 {
-		return []matchitem{}
-	} else if l := segments[len(segments)-1]; l == "*" || l == "**" {
 		return []matchitem{}
 	}
 	return matchTypeDefHolder(cfg, segments, []string{})
