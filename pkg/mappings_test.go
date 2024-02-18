@@ -38,7 +38,7 @@ func TestMappings(t *testing.T) {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 
-			files := []string{"go.mod", "go.sum", "config_test.go", "config.yml"}
+			files := []string{"go.mod", "go.sum", "config_test.go", "config.yml", "extend.go"}
 			for _, file := range files {
 				src := filepath.Join("testdata", tc, file)
 				dst := filepath.Join(testloc, file)
