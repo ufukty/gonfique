@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestOrganize(t *testing.T) {
+func TestConfig(t *testing.T) {
 	cfg, err := ReadConfig("config.yml")
 	if err != nil {
 		t.Fatal(fmt.Errorf("reading config: %w", err))

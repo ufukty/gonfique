@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"slices"
-	"strings"
 
 	"golang.org/x/exp/maps"
 	"gopkg.in/yaml.v3"
@@ -55,7 +54,6 @@ func Mappings(cts *ast.TypeSpec, mappings map[Pathway]TypeName) *ast.GenDecl {
 
 	products := map[*ast.Ident]ast.Expr{}
 	for _, mi := range miskeys {
-		fmt.Println(strings.Join(mi.pathway, "."))
 		i := mis[mi]
 		switch holder := mi.holder.(type) {
 		case *ast.Field:
