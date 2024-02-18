@@ -37,19 +37,6 @@ type matchitem struct {
 	pathway []string
 }
 
-// b can be longer
-func containsPathway(a, b []string) bool {
-	if len(a) < len(b) {
-		return false
-	}
-	for i := 0; i < len(b); i++ {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
-}
-
 // return items are either *ast.Field or *ast.ArrayType.
 // use a typeswitch to replace .Type or .Elt fields.
 func matchTypeDefHolder(n ast.Node, rule []string, pathway []string) []matchitem {
