@@ -6,9 +6,7 @@ import (
 	"go/token"
 	"log"
 	"os"
-	"slices"
 
-	"golang.org/x/exp/maps"
 	"gopkg.in/yaml.v3"
 )
 
@@ -31,43 +29,38 @@ func ReadMappings(src string) (map[Pathway]TypeName, error) {
 }
 
 func Mappings(cts *ast.TypeSpec, mappings map[Pathway]TypeName) []*ast.GenDecl {
-	idents := map[TypeName]*ast.Ident{}
-	for _, tn := range mappings {
-		idents[tn] = ast.NewIdent(tn)
-	}
-
-	mis := map[*matchitem]*ast.Ident{}
+	miss := map[*ast.Ident][]matchitem{}
 	for pw, tn := range mappings {
-		for _, m := range MatchTypeDefinitionHolder(cts, pw) {
-			mis[&m] = idents[tn]
+		matches := MatchTypeDefinitionHolder(cts, pw)
+		if len(matches) == 0 {
+			fmt.Printf("Pattern %q (->%s) didn't match any region\n", pw, tn)
 		}
+		miss[ast.NewIdent(tn)] = matches
 	}
-
-	miskeys := maps.Keys(mis)
-	slices.SortFunc(miskeys, func(l, r *matchitem) int {
-		if containsPathway(l.pathway, r.pathway) {
-			return -1
-		} else {
-			return +1
-		}
-	})
 
 	products := map[*ast.Ident]ast.Expr{}
-	for _, mi := range miskeys {
-		i := mis[mi]
-		switch holder := mi.holder.(type) {
-		case *ast.Field:
-			if t, ok := products[i]; ok && !compare(t, holder.Type) {
-				log.Fatalf("conflicting schemas found for type name %q\n", i.Name)
+	for i, mis := range miss {
+		for _, mi := range mis {
+			switch holder := mi.holder.(type) {
+			case *ast.Field:
+				if t, ok := products[i]; ok {
+					if !compare(t, holder.Type) {
+						log.Fatalf("conflicting schemas found for type name %q\n", i.Name)
+					}
+				} else {
+					products[i] = holder.Type
+				}
+				holder.Type = i
+			case *ast.ArrayType:
+				if t, ok := products[i]; ok {
+					if !compare(t, holder.Elt) {
+						log.Fatalf("conflicting schemas found for type name %q\n", i.Name)
+					}
+				} else {
+					products[i] = holder.Elt
+				}
+				holder.Elt = i
 			}
-			products[i] = holder.Type
-			holder.Type = i
-		case *ast.ArrayType:
-			if t, ok := products[i]; ok && !compare(t, holder.Elt) {
-				log.Fatalf("conflicting schemas found for type name %q\n", i.Name)
-			}
-			products[i] = holder.Elt
-			holder.Elt = i
 		}
 	}
 
