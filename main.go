@@ -65,7 +65,7 @@ func perform() error {
 	}
 
 	if !args.Org {
-		if err := pkg.WriteConfigGo(args.Out, cfgts, nil, nil, args.Pkg); err != nil {
+		if err := pkg.WriteConfigGo(args.Out, cfgts, nil, nil, nil, args.Pkg); err != nil {
 			return fmt.Errorf("creating %q: %w", args.Out, err)
 		}
 	} else {
@@ -74,7 +74,7 @@ func perform() error {
 		if err != nil {
 			return fmt.Errorf("creating iterators: %w", err)
 		}
-		if err := pkg.WriteConfigGo(args.Out, cfgts, isolated, iterators, args.Pkg); err != nil {
+		if err := pkg.WriteConfigGo(args.Out, cfgts, nil, isolated, iterators, args.Pkg); err != nil {
 			return fmt.Errorf("creating %q: %w", args.Out, err)
 		}
 	}
