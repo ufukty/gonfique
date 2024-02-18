@@ -19,7 +19,7 @@ func TestCreatation(t *testing.T) {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
 
-			if err := WriteConfigGo(os.DevNull, cts, nil, nil, "config"); err != nil {
+			if err := WriteConfigGo(os.DevNull, cts, nil, nil, nil, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 		})
@@ -77,7 +77,7 @@ func TestCreationConfigTypeDefinitionAndDecodingInto(t *testing.T) {
 				}
 			}
 
-			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, nil, "config"); err != nil {
+			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, nil, nil, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 

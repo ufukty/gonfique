@@ -27,10 +27,13 @@ func ReadConfigYaml(src string) (*ast.TypeSpec, error) {
 	}, nil
 }
 
-func WriteConfigGo(dst string, cfg *ast.TypeSpec, isolated *ast.GenDecl, iterators []*ast.FuncDecl, pkgname string) error {
+func WriteConfigGo(dst string, cfg *ast.TypeSpec, named []*ast.GenDecl, isolated *ast.GenDecl, iterators []*ast.FuncDecl, pkgname string) error {
 	f := &ast.File{
 		Name:  ast.NewIdent(pkgname),
 		Decls: []ast.Decl{imports},
+	}
+	for _, n := range named {
+		f.Decls = append(f.Decls, n)
 	}
 	if isolated != nil {
 		f.Decls = append(f.Decls, isolated)

@@ -34,7 +34,7 @@ func TestMappings(t *testing.T) {
 			}
 			fmt.Println("using tmp dir:", testloc)
 
-			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, fts, nil, "config"); err != nil {
+			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, fts, nil, nil, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 

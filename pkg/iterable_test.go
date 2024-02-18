@@ -39,7 +39,7 @@ func TestIterators(t *testing.T) {
 				t.Fatal(fmt.Errorf("generating iterators for all-same-type-field structs: %w", err))
 			}
 
-			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, gds, its, "config"); err != nil {
+			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, gds, its, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 
