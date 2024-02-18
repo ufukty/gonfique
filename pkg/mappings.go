@@ -30,7 +30,7 @@ func ReadMappings(src string) (map[Pathway]TypeName, error) {
 	return ms, nil
 }
 
-func Mappings(cts *ast.TypeSpec, mappings map[Pathway]TypeName) *ast.GenDecl {
+func Mappings(cts *ast.TypeSpec, mappings map[Pathway]TypeName) []*ast.GenDecl {
 	idents := map[TypeName]*ast.Ident{}
 	for _, tn := range mappings {
 		idents[tn] = ast.NewIdent(tn)
@@ -71,15 +71,15 @@ func Mappings(cts *ast.TypeSpec, mappings map[Pathway]TypeName) *ast.GenDecl {
 		}
 	}
 
-	gd := &ast.GenDecl{
-		Tok:   token.TYPE,
-		Specs: []ast.Spec{},
-	}
+	gds := []*ast.GenDecl{}
 	for i, t := range products {
-		gd.Specs = append(gd.Specs, &ast.TypeSpec{
-			Name: i,
-			Type: t,
+		gds = append(gds, &ast.GenDecl{
+			Tok: token.TYPE,
+			Specs: []ast.Spec{&ast.TypeSpec{
+				Name: i,
+				Type: t,
+			}},
 		})
 	}
-	return gd
+	return gds
 }

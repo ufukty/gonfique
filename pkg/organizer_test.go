@@ -33,7 +33,7 @@ func TestOrganizer(t *testing.T) {
 				}
 			}
 
-			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, Organize(cts), nil, "config"); err != nil {
+			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, Organize(cts), nil, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 
