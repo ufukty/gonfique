@@ -1,5 +1,8 @@
-# apiVersion: ApiVersion
-# metadata.name: Name
+apiVersion: ApiVersion
+metadata.name: Name
+spec.rules.[]: Rule
+spec.rules.[].http.paths.[]: Path
+spec.ports.[]: Port
 spec.**.containers: SpecContainers
 spec.**.containers.[]: SpecContainer
 spec.**.containers.[].name: ContainerName
