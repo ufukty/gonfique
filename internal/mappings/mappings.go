@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/ufukty/gonfique/pkg/compares"
+	"github.com/ufukty/gonfique/internal/compares"
 	"gopkg.in/yaml.v3"
 )
 

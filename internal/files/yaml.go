@@ -8,7 +8,7 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/ufukty/gonfique/pkg/transform"
+	"github.com/ufukty/gonfique/internal/transform"
 	"gopkg.in/yaml.v3"
 )
 

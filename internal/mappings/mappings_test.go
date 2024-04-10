@@ -1,4 +1,4 @@
-package organizer
+package mappings
 
 import (
 	"fmt"
@@ -11,15 +11,25 @@ import (
 	"github.com/ufukty/gonfique/internal/testutils"
 )
 
-func TestOrganizer(t *testing.T) {
-	tcs := []string{"tc6-organize"}
+func TestMappings(t *testing.T) {
+
+	tcs := []string{"tc8-mappings", "tc9-mappings"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
+
 			cts, err := files.ReadConfigYaml(filepath.Join("testdata", tc, "config.yml"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
+
+			ms, err := ReadMappings(filepath.Join("testdata", tc, "mappings.gonfique.yml"))
+			if err != nil {
+				t.Fatal(fmt.Errorf("reading mappings from user-provided file: %w", err))
+			}
+
+			// apply mappings before "organize" & "iterate"
+			fts := Mappings(cts, ms)
 
 			testloc, err := os.MkdirTemp(os.TempDir(), "*")
 			if err != nil {
@@ -27,7 +37,11 @@ func TestOrganizer(t *testing.T) {
 			}
 			fmt.Println("using tmp dir:", testloc)
 
-			filenames := []string{"go.mod", "go.sum", "config_test.go", "config.yml"}
+			if err := files.WriteConfigGo(filepath.Join(testloc, "config.go"), cts, fts, nil, nil, "config"); err != nil {
+				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
+			}
+
+			filenames := []string{"go.mod", "go.sum", "config_test.go", "config.yml", "extend.go"}
 			for _, file := range filenames {
 				src := filepath.Join("testdata", tc, file)
 				dst := filepath.Join(testloc, file)
@@ -36,13 +50,9 @@ func TestOrganizer(t *testing.T) {
 				}
 			}
 
-			if err := files.WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, Organize(cts), nil, "config"); err != nil {
-				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
-			}
-
 			cmd := exec.Command("/usr/local/go/bin/go", "test",
 				"-timeout", "10s",
-				"-run", "^TestOrganize$",
+				"-run", "^TestConfig$",
 				"test",
 				"-v", "-count=1",
 			)
@@ -55,6 +65,5 @@ func TestOrganizer(t *testing.T) {
 			}
 
 		})
-
 	}
 }

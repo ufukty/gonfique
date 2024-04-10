@@ -1,4 +1,4 @@
-package files
+package organizer
 
 import (
 	"fmt"
@@ -7,32 +7,16 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ufukty/gonfique/pkg/testutils"
+	"github.com/ufukty/gonfique/internal/files"
+	"github.com/ufukty/gonfique/internal/testutils"
 )
 
-func TestCreatation(t *testing.T) {
-	tcs := []string{"tc1", "tc2"}
+func TestOrganizer(t *testing.T) {
+	tcs := []string{"tc6-organize"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			cts, err := ReadConfigYaml(filepath.Join("testdata", tc, "config.yml"))
-			if err != nil {
-				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
-			}
-
-			if err := WriteConfigGo(os.DevNull, cts, nil, nil, nil, "config"); err != nil {
-				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
-			}
-		})
-	}
-}
-
-func TestCreationConfigTypeDefinitionAndDecodingInto(t *testing.T) {
-	tcs := []string{"tc1", "tc2", "tc5-k8s"}
-
-	for _, tc := range tcs {
-		t.Run(tc, func(t *testing.T) {
-			cts, err := ReadConfigYaml(filepath.Join("testdata", tc, "config.yml"))
+			cts, err := files.ReadConfigYaml(filepath.Join("testdata", tc, "config.yml"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
@@ -43,8 +27,8 @@ func TestCreationConfigTypeDefinitionAndDecodingInto(t *testing.T) {
 			}
 			fmt.Println("using tmp dir:", testloc)
 
-			files := []string{"go.mod", "go.sum", "config_test.go", "config.yml"}
-			for _, file := range files {
+			filenames := []string{"go.mod", "go.sum", "config_test.go", "config.yml"}
+			for _, file := range filenames {
 				src := filepath.Join("testdata", tc, file)
 				dst := filepath.Join(testloc, file)
 				if err := testutils.CopyFile(src, dst); err != nil {
@@ -52,13 +36,13 @@ func TestCreationConfigTypeDefinitionAndDecodingInto(t *testing.T) {
 				}
 			}
 
-			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, nil, nil, "config"); err != nil {
+			if err := files.WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, Organize(cts), nil, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 
 			cmd := exec.Command("/usr/local/go/bin/go", "test",
 				"-timeout", "10s",
-				"-run", "^TestConfig$",
+				"-run", "^TestOrganize$",
 				"test",
 				"-v", "-count=1",
 			)

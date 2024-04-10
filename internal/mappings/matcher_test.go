@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ufukty/gonfique/pkg/testdata/appendix"
-	"github.com/ufukty/gonfique/pkg/testutils"
+	"github.com/ufukty/gonfique/internal/testdata/appendix"
+	"github.com/ufukty/gonfique/internal/testutils"
 )
 
 func compareMatchs(got []matchitem, want []ast.Node) bool {

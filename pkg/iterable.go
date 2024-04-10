@@ -1,4 +1,4 @@
-package iterables
+package pkg
 
 import (
 	"fmt"

@@ -7,7 +7,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/ufukty/gonfique/pkg/namings"
+	"github.com/ufukty/gonfique/internal/namings"
 )
 
 func degraded(keys []string) []string {
