@@ -8,15 +8,25 @@ import (
 	"testing"
 )
 
-func TestSubstitute(t *testing.T) {
-	tcs := []string{"tc3", "tc4"}
+func TestMappings(t *testing.T) {
+
+	tcs := []string{"tc8-mappings", "tc9-mappings"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
+
 			cts, err := ReadConfigYaml(filepath.Join("testdata", tc, "config.yml"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
+
+			ms, err := ReadMappings(filepath.Join("testdata", tc, "mappings.gonfique.yml"))
+			if err != nil {
+				t.Fatal(fmt.Errorf("reading mappings from user-provided file: %w", err))
+			}
+
+			// apply mappings before "organize" & "iterate"
+			fts := Mappings(cts, ms)
 
 			testloc, err := os.MkdirTemp(os.TempDir(), "*")
 			if err != nil {
@@ -24,24 +34,17 @@ func TestSubstitute(t *testing.T) {
 			}
 			fmt.Println("using tmp dir:", testloc)
 
-			files := []string{"go.mod", "go.sum", "config_test.go", "config.yml", "use.go"}
+			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, fts, nil, nil, "config"); err != nil {
+				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
+			}
+
+			files := []string{"go.mod", "go.sum", "config_test.go", "config.yml", "extend.go"}
 			for _, file := range files {
 				src := filepath.Join("testdata", tc, file)
 				dst := filepath.Join(testloc, file)
 				if err := copyFile(src, dst); err != nil {
 					t.Fatal(fmt.Errorf("copying %q to %q: %w", file, dst, err))
 				}
-			}
-
-			etss, err := ReadTypes(filepath.Join("testdata", tc, "use.go"))
-			if err != nil {
-				t.Fatal(fmt.Errorf("reading types to use in substitution: %w", err))
-			}
-
-			Substitute(cts, etss)
-
-			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, nil, nil, "config"); err != nil {
-				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 
 			cmd := exec.Command("/usr/local/go/bin/go", "test",
