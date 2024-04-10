@@ -11,7 +11,7 @@ import (
 	"github.com/ufukty/gonfique/internal/iterables"
 	"github.com/ufukty/gonfique/internal/mappings"
 	"github.com/ufukty/gonfique/internal/organizer"
-	"github.com/ufukty/gonfique/internal/substitudes"
+	"github.com/ufukty/gonfique/internal/substitude"
 )
 
 type Args struct {
@@ -64,11 +64,11 @@ func perform() error {
 	}
 
 	if args.Use != "" {
-		tss, err := substitudes.ReadTypes(args.Use)
+		tss, err := substitude.ReadTypes(args.Use)
 		if err != nil {
 			return fmt.Errorf("reading -use file %q: %w", args.Use, err)
 		}
-		substitudes.Substitute(cfgts, tss)
+		substitude.UserProvided(cfgts, tss)
 	}
 
 	var products []*ast.GenDecl
