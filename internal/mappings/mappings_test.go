@@ -13,7 +13,7 @@ import (
 
 func TestMappings(t *testing.T) {
 
-	tcs := []string{"tc8-mappings", "tc9-mappings"}
+	tcs := []string{"k8s", "api"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {

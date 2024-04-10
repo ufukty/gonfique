@@ -13,7 +13,7 @@ import (
 )
 
 func TestIterators(t *testing.T) {
-	tcs := []string{"tc7-iterables"}
+	tcs := []string{"api"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {

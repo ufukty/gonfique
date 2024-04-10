@@ -12,7 +12,7 @@ import (
 )
 
 func TestOrganizer(t *testing.T) {
-	tcs := []string{"tc6-organize"}
+	tcs := []string{"api"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {

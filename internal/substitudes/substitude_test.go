@@ -12,7 +12,7 @@ import (
 )
 
 func TestSubstitute(t *testing.T) {
-	tcs := []string{"tc3", "tc4"}
+	tcs := []string{"api", "apiv2"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
