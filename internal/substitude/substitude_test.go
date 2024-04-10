@@ -1,4 +1,4 @@
-package substitudes
+package substitude
 
 import (
 	"fmt"
@@ -41,7 +41,7 @@ func TestSubstitute(t *testing.T) {
 				t.Fatal(fmt.Errorf("reading types to use in substitution: %w", err))
 			}
 
-			Substitute(cts, etss)
+			UserProvided(cts, etss)
 
 			if err := files.WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, nil, nil, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))

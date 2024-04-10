@@ -1,4 +1,4 @@
-package substitudes
+package substitude
 
 import (
 	"fmt"
@@ -30,7 +30,7 @@ func ReadTypes(path string) ([]*ast.TypeSpec, error) {
 	return tss, nil
 }
 
-func Substitute(produced *ast.TypeSpec, existing []*ast.TypeSpec) {
+func UserProvided(produced *ast.TypeSpec, existing []*ast.TypeSpec) {
 	// substitute on dfs traceback
 	astutil.Apply(produced.Type, nil, func(c *astutil.Cursor) bool {
 		for _, e := range existing {
