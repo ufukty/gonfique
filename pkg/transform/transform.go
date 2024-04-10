@@ -1,4 +1,4 @@
-package pkg
+package transform
 
 import (
 	"fmt"
@@ -8,7 +8,9 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/ufukty/gonfique/pkg/compares"
 	"github.com/ufukty/gonfique/pkg/fieldlist"
+	"github.com/ufukty/gonfique/pkg/namings"
 )
 
 func fieldsByTags(fl *ast.FieldList) map[string]*ast.Field {
@@ -24,7 +26,7 @@ func areMergeable(a, b *ast.FieldList) error {
 	conflicts := []string{}
 	for _, af := range a.List {
 		if bf, ok := bfs[af.Tag.Value]; ok {
-			if !compare(af.Type, bf.Type) {
+			if !compares.Compare(af.Type, bf.Type) {
 				conflicts = append(conflicts, af.Names[0].Name) // FIXME: ".Name" is the transformed version of the user-provided key
 			}
 		}
@@ -73,7 +75,7 @@ func structType(v reflect.Value) *ast.StructType {
 		ik := iter.Key()
 		iv := iter.Value()
 		st.Fields.List = append(st.Fields.List, &ast.Field{
-			Names: []*ast.Ident{ast.NewIdent(safeFieldName(ik.String()))},
+			Names: []*ast.Ident{ast.NewIdent(namings.SafeFieldName(ik.String()))},
 			Type:  Transform(iv),
 			Tag: &ast.BasicLit{
 				Kind:  token.STRING,

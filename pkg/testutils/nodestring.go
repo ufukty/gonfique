@@ -1,4 +1,4 @@
-package pkg
+package testutils
 
 import (
 	"fmt"
@@ -37,7 +37,7 @@ func PrintPathways(v reflect.Value, anc []string) {
 	}
 }
 
-func nodeString(n ast.Node) string {
+func NodeString(n ast.Node) string {
 	switch n := n.(type) {
 	case *ast.Field:
 		return fmt.Sprintf("%s (%p)", n.Names[0].Name, n)
@@ -47,10 +47,10 @@ func nodeString(n ast.Node) string {
 	return fmt.Sprintf("anonymous (%p)", n)
 }
 
-func nodeSliceString(ns []ast.Node) string {
+func NodeSliceString(ns []ast.Node) string {
 	s := []string{}
 	for _, n := range ns {
-		s = append(s, nodeString(n))
+		s = append(s, NodeString(n))
 	}
 	return strings.Join(s, ", ")
 }

@@ -7,7 +7,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ufukty/gonfique/pkg"
+	"github.com/ufukty/gonfique/pkg/files"
+	"github.com/ufukty/gonfique/pkg/iterables"
+	"github.com/ufukty/gonfique/pkg/mappings"
+	"github.com/ufukty/gonfique/pkg/organizer"
+	"github.com/ufukty/gonfique/pkg/substitudes"
 )
 
 type Args struct {
@@ -54,39 +58,39 @@ func perform() error {
 		return fmt.Errorf("checking args: %w", err)
 	}
 
-	cfgts, err := pkg.ReadConfigYaml(args.In)
+	cfgts, err := files.ReadConfigYaml(args.In)
 	if err != nil {
 		return fmt.Errorf("reading input file: %w", err)
 	}
 
 	if args.Use != "" {
-		tss, err := pkg.ReadTypes(args.Use)
+		tss, err := substitudes.ReadTypes(args.Use)
 		if err != nil {
 			return fmt.Errorf("reading -use file %q: %w", args.Use, err)
 		}
-		pkg.Substitute(cfgts, tss)
+		substitudes.Substitute(cfgts, tss)
 	}
 
 	var products []*ast.GenDecl
 	if args.Mappings != "" {
-		rules, err := pkg.ReadMappings(args.Mappings)
+		rules, err := mappings.ReadMappings(args.Mappings)
 		if err != nil {
 			return fmt.Errorf("reading -mappings file %q: %w", args.Mappings, err)
 		}
-		products = pkg.Mappings(cfgts, rules)
+		products = mappings.Mappings(cfgts, rules)
 	}
 
 	if !args.Org {
-		if err := pkg.WriteConfigGo(args.Out, cfgts, products, nil, nil, args.Pkg); err != nil {
+		if err := files.WriteConfigGo(args.Out, cfgts, products, nil, nil, args.Pkg); err != nil {
 			return fmt.Errorf("creating %q: %w", args.Out, err)
 		}
 	} else {
-		isolated := pkg.Organize(cfgts)
-		iterators, err := pkg.Iterators(cfgts, isolated)
+		isolated := organizer.Organize(cfgts)
+		iterators, err := iterables.Iterators(cfgts, isolated)
 		if err != nil {
 			return fmt.Errorf("creating iterators: %w", err)
 		}
-		if err := pkg.WriteConfigGo(args.Out, cfgts, products, isolated, iterators, args.Pkg); err != nil {
+		if err := files.WriteConfigGo(args.Out, cfgts, products, isolated, iterators, args.Pkg); err != nil {
 			return fmt.Errorf("creating %q: %w", args.Out, err)
 		}
 	}

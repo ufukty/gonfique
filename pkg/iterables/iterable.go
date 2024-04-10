@@ -1,9 +1,11 @@
-package pkg
+package iterables
 
 import (
 	"fmt"
 	"go/ast"
 	"go/token"
+
+	"github.com/ufukty/gonfique/pkg/namings"
 )
 
 func Iterators(cfg *ast.TypeSpec, isolated *ast.GenDecl) ([]*ast.FuncDecl, error) {
@@ -31,7 +33,7 @@ func Iterators(cfg *ast.TypeSpec, isolated *ast.GenDecl) ([]*ast.FuncDecl, error
 					if cti != nil {
 						elements := []ast.Expr{}
 						for _, f := range st.Fields.List {
-							keyname, err := stripKeyname(f.Tag.Value)
+							keyname, err := namings.StripKeyname(f.Tag.Value)
 							if err != nil {
 								return nil, fmt.Errorf("could not strip the keyname in %s.%s field tag list: %w", ts.Name.Name, f.Names[0].Name, err)
 							}
