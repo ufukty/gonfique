@@ -1,4 +1,4 @@
-package pkg
+package substitudes
 
 import (
 	"fmt"
@@ -6,6 +6,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+
+	"github.com/ufukty/gonfique/pkg/files"
+	"github.com/ufukty/gonfique/pkg/testutils"
 )
 
 func TestSubstitute(t *testing.T) {
@@ -13,7 +16,7 @@ func TestSubstitute(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			cts, err := ReadConfigYaml(filepath.Join("testdata", tc, "config.yml"))
+			cts, err := files.ReadConfigYaml(filepath.Join("testdata", tc, "config.yml"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
@@ -24,11 +27,11 @@ func TestSubstitute(t *testing.T) {
 			}
 			fmt.Println("using tmp dir:", testloc)
 
-			files := []string{"go.mod", "go.sum", "config_test.go", "config.yml", "use.go"}
-			for _, file := range files {
+			filenames := []string{"go.mod", "go.sum", "config_test.go", "config.yml", "use.go"}
+			for _, file := range filenames {
 				src := filepath.Join("testdata", tc, file)
 				dst := filepath.Join(testloc, file)
-				if err := copyFile(src, dst); err != nil {
+				if err := testutils.CopyFile(src, dst); err != nil {
 					t.Fatal(fmt.Errorf("copying %q to %q: %w", file, dst, err))
 				}
 			}
@@ -40,7 +43,7 @@ func TestSubstitute(t *testing.T) {
 
 			Substitute(cts, etss)
 
-			if err := WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, nil, nil, "config"); err != nil {
+			if err := files.WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, nil, nil, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 

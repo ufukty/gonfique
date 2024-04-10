@@ -1,4 +1,4 @@
-package pkg
+package substitudes
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"go/parser"
 	"go/token"
 
+	"github.com/ufukty/gonfique/pkg/compares"
 	"golang.org/x/tools/go/ast/astutil"
 )
 
@@ -33,7 +34,7 @@ func Substitute(produced *ast.TypeSpec, existing []*ast.TypeSpec) {
 	// substitute on dfs traceback
 	astutil.Apply(produced.Type, nil, func(c *astutil.Cursor) bool {
 		for _, e := range existing {
-			if c.Node() != nil && compare(c.Node(), e.Type) {
+			if c.Node() != nil && compares.Compare(c.Node(), e.Type) {
 				c.Replace(e.Name)
 			}
 		}

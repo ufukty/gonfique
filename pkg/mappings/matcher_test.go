@@ -1,4 +1,4 @@
-package pkg
+package mappings
 
 import (
 	"go/ast"
@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/ufukty/gonfique/pkg/testdata/appendix"
+	"github.com/ufukty/gonfique/pkg/testutils"
 )
 
 func compareMatchs(got []matchitem, want []ast.Node) bool {
@@ -23,7 +24,7 @@ func compareMatchs(got []matchitem, want []ast.Node) bool {
 func matchitemsToString(mis []matchitem) string {
 	s := []string{}
 	for _, mi := range mis {
-		s = append(s, nodeString(mi.holder))
+		s = append(s, testutils.NodeString(mi.holder))
 	}
 	return strings.Join(s, ", ")
 }
@@ -79,7 +80,7 @@ func TestMatch(t *testing.T) {
 		t.Run(tc.input, func(t *testing.T) {
 			got := MatchTypeDefinitionHolder(k8sCfgTs, tc.input)
 			if !compareMatchs(got, tc.want) {
-				t.Fatalf("want %#v got %#v", nodeSliceString(tc.want), matchitemsToString(got))
+				t.Fatalf("want %#v got %#v", testutils.NodeSliceString(tc.want), matchitemsToString(got))
 			}
 		})
 	}

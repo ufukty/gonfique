@@ -1,4 +1,4 @@
-package pkg
+package mappings
 
 import (
 	"go/ast"
@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"slices"
 	"strings"
+
+	"github.com/ufukty/gonfique/pkg/namings"
 )
 
 func degraded(keys []string) []string {
@@ -62,7 +64,7 @@ func matchTypeDefHolder(n ast.Node, rule []string, pathway []string) []matchitem
 	case "**": // works like Levenshtein (DP)
 		if st, ok := t.(*ast.StructType); ok {
 			for _, f := range st.Fields.List {
-				ckey, err := stripKeyname(f.Tag.Value)
+				ckey, err := namings.StripKeyname(f.Tag.Value)
 				if err != nil {
 					log.Fatalf("could not get the key name out of field tag for %s", f.Tag.Value)
 				}
@@ -76,7 +78,7 @@ func matchTypeDefHolder(n ast.Node, rule []string, pathway []string) []matchitem
 		switch t := t.(type) {
 		case *ast.StructType:
 			for _, f := range t.Fields.List {
-				ckey, err := stripKeyname(f.Tag.Value)
+				ckey, err := namings.StripKeyname(f.Tag.Value)
 				if err != nil {
 					log.Fatalf("could not get the key name out of field tag for %s", f.Tag.Value)
 				}
@@ -100,7 +102,7 @@ func matchTypeDefHolder(n ast.Node, rule []string, pathway []string) []matchitem
 	default:
 		if st, ok := t.(*ast.StructType); ok {
 			for _, f := range st.Fields.List {
-				ckey, err := stripKeyname(f.Tag.Value)
+				ckey, err := namings.StripKeyname(f.Tag.Value)
 				if err != nil {
 					log.Fatalf("could not get the key name out of field tag for %s", f.Tag.Value)
 				}

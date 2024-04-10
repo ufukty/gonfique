@@ -1,10 +1,11 @@
-package pkg
+package organizer
 
 import (
 	"go/ast"
 	"go/token"
 	"slices"
 
+	"github.com/ufukty/gonfique/pkg/compares"
 	"golang.org/x/tools/go/ast/astutil"
 )
 
@@ -15,7 +16,7 @@ func Organize(ts *ast.TypeSpec) *ast.GenDecl {
 		if c.Node() != nil && c.Node() != ts.Type {
 			if st, ok := c.Node().(*ast.StructType); ok {
 				i := slices.IndexFunc(prevs, func(prev *ast.StructType) bool {
-					return compare(prev, st)
+					return compares.Compare(prev, st)
 				})
 				if i != -1 {
 					c.Replace(store[prevs[i]])

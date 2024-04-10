@@ -1,4 +1,4 @@
-package pkg
+package files
 
 import (
 	"go/ast"

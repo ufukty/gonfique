@@ -1,4 +1,4 @@
-package pkg
+package files
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"os"
 	"reflect"
 
+	"github.com/ufukty/gonfique/pkg/transform"
 	"gopkg.in/yaml.v3"
 )
 
@@ -23,7 +24,7 @@ func ReadConfigYaml(src string) (*ast.TypeSpec, error) {
 	}
 	return &ast.TypeSpec{
 		Name: ast.NewIdent("Config"),
-		Type: Transform(reflect.ValueOf(y)),
+		Type: transform.Transform(reflect.ValueOf(y)),
 	}, nil
 }
 

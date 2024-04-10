@@ -1,4 +1,4 @@
-package pkg
+package mappings
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/ufukty/gonfique/pkg/compares"
 	"gopkg.in/yaml.v3"
 )
 
@@ -44,7 +45,7 @@ func Mappings(cts *ast.TypeSpec, mappings map[Pathway]TypeName) []*ast.GenDecl {
 			switch holder := mi.holder.(type) {
 			case *ast.Field:
 				if t, ok := products[i]; ok {
-					if !compare(t, holder.Type) {
+					if !compares.Compare(t, holder.Type) {
 						log.Fatalf("conflicting schemas found for type name %q\n", i.Name)
 					}
 				} else {
@@ -53,7 +54,7 @@ func Mappings(cts *ast.TypeSpec, mappings map[Pathway]TypeName) []*ast.GenDecl {
 				holder.Type = i
 			case *ast.ArrayType:
 				if t, ok := products[i]; ok {
-					if !compare(t, holder.Elt) {
+					if !compares.Compare(t, holder.Elt) {
 						log.Fatalf("conflicting schemas found for type name %q\n", i.Name)
 					}
 				} else {
