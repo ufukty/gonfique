@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/ufukty/gonfique/pkg/compares"
-	"github.com/ufukty/gonfique/pkg/fieldlist"
 	"github.com/ufukty/gonfique/pkg/namings"
 )
 
@@ -54,7 +53,7 @@ func arrayType(v reflect.Value) ast.Expr {
 				log.Println(fmt.Errorf("assigning 'any' to array type because of at least 2 items' type are different: %w", err))
 				return &ast.ArrayType{Elt: ast.NewIdent("any")}
 			} else {
-				m = &ast.StructType{Fields: fieldlist.Combine(stM.Fields, stT.Fields)}
+				m = &ast.StructType{Fields: combine(stM.Fields, stT.Fields)}
 			}
 		}
 	}
@@ -82,7 +81,7 @@ func structType(v reflect.Value) *ast.StructType {
 				Value: fmt.Sprintf("`yaml:%q`", ik.String()),
 			},
 		})
-		fieldlist.Sort(st.Fields)
+		sort(st.Fields)
 	}
 	return st
 }
