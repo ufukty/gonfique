@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ufukty/gonfique/internal/testdata/appendix"
+	"github.com/ufukty/gonfique/internal/mappings/testdata/appendix"
 	"github.com/ufukty/gonfique/internal/testutils"
 )
 

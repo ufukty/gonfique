@@ -11,7 +11,7 @@ import (
 )
 
 func TestCreatation(t *testing.T) {
-	tcs := []string{"tc1", "tc2"}
+	tcs := []string{"api", "generic"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
@@ -28,7 +28,7 @@ func TestCreatation(t *testing.T) {
 }
 
 func TestCreationConfigTypeDefinitionAndDecodingInto(t *testing.T) {
-	tcs := []string{"tc1", "tc2", "tc5-k8s"}
+	tcs := []string{"api", "generic", "k8s"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
