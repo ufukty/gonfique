@@ -7,11 +7,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ufukty/gonfique/pkg/files"
-	"github.com/ufukty/gonfique/pkg/iterables"
-	"github.com/ufukty/gonfique/pkg/mappings"
-	"github.com/ufukty/gonfique/pkg/organizer"
-	"github.com/ufukty/gonfique/pkg/substitudes"
+	"github.com/ufukty/gonfique/internal/files"
+	"github.com/ufukty/gonfique/internal/iterables"
+	"github.com/ufukty/gonfique/internal/mappings"
+	"github.com/ufukty/gonfique/internal/organizer"
+	"github.com/ufukty/gonfique/internal/substitudes"
 )
 
 type Args struct {
