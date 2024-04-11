@@ -17,7 +17,7 @@ func TestIterators(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			cts, err := files.ReadConfigYaml(filepath.Join("testdata", tc, "config.yml"))
+			f, err := files.ReadConfigYaml(filepath.Join("testdata", tc, "config.yml"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
@@ -37,13 +37,13 @@ func TestIterators(t *testing.T) {
 				}
 			}
 
-			gds := organizer.Organize(cts)
-			its, err := Iterators(cts, gds)
+			organizer.Organize(f)
+			err = DetectIterators(f)
 			if err != nil {
 				t.Fatal(fmt.Errorf("generating iterators for all-same-type-field structs: %w", err))
 			}
 
-			if err := files.WriteConfigGo(filepath.Join(testloc, "config.go"), cts, nil, gds, its, "config"); err != nil {
+			if err := f.Write(filepath.Join(testloc, "config.go"), "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 

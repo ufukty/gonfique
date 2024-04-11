@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"go/ast"
 	"os"
 	"strings"
 
@@ -58,7 +57,7 @@ func perform() error {
 		return fmt.Errorf("checking args: %w", err)
 	}
 
-	cfgts, err := files.ReadConfigYaml(args.In)
+	f, err := files.ReadConfigYaml(args.In)
 	if err != nil {
 		return fmt.Errorf("reading input file: %w", err)
 	}
@@ -68,31 +67,27 @@ func perform() error {
 		if err != nil {
 			return fmt.Errorf("reading -use file %q: %w", args.Use, err)
 		}
-		substitude.UserProvided(cfgts, tss)
+		substitude.UserProvided(f, tss)
 	}
 
-	var products []*ast.GenDecl
 	if args.Mappings != "" {
 		rules, err := mappings.ReadMappings(args.Mappings)
 		if err != nil {
 			return fmt.Errorf("reading -mappings file %q: %w", args.Mappings, err)
 		}
-		products = mappings.Mappings(cfgts, rules)
+		mappings.ApplyMappings(f, rules)
 	}
 
-	if !args.Org {
-		if err := files.WriteConfigGo(args.Out, cfgts, products, nil, nil, args.Pkg); err != nil {
-			return fmt.Errorf("creating %q: %w", args.Out, err)
-		}
-	} else {
-		isolated := organizer.Organize(cfgts)
-		iterators, err := iterables.Iterators(cfgts, isolated)
+	if args.Org {
+		organizer.Organize(f)
+		err := iterables.DetectIterators(f)
 		if err != nil {
 			return fmt.Errorf("creating iterators: %w", err)
 		}
-		if err := files.WriteConfigGo(args.Out, cfgts, products, isolated, iterators, args.Pkg); err != nil {
-			return fmt.Errorf("creating %q: %w", args.Out, err)
-		}
+	}
+
+	if err := f.Write(args.Out, args.Pkg); err != nil {
+		return fmt.Errorf("creating %q: %w", args.Out, err)
 	}
 
 	return nil

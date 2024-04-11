@@ -1,0 +1,23 @@
+Github:
+  Domain: github.com
+  Gateways:
+    Public:
+      Path: /api/v1.0.0
+      RequestTimeout: 200ms
+      GracePeriod: 200µs
+      Services:
+        Document:
+          Path: document
+          Endpoints:
+            List: { Method: "GET", Path: "list/{root}" }
+        Objectives:
+          Path: tasks
+          Endpoints:
+            Create: { Method: "POST", Path: "task" }
+        Tags:
+          Path: tags
+          Endpoints:
+            Creation: { Method: "POST", Path: "" }
+            Assign: { Method: "POST", Path: "assign" }
+Gitlab:
+  Domain: gitlab.com

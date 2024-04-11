@@ -18,7 +18,7 @@ func TestMappings(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
 
-			cts, err := files.ReadConfigYaml(filepath.Join("testdata", tc, "config.yml"))
+			f, err := files.ReadConfigYaml(filepath.Join("testdata", tc, "config.yml"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
@@ -29,7 +29,7 @@ func TestMappings(t *testing.T) {
 			}
 
 			// apply mappings before "organize" & "iterate"
-			fts := Mappings(cts, ms)
+			ApplyMappings(f, ms)
 
 			testloc, err := os.MkdirTemp(os.TempDir(), "*")
 			if err != nil {
@@ -37,7 +37,7 @@ func TestMappings(t *testing.T) {
 			}
 			fmt.Println("using tmp dir:", testloc)
 
-			if err := files.WriteConfigGo(filepath.Join(testloc, "config.go"), cts, fts, nil, nil, "config"); err != nil {
+			if err := f.Write(filepath.Join(testloc, "config.go"), "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 

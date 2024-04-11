@@ -6,41 +6,20 @@ import (
 	"go/token"
 	"log"
 	"reflect"
-	"strings"
+	"time"
 
-	"github.com/ufukty/gonfique/internal/compares"
 	"github.com/ufukty/gonfique/internal/namings"
 )
 
-func fieldsByTags(fl *ast.FieldList) map[string]*ast.Field {
-	tgs := map[string]*ast.Field{}
-	for _, f := range fl.List {
-		tgs[f.Tag.Value] = f
-	}
-	return tgs
+type transformer struct {
+	isTimeUsed bool
 }
 
-func areMergeable(a, b *ast.FieldList) error {
-	bfs := fieldsByTags(b)
-	conflicts := []string{}
-	for _, af := range a.List {
-		if bf, ok := bfs[af.Tag.Value]; ok {
-			if !compares.Compare(af.Type, bf.Type) {
-				conflicts = append(conflicts, af.Names[0].Name) // FIXME: ".Name" is the transformed version of the user-provided key
-			}
-		}
-	}
-	if len(conflicts) > 0 {
-		return fmt.Errorf(strings.Join(conflicts, ", "))
-	}
-	return nil
-}
-
-func arrayType(v reflect.Value) ast.Expr {
+func (tr *transformer) arrayType(v reflect.Value) ast.Expr {
 	var m ast.Expr
 	for i := 0; i < v.Len(); i++ {
 		iv := v.Index(i)
-		t := Transform(iv)
+		t := tr.transform(iv)
 		if m == nil {
 			m = t
 			continue
@@ -63,7 +42,7 @@ func arrayType(v reflect.Value) ast.Expr {
 	return &ast.ArrayType{Elt: m}
 }
 
-func structType(v reflect.Value) *ast.StructType {
+func (tr *transformer) structType(v reflect.Value) *ast.StructType {
 	st := &ast.StructType{
 		Fields: &ast.FieldList{
 			List: []*ast.Field{},
@@ -75,7 +54,7 @@ func structType(v reflect.Value) *ast.StructType {
 		iv := iter.Value()
 		st.Fields.List = append(st.Fields.List, &ast.Field{
 			Names: []*ast.Ident{ast.NewIdent(namings.SafeFieldName(ik.String()))},
-			Type:  Transform(iv),
+			Type:  tr.transform(iv),
 			Tag: &ast.BasicLit{
 				Kind:  token.STRING,
 				Value: fmt.Sprintf("`yaml:%q`", ik.String()),
@@ -86,21 +65,31 @@ func structType(v reflect.Value) *ast.StructType {
 	return st
 }
 
-// reconstructs a reflect-value's type in ast.TypeSpec.
-// limited with types used by YAML decoder.
-func Transform(v reflect.Value) ast.Expr {
+func (tr *transformer) stringType(v reflect.Value) ast.Expr {
+	s := v.Interface().(string)
+	if _, err := time.ParseDuration(s); err == nil {
+		tr.isTimeUsed = true
+		return &ast.SelectorExpr{
+			X:   ast.NewIdent("time"),
+			Sel: ast.NewIdent("Duration"),
+		}
+	}
+	return ast.NewIdent("string") // generic string
+}
+
+func (tr *transformer) transform(v reflect.Value) ast.Expr {
 	t := v.Type()
 	switch t.Kind() {
 	case reflect.Interface:
-		return Transform(v.Elem())
+		return tr.transform(v.Elem())
 	case reflect.Map:
-		return structType(v)
+		return tr.structType(v)
 	case reflect.Slice:
-		return arrayType(v)
+		return tr.arrayType(v)
 	case reflect.Bool:
 		return ast.NewIdent("bool")
 	case reflect.String:
-		return ast.NewIdent("string")
+		return tr.stringType(v)
 	case reflect.Int:
 		return ast.NewIdent("int")
 	case reflect.Int32:
@@ -121,4 +110,18 @@ func Transform(v reflect.Value) ast.Expr {
 		log.Println("unhandled reflect kind", t)
 	}
 	return nil
+}
+
+// reconstructs a reflect-value's type in ast.TypeSpec.
+// limited with types used by YAML decoder.
+func Transform(cfgcontent any) (ast.Expr, []string) {
+	t := &transformer{
+		isTimeUsed: false,
+	}
+	cfg := t.transform(reflect.ValueOf(cfgcontent))
+	imports := []string{}
+	if t.isTimeUsed {
+		imports = append(imports, "time")
+	}
+	return cfg, imports
 }
