@@ -155,7 +155,7 @@ See outputs for different flag combinations when [`-organize` flag is used](/exa
 Use version tags to avoid development versions as such:
 
 ```sh
-go install github.com/ufukty/gonfique@v1.2.0
+go install github.com/ufukty/gonfique@v1.3.0
 ```
 
 ## Usage
