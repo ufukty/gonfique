@@ -170,8 +170,8 @@ gonfique -in config.yml -out config.go -pkg main [-use <file>] [-organize]
 - Defines named or inline types depending on user choice (`-organize` flag).
 - Reuses user-defined types defined provided in a file when schemas match via `-use` flag
 - Supports arrays:
-  - When all array items share same schema; array types are generated as []<item type>.
-  - When all array items doesn't share same schema, but all items are compatible; array types are generated as []<combined item types>
+  - When all array items share same schema; array types are generated as `[]<item type>`.
+  - When all array items don't share same schema, but all items are compatible; array types are generated as `[]<combined item types>`.
   - When at least 2 array item contain conflicting props; array types are generated as interfaces, and each item type gets its methods implemented to conform the array type.
 - Supports dictionaries:
   - Implements `.Range()` method on those dictionaries that all values share same schema, so they can be iterable via for loops. Such as `for service, details := range cfg.Services.Range() { ... }`
