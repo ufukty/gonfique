@@ -5,12 +5,19 @@ import (
 	"go/ast"
 	"go/token"
 
+	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/namings"
 )
 
-func Iterators(cfg *ast.TypeSpec, isolated *ast.GenDecl) ([]*ast.FuncDecl, error) {
+func DetectIterators(f *files.File) error {
 	fds := []*ast.FuncDecl{}
-	for _, gd := range []*ast.GenDecl{{Tok: token.TYPE, Specs: []ast.Spec{cfg}}, isolated} {
+	gds := []*ast.GenDecl{
+		f.Isolated,
+		&ast.GenDecl{ // temporary
+			Tok:   token.TYPE,
+			Specs: []ast.Spec{&ast.TypeSpec{Type: f.Cfg}}},
+	}
+	for _, gd := range gds {
 		for _, s := range gd.Specs {
 			if ts, ok := s.(*ast.TypeSpec); ok {
 				if st, ok := ts.Type.(*ast.StructType); ok {
@@ -35,7 +42,7 @@ func Iterators(cfg *ast.TypeSpec, isolated *ast.GenDecl) ([]*ast.FuncDecl, error
 						for _, f := range st.Fields.List {
 							keyname, err := namings.StripKeyname(f.Tag.Value)
 							if err != nil {
-								return nil, fmt.Errorf("could not strip the keyname in %s.%s field tag list: %w", ts.Name.Name, f.Names[0].Name, err)
+								return fmt.Errorf("could not strip the keyname in %s.%s field tag list: %w", ts.Name.Name, f.Names[0].Name, err)
 							}
 							elements = append(elements, &ast.KeyValueExpr{
 								Key:   &ast.BasicLit{Kind: token.STRING, Value: fmt.Sprintf("%q", keyname)},
@@ -61,5 +68,6 @@ func Iterators(cfg *ast.TypeSpec, isolated *ast.GenDecl) ([]*ast.FuncDecl, error
 			}
 		}
 	}
-	return fds, nil
+	f.Iterators = fds
+	return nil
 }

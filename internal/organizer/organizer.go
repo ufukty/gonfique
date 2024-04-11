@@ -6,14 +6,15 @@ import (
 	"slices"
 
 	"github.com/ufukty/gonfique/internal/compares"
+	"github.com/ufukty/gonfique/internal/files"
 	"golang.org/x/tools/go/ast/astutil"
 )
 
-func Organize(ts *ast.TypeSpec) *ast.GenDecl {
+func Organize(f *files.File) {
 	store := map[*ast.StructType]*ast.Ident{}
 	prevs := []*ast.StructType{}
-	astutil.Apply(ts.Type, nil, func(c *astutil.Cursor) bool {
-		if c.Node() != nil && c.Node() != ts.Type {
+	astutil.Apply(f.Cfg, nil, func(c *astutil.Cursor) bool {
+		if c.Node() != nil && c.Node() != f.Cfg {
 			if st, ok := c.Node().(*ast.StructType); ok {
 				i := slices.IndexFunc(prevs, func(prev *ast.StructType) bool {
 					return compares.Compare(prev, st)
@@ -32,7 +33,7 @@ func Organize(ts *ast.TypeSpec) *ast.GenDecl {
 		return true
 	})
 	if len(prevs) == 0 {
-		return nil
+		return
 	}
 	var gd = &ast.GenDecl{
 		Doc: &ast.CommentGroup{[]*ast.Comment{
@@ -49,5 +50,5 @@ func Organize(ts *ast.TypeSpec) *ast.GenDecl {
 			Type: st,
 		})
 	}
-	return gd
+	f.Isolated = gd
 }

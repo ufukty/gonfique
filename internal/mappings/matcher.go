@@ -41,7 +41,7 @@ type matchitem struct {
 
 // return items are either *ast.Field or *ast.ArrayType.
 // use a typeswitch to replace .Type or .Elt fields.
-func matchTypeDefHolder(n ast.Node, rule []string, pathway []string) []matchitem {
+func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string) []matchitem {
 	if len(rule) == 0 {
 		return []matchitem{}
 	}
@@ -68,8 +68,8 @@ func matchTypeDefHolder(n ast.Node, rule []string, pathway []string) []matchitem
 				if err != nil {
 					log.Fatalf("could not get the key name out of field tag for %s", f.Tag.Value)
 				}
-				matches = append(matches, matchTypeDefHolder(f, rule, append(pathway, ckey))...)
-				matches = append(matches, matchTypeDefHolder(f, degraded(rule), append(pathway, ckey))...)
+				matches = append(matches, matchTypeDefHolderHelper(f, rule, append(pathway, ckey))...)
+				matches = append(matches, matchTypeDefHolderHelper(f, degraded(rule), append(pathway, ckey))...)
 				// TODO: add call to check "[]" appended rule
 			}
 		}
@@ -85,7 +85,7 @@ func matchTypeDefHolder(n ast.Node, rule []string, pathway []string) []matchitem
 				if len(rule) == 1 {
 					matches = append(matches, matchitem{f, append(pathway, ckey)})
 				} else {
-					matches = append(matches, matchTypeDefHolder(f, rule[1:], append(pathway, ckey))...)
+					matches = append(matches, matchTypeDefHolderHelper(f, rule[1:], append(pathway, ckey))...)
 				}
 			}
 		}
@@ -95,7 +95,7 @@ func matchTypeDefHolder(n ast.Node, rule []string, pathway []string) []matchitem
 			if len(rule) == 1 { // should be leaf
 				matches = append(matches, matchitem{at, append(pathway, "[]")})
 			} else {
-				matches = append(matches, matchTypeDefHolder(at, rule[1:], append(pathway, "[]"))...)
+				matches = append(matches, matchTypeDefHolderHelper(at, rule[1:], append(pathway, "[]"))...)
 			}
 		}
 
@@ -110,7 +110,7 @@ func matchTypeDefHolder(n ast.Node, rule []string, pathway []string) []matchitem
 					if len(rule) == 1 { // should be leaf
 						matches = append(matches, matchitem{f, append(pathway, ckey)})
 					} else {
-						matches = append(matches, matchTypeDefHolder(f, rule[1:], append(pathway, ckey))...)
+						matches = append(matches, matchTypeDefHolderHelper(f, rule[1:], append(pathway, ckey))...)
 					}
 				}
 			}
@@ -122,10 +122,10 @@ func matchTypeDefHolder(n ast.Node, rule []string, pathway []string) []matchitem
 // accepts processed form of Config type AST which:
 //   - should not have multiple names per ast.Field
 //   - array types should be defined by combining compatible item fields
-func MatchTypeDefinitionHolder(cfg *ast.TypeSpec, rule string) []matchitem {
+func matchTypeDefHolder(cfg *ast.TypeSpec, rule string) []matchitem {
 	segments := strings.Split(rule, ".")
 	if len(segments) == 0 {
 		return []matchitem{}
 	}
-	return matchTypeDefHolder(cfg, segments, []string{})
+	return matchTypeDefHolderHelper(cfg, segments, []string{})
 }

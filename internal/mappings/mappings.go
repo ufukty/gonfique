@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/ufukty/gonfique/internal/compares"
+	"github.com/ufukty/gonfique/internal/files"
 	"gopkg.in/yaml.v3"
 )
 
@@ -29,10 +30,10 @@ func ReadMappings(src string) (map[Pathway]TypeName, error) {
 	return ms, nil
 }
 
-func Mappings(cts *ast.TypeSpec, mappings map[Pathway]TypeName) []*ast.GenDecl {
+func ApplyMappings(f *files.File, mappings map[Pathway]TypeName) {
 	miss := map[*ast.Ident][]matchitem{}
 	for pw, tn := range mappings {
-		matches := MatchTypeDefinitionHolder(cts, pw)
+		matches := matchTypeDefHolder(&ast.TypeSpec{Name: ast.NewIdent("Config"), Type: f.Cfg}, pw)
 		if len(matches) == 0 {
 			fmt.Printf("Pattern %q (->%s) didn't match any region\n", pw, tn)
 		}
@@ -65,9 +66,8 @@ func Mappings(cts *ast.TypeSpec, mappings map[Pathway]TypeName) []*ast.GenDecl {
 		}
 	}
 
-	gds := []*ast.GenDecl{}
 	for i, t := range products {
-		gds = append(gds, &ast.GenDecl{
+		f.Named = append(f.Named, &ast.GenDecl{
 			Tok: token.TYPE,
 			Specs: []ast.Spec{&ast.TypeSpec{
 				Name: i,
@@ -75,5 +75,4 @@ func Mappings(cts *ast.TypeSpec, mappings map[Pathway]TypeName) []*ast.GenDecl {
 			}},
 		})
 	}
-	return gds
 }

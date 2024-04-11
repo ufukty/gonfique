@@ -5,36 +5,6 @@ import (
 	"go/token"
 )
 
-var imports = &ast.GenDecl{
-	Tok: token.IMPORT,
-	Specs: []ast.Spec{
-		&ast.ImportSpec{
-			Name: nil,
-			Path: &ast.BasicLit{
-				Kind:  token.STRING,
-				Value: "\"fmt\"",
-			},
-			Comment: nil,
-		},
-		&ast.ImportSpec{
-			Name: nil,
-			Path: &ast.BasicLit{
-				Kind:  token.STRING,
-				Value: "\"os\"",
-			},
-			Comment: nil,
-		},
-		&ast.ImportSpec{
-			Name: nil,
-			Path: &ast.BasicLit{
-				Kind:  token.STRING,
-				Value: "\"gopkg.in/yaml.v3\"",
-			},
-			Comment: nil,
-		},
-	},
-}
-
 var readerFunc = &ast.FuncDecl{
 	Name: &ast.Ident{
 		Name: "ReadConfig",
