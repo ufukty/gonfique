@@ -31,23 +31,13 @@ func TestMappings(t *testing.T) {
 			// apply mappings before "organize" & "iterate"
 			ApplyMappings(f, ms)
 
-			testloc, err := os.MkdirTemp(os.TempDir(), "*")
+			testloc, err := testutils.PrepareTestCase(tc, []string{"go.mod", "go.sum", "config_test.go", "config.yml", "extend.go"})
 			if err != nil {
-				t.Fatal(fmt.Errorf("creating temporary directory to test the created schema: %w", err))
+				t.Error(fmt.Errorf("preparing testcase to test: :%w", err))
 			}
-			fmt.Println("using tmp dir:", testloc)
 
 			if err := f.Write(filepath.Join(testloc, "config.go"), "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
-			}
-
-			filenames := []string{"go.mod", "go.sum", "config_test.go", "config.yml", "extend.go"}
-			for _, file := range filenames {
-				src := filepath.Join("testdata", tc, file)
-				dst := filepath.Join(testloc, file)
-				if err := testutils.CopyFile(src, dst); err != nil {
-					t.Fatal(fmt.Errorf("copying %q to %q: %w", file, dst, err))
-				}
 			}
 
 			cmd := exec.Command("/usr/local/go/bin/go", "test",
