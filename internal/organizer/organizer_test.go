@@ -25,6 +25,8 @@ func TestOrganizer(t *testing.T) {
 				t.Error(fmt.Errorf("preparing testcase to test: :%w", err))
 			}
 
+			Organize(f)
+
 			if err := f.Write(filepath.Join(testloc, "config.go"), "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
