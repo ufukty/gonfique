@@ -13,9 +13,9 @@ func DetectIterators(f *files.File) error {
 	fds := []*ast.FuncDecl{}
 	gds := []*ast.GenDecl{
 		f.Isolated,
-		&ast.GenDecl{ // temporary
+		{ // temporary
 			Tok:   token.TYPE,
-			Specs: []ast.Spec{&ast.TypeSpec{Type: f.Cfg}}},
+			Specs: []ast.Spec{&ast.TypeSpec{Name: ast.NewIdent("Config"), Type: f.Cfg}}},
 	}
 	for _, gd := range gds {
 		for _, s := range gd.Specs {
