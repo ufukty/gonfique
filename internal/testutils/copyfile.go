@@ -1,8 +1,10 @@
 package testutils
 
 import (
+	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 func CopyFile(src, dst string) error {
@@ -29,4 +31,22 @@ func CopyFile(src, dst string) error {
 	}
 
 	return os.Chmod(dst, srcInfo.Mode())
+}
+
+func PrepareTestCase(tc string, files []string) (string, error) {
+	testloc, err := os.MkdirTemp(os.TempDir(), "*")
+	if err != nil {
+		return "", fmt.Errorf("creating temporary directory to test the created schema: %w", err)
+	}
+	fmt.Println("using tmp dir:", testloc)
+
+	for _, file := range files {
+		src := filepath.Join("testdata", tc, file)
+		dst := filepath.Join(testloc, file)
+		if err := CopyFile(src, dst); err != nil {
+			return "", fmt.Errorf("copying %q to %q: %w", file, dst, err)
+		}
+	}
+
+	return testloc, nil
 }
