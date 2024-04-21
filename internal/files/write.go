@@ -6,6 +6,7 @@ import (
 	"go/format"
 	"go/token"
 	"os"
+	"slices"
 )
 
 func addImports(dst *ast.File, imports []string) {
@@ -39,6 +40,13 @@ func addIteratorMethods(dst *ast.File, iterators []*ast.FuncDecl) {
 }
 
 func addNamedTypeSpecifications(dst *ast.File, named []*ast.GenDecl) {
+	slices.SortFunc(named, func(a, b *ast.GenDecl) int {
+		if a.Specs[0].(*ast.TypeSpec).Name.Name > b.Specs[0].(*ast.TypeSpec).Name.Name {
+			return 1
+		} else {
+			return -1
+		}
+	})
 	for _, n := range named {
 		dst.Decls = append(dst.Decls, n)
 	}
