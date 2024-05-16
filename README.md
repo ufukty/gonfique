@@ -148,7 +148,11 @@ func ReadConfig(path string) (Config, error) {
 }
 ```
 
-See outputs for different flag combinations when [`-organize` flag is used](/examples/k8s/organized/output.go) or [both `-organize` and `-use` flags are used](/examples/k8s/organized-used/output.go). Also, usage for each: [usage_test.go](/examples/k8s/usage_test.go)
+See outputs for different flag combinations:
+
+- [`-mapping`](/examples/k8s/map/output.go)
+- [`-organize`](/examples/k8s/organized/output.go)
+- [`-organize`, `-use`](/examples/k8s/organized-used/output.go)
 
 ## Install
 
