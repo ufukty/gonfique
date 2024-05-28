@@ -61,8 +61,8 @@ func (tr *transformer) structType(v reflect.Value) *ast.StructType {
 				Value: fmt.Sprintf("`yaml:%q`", ik.String()),
 			},
 		})
-		sort(st.Fields)
 	}
+	sort(st.Fields)
 	return st
 }
 
