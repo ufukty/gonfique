@@ -1,0 +1,120 @@
+{
+  "digitalocean": {
+    "fra1": {
+      "services": {
+        "account": [
+          {
+            "backups": false,
+            "created_at": "2024-05-28T08:52:11Z",
+            "disk": 25,
+            "droplet_agent": null,
+            "graceful_shutdown": false,
+            "id": "1",
+            "image": "1",
+            "ipv4_address": "1.1.1.1",
+            "ipv4_address_private": "1.1.1.1",
+            "ipv6": true,
+            "ipv6_address": "0000:0000:0:00::000:0000",
+            "locked": false,
+            "memory": 1024,
+            "monitoring": true,
+            "name": "fra1-account-0",
+            "price_hourly": 0.00893,
+            "price_monthly": 6,
+            "private_networking": true,
+            "region": "fra1",
+            "resize_disk": false,
+            "size": "s-1vcpu-1gb",
+            "ssh_keys": [""],
+            "status": "active",
+            "tags": ["account"],
+            "timeouts": null,
+            "urn": "do:droplet:0",
+            "user_data": null,
+            "vcpus": 1,
+            "volume_ids": [],
+            "vpc_uuid": "00000000-0000-0000-0000-000000000000"
+          }
+        ],
+        "gateway": [
+          {
+            "backups": false,
+            "created_at": "2024-05-28T09:05:51Z",
+            "disk": 25,
+            "droplet_agent": null,
+            "graceful_shutdown": false,
+            "id": "1",
+            "image": "1",
+            "ipv4_address": "0.0.0.0",
+            "ipv4_address_private": "0.0.0.0",
+            "ipv6": true,
+            "ipv6_address": "0000:0000:0:00::000:0000",
+            "locked": false,
+            "memory": 1024,
+            "monitoring": true,
+            "name": "fra1-gateway-0",
+            "price_hourly": 0.00893,
+            "price_monthly": 6,
+            "private_networking": true,
+            "region": "fra1",
+            "resize_disk": false,
+            "size": "s-1vcpu-1gb",
+            "ssh_keys": [""],
+            "status": "active",
+            "tags": ["gateway"],
+            "timeouts": null,
+            "urn": "do:droplet:1",
+            "user_data": null,
+            "vcpus": 1,
+            "volume_ids": [],
+            "vpc_uuid": "00000000-0000-0000-0000-000000000000"
+          }
+        ],
+        "objectives": [
+          {
+            "backups": false,
+            "created_at": "2024-05-28T08:52:11Z",
+            "disk": 25,
+            "droplet_agent": null,
+            "graceful_shutdown": false,
+            "id": "1",
+            "image": "1",
+            "ipv4_address": "0.0.0.0",
+            "ipv4_address_private": "0.0.0.0",
+            "ipv6": true,
+            "ipv6_address": "0000:0000:0:00::000:0000",
+            "locked": false,
+            "memory": 1024,
+            "monitoring": true,
+            "name": "fra1-objectives-0",
+            "price_hourly": 0.00893,
+            "price_monthly": 6,
+            "private_networking": true,
+            "region": "fra1",
+            "resize_disk": false,
+            "size": "s-1vcpu-1gb",
+            "ssh_keys": [""],
+            "status": "active",
+            "tags": ["objectives"],
+            "timeouts": null,
+            "urn": "do:droplet:1",
+            "user_data": null,
+            "vcpus": 1,
+            "volume_ids": [],
+            "vpc_uuid": "00000000-0000-0000-0000-000000000000"
+          }
+        ]
+      },
+      "vpc": {
+        "created_at": "2024-05-09 18:12:37 +0000 UTC",
+        "default": false,
+        "description": "",
+        "id": "00000000-0000-0000-0000-000000000000",
+        "ip_range": "0.0.0.0/1",
+        "name": "fra1",
+        "region": "fra1",
+        "urn": "do:vpc:00000000-0000-0000-0000-000000000000"
+      }
+    }
+  }
+}
