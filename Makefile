@@ -15,3 +15,8 @@ build:
 	GOOS=freebsd GOARCH=amd64 go build -trimpath $(LDFLAGS) -o build/$(VERSION)/gonfique-$(VERSION)-freebsd-amd64 .
 	GOOS=freebsd GOARCH=386   go build -trimpath $(LDFLAGS) -o build/$(VERSION)/gonfique-$(VERSION)-freebsd-386   .
 	GOOS=freebsd GOARCH=arm   go build -trimpath $(LDFLAGS) -o build/$(VERSION)/gonfique-$(VERSION)-freebsd-arm   .
+
+.PHONY: install
+
+install:
+	go build $(LDFLAGS) -o ~/bin/gonfique  .
