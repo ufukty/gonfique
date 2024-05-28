@@ -68,6 +68,9 @@ func (tr *transformer) structType(v reflect.Value) *ast.StructType {
 
 func (tr *transformer) stringType(v reflect.Value) ast.Expr {
 	s := v.Interface().(string)
+	if s == "0" { // BECAUSE: time.ParseDuration("0") doesn't return error
+		return ast.NewIdent("string")
+	}
 	if _, err := time.ParseDuration(s); err == nil {
 		tr.isTimeUsed = true
 		return &ast.SelectorExpr{
