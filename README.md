@@ -159,7 +159,7 @@ See outputs for different flag combinations:
 Use version tags to avoid development versions as such:
 
 ```sh
-go install github.com/ufukty/gonfique@v1.3.2
+go install github.com/ufukty/gonfique@v1.3.4
 ```
 
 ## Usage
