@@ -13,6 +13,8 @@ import (
 	"github.com/ufukty/gonfique/internal/substitude"
 )
 
+var Version = ""
+
 type Args struct {
 	In       string
 	Out      string
@@ -93,8 +95,19 @@ func perform() error {
 	return nil
 }
 
+func dispatch() error {
+	if len(os.Args) < 2 {
+		return fmt.Errorf("needs more arguments")
+	}
+	if os.Args[1] == "version" {
+		fmt.Println(Version)
+		return nil
+	}
+	return perform()
+}
+
 func main() {
-	if err := perform(); err != nil {
+	if err := dispatch(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
