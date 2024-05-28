@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 	"log"
+	"os"
 	"reflect"
 	"time"
 
@@ -78,6 +79,10 @@ func (tr *transformer) stringType(v reflect.Value) ast.Expr {
 }
 
 func (tr *transformer) transform(v reflect.Value) ast.Expr {
+	if !v.IsValid() {
+		fmt.Fprintf(os.Stderr, "Notice: Seen an invalid value (%q) and assigned 'any' as type. This may caused by input file contain a 'null' as value.\n", v.String())
+		return ast.NewIdent("any")
+	}
 	t := v.Type()
 	switch t.Kind() {
 	case reflect.Interface:
