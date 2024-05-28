@@ -11,12 +11,14 @@ import (
 
 func DetectIterators(f *files.File) error {
 	fds := []*ast.FuncDecl{}
-	gds := []*ast.GenDecl{
-		f.Isolated,
-		{ // temporary
-			Tok:   token.TYPE,
-			Specs: []ast.Spec{&ast.TypeSpec{Name: ast.NewIdent("Config"), Type: f.Cfg}}},
+	gds := []*ast.GenDecl{}
+	if f.Isolated != nil {
+		gds = append(gds, f.Isolated)
 	}
+	gds = append(gds, &ast.GenDecl{ // temporary
+		Tok:   token.TYPE,
+		Specs: []ast.Spec{&ast.TypeSpec{Name: ast.NewIdent("Config"), Type: f.Cfg}},
+	})
 	for _, gd := range gds {
 		for _, s := range gd.Specs {
 			if ts, ok := s.(*ast.TypeSpec); ok {
