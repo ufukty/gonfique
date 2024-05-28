@@ -1,6 +1,7 @@
 package files
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"slices"
@@ -23,8 +24,37 @@ func ReadConfigYaml(src string) (*File, error) {
 	cfg, imports := transform.Transform(y)
 	imports = slices.Concat([]string{"fmt", "os", "gopkg.in/yaml.v3"}, imports)
 	slices.Sort(imports)
-	
+
 	file := &File{
+		Lang:          Yaml,
+		ConfigContent: y,
+		Cfg:           cfg,
+		Named:         nil,
+		Isolated:      nil,
+		Iterators:     nil,
+		Imports:       imports,
+	}
+
+	return file, nil
+}
+
+func ReadConfigJson(src string) (*File, error) {
+	f, err := os.Open(src)
+	if err != nil {
+		return nil, fmt.Errorf("opening input file: %w", err)
+	}
+	defer f.Close()
+	var y any
+	if err := json.NewDecoder(f).Decode(&y); err != nil {
+		return nil, fmt.Errorf("decoding input file: %w", err)
+	}
+
+	cfg, imports := transform.Transform(y)
+	imports = slices.Concat([]string{"fmt", "os", "encoding/json"}, imports)
+	slices.Sort(imports)
+
+	file := &File{
+		Lang:          Json,
 		ConfigContent: y,
 		Cfg:           cfg,
 		Named:         nil,

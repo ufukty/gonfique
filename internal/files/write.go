@@ -62,8 +62,12 @@ func addConfig(dst *ast.File, cfg ast.Expr) {
 	})
 }
 
-func addReaderFunction(dst *ast.File) {
-	dst.Decls = append(dst.Decls, readerFunc)
+func (f *File) addReaderFunction(dst *ast.File) {
+	if f.Lang == Yaml {
+		dst.Decls = append(dst.Decls, readerFuncForYaml)
+	} else if f.Lang == Json {
+		dst.Decls = append(dst.Decls, readerFuncForJson)
+	}
 }
 
 func (f *File) Write(dst string, pkgname string) error {
@@ -77,7 +81,7 @@ func (f *File) Write(dst string, pkgname string) error {
 	addIteratorMethods(af, f.Iterators)
 	addNamedTypeSpecifications(af, f.Named)
 	addConfig(af, f.Cfg)
-	addReaderFunction(af)
+	f.addReaderFunction(af)
 
 	o, err := os.Create(dst)
 	if err != nil {
