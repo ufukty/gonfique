@@ -28,7 +28,7 @@ func TestCreatation(t *testing.T) {
 }
 
 func TestCreationConfigTypeDefinitionAndDecodingInto(t *testing.T) {
-	tcs := []string{"api", "generic", "k8s", "duration"}
+	tcs := []string{"api", "generic", "k8s", "duration", "null"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
