@@ -59,7 +59,7 @@ func perform() error {
 		return fmt.Errorf("checking args: %w", err)
 	}
 
-	f, err := files.ReadConfigYaml(args.In)
+	f, err := files.ReadConfigFile(args.In)
 	if err != nil {
 		return fmt.Errorf("reading input file: %w", err)
 	}
