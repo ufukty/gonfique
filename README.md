@@ -191,6 +191,8 @@ gonfique -in config.yml -out config.go -pkg main [-use <file>] [-organize]
 ## Limitations
 
 - Multidocument YAML files are not supported.
+- Mapping file enables aliasing the assigned type; not to specify underlying type.
+- Type of keys with value of `null` gets assigned as `any`.
 
 ## Contribution
 
