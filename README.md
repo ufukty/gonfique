@@ -2,7 +2,7 @@
 
 <img src="assets/Gonfique.png" alt="Gonfique logo" height="300px">
 
-`gonfique` is a CLI tool for Go developers to automatically build exact **struct definitions** in Go that will match the provided YAML config. Makes instant to notice **when and where a breaking change** occurs. Since compiler warns whenever it happens by type-checking, and source control shows where the change exactly is.
+`gonfique` is a CLI tool for Go developers to automatically build exact **struct definitions** in Go that will match the provided YAML or JSON config. Makes instant to notice **when and where a breaking change** occurs. Since compiler warns whenever it happens by type-checking, and source control shows where the change exactly is.
 
 ## Example
 
@@ -179,6 +179,7 @@ gonfique -in config.yml -out config.go -pkg main [-use <file>] [-organize]
 - Supports dictionaries:
   - Implements `.Range()` method on those dictionaries that all values share same schema, so they can be iterable via for loops. Such as `for service, details := range cfg.Services.Range() { ... }`
 - Supports `time.Duration` values such as `200ms` or `1µs`.
+- Supports JSON and YAML config files.
 
 ## Docs
 
