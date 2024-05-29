@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"slices"
 
 	"github.com/ufukty/gonfique/internal/transform"
 	"gopkg.in/yaml.v3"
 )
 
-func ReadConfigYaml(src string) (*File, error) {
+func readYamlConfig(src string) (*File, error) {
 	f, err := os.Open(src)
 	if err != nil {
 		return nil, fmt.Errorf("opening input file: %w", err)
@@ -38,7 +39,7 @@ func ReadConfigYaml(src string) (*File, error) {
 	return file, nil
 }
 
-func ReadConfigJson(src string) (*File, error) {
+func readJsonConfig(src string) (*File, error) {
 	f, err := os.Open(src)
 	if err != nil {
 		return nil, fmt.Errorf("opening input file: %w", err)
@@ -64,4 +65,15 @@ func ReadConfigJson(src string) (*File, error) {
 	}
 
 	return file, nil
+}
+
+func ReadConfigFile(src string) (*File, error) {
+	switch ext := filepath.Ext(src); ext {
+	case ".json":
+		return readJsonConfig(src)
+	case ".yaml", ".yml":
+		return readYamlConfig(src)
+	default:
+		return nil, fmt.Errorf("unsupported file extension %q", ext)
+	}
 }
