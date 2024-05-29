@@ -170,7 +170,7 @@ gonfique -in config.yml -out config.go -pkg main [-use <file>] [-organize]
 
 ## Features
 
-- Specify names for generated types via `-mapping` flag. [More](docs/mapping.md)
+- Specify names for detected types via `-mapping` flag to export safely. [More](docs/mapping.md)
 - Defines named or inline types depending on user choice (`-organize` flag).
 - Reuses user-defined types defined provided in a file when schemas match via `-use` flag
 - Supports arrays:
@@ -191,7 +191,7 @@ gonfique -in config.yml -out config.go -pkg main [-use <file>] [-organize]
 ## Limitations
 
 - Multidocument YAML files are not supported.
-- Mapping file enables aliasing the assigned type; not to specify underlying type.
+- Mapping file is for generating an exported type definition with the given name and detected type; not to specify type.
 - Type of keys with value of `null` gets assigned as `any`.
 
 ## Contribution
