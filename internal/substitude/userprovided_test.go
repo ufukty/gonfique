@@ -16,7 +16,7 @@ func TestSubstitute(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			f, err := files.ReadConfigFile(filepath.Join("testdata", tc, "config.yml"))
+			f, err := files.ReadConfigFile(filepath.Join("testdata", tc, "config.yml"), "Config")
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}

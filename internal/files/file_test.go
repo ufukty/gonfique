@@ -15,7 +15,7 @@ func TestCreatation(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			f, err := ReadConfigFile(filepath.Join("testdata", tc, "config.yml"))
+			f, err := ReadConfigFile(filepath.Join("testdata", tc, "config.yml"), "Config")
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
@@ -32,7 +32,7 @@ func Test_CreateAndUseForYaml(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			f, err := ReadConfigFile(filepath.Join("testdata", tc, "config.yml"))
+			f, err := ReadConfigFile(filepath.Join("testdata", tc, "config.yml"), "Config")
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
@@ -70,7 +70,7 @@ func Test_CreateAndUseForJson(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			f, err := ReadConfigFile(filepath.Join("testdata", tc, "config.json"))
+			f, err := ReadConfigFile(filepath.Join("testdata", tc, "config.json"), "Config")
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}

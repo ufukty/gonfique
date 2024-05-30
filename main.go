@@ -19,6 +19,7 @@ type Args struct {
 	In       string
 	Out      string
 	Pkg      string
+	TypeName string
 	Use      string
 	Org      bool
 	Mappings string
@@ -29,6 +30,7 @@ func getArgs() Args {
 	flag.StringVar(&args.In, "in", "", "input file path (yml or yaml)")
 	flag.StringVar(&args.Out, "out", "", "output file path (go)")
 	flag.StringVar(&args.Pkg, "pkg", "", "package name that will be inserted into the generated file")
+	flag.StringVar(&args.TypeName, "type-name", "Config", "will be used to name generated type")
 	flag.StringVar(&args.Use, "use", "", "(optional) use type definitions found in <file>")
 	flag.StringVar(&args.Mappings, "mappings", "", "(optional) use typenames found in the <file>. see examples for mapping file structure")
 	flag.BoolVar(&args.Org, "organize", false, "(optional) defines the types of struct fields that are also structs separately instead inline, with auto generated UNSTABLE names.")
@@ -59,7 +61,7 @@ func perform() error {
 		return fmt.Errorf("checking args: %w", err)
 	}
 
-	f, err := files.ReadConfigFile(args.In)
+	f, err := files.ReadConfigFile(args.In, args.TypeName)
 	if err != nil {
 		return fmt.Errorf("reading input file: %w", err)
 	}
