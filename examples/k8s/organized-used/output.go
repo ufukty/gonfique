@@ -3,8 +3,10 @@ package config
 import (
 	"fmt"
 	"os"
+
 	"gopkg.in/yaml.v3"
 )
+
 // IMPORTANT:
 // Types are defined only for internal purposes.
 // Do not refer auto generated type names from outside.
@@ -70,26 +72,26 @@ type (
 	}
 )
 
-func (a autoGenB) Range() map[string]autoGenA {
-	return map[string]autoGenA{"service": a.Service}
+func (c autoGenB) Range() map[string]autoGenA {
+	return map[string]autoGenA{"service": c.Service}
 }
-func (a autoGenF) Range() map[string]string {
-	return map[string]string{"app": a.App}
+func (c autoGenF) Range() map[string]string {
+	return map[string]string{"app": c.App}
 }
-func (a autoGenG) Range() map[string]autoGenF {
-	return map[string]autoGenF{"matchLabels": a.MatchLabels}
+func (c autoGenG) Range() map[string]autoGenF {
+	return map[string]autoGenF{"matchLabels": c.MatchLabels}
 }
-func (a autoGenH) Range() map[string]autoGenF {
-	return map[string]autoGenF{"labels": a.Labels}
+func (c autoGenH) Range() map[string]autoGenF {
+	return map[string]autoGenF{"labels": c.Labels}
 }
-func (a autoGenI) Range() map[string]string {
-	return map[string]string{"name": a.Name}
+func (c autoGenI) Range() map[string]string {
+	return map[string]string{"name": c.Name}
 }
-func (a autoGenJ) Range() map[string]autoGenI {
-	return map[string]autoGenI{"configMapRef": a.ConfigMapRef, "secretRef": a.SecretRef}
+func (c autoGenJ) Range() map[string]autoGenI {
+	return map[string]autoGenI{"configMapRef": c.ConfigMapRef, "secretRef": c.SecretRef}
 }
-func (a autoGenK) Range() map[string]int {
-	return map[string]int{"containerPort": a.ContainerPort}
+func (c autoGenK) Range() map[string]int {
+	return map[string]int{"containerPort": c.ContainerPort}
 }
 
 type Config struct {
@@ -102,14 +104,15 @@ type Config struct {
 }
 
 func ReadConfig(path string) (Config, error) {
-	f, err := os.Open(path)
+	file, err := os.Open(path)
 	if err != nil {
 		return Config{}, fmt.Errorf("opening config file: %w", err)
 	}
-	cfg := Config{}
-	err = yaml.NewDecoder(f).Decode(&cfg)
+	defer file.Close()
+	c := Config{}
+	err = yaml.NewDecoder(file).Decode(&c)
 	if err != nil {
 		return Config{}, fmt.Errorf("decoding config file: %w", err)
 	}
-	return cfg, nil
+	return c, nil
 }
