@@ -1,6 +1,7 @@
 package mappings
 
 import (
+	"fmt"
 	"go/ast"
 	"strings"
 	"testing"
@@ -30,55 +31,32 @@ func matchitemsToString(mis []matchitem) string {
 }
 
 func TestMatch(t *testing.T) {
-	var (
-		k8sFile  = appendix.KubernetesExampleOutput
-		k8sCfg   = k8sFile.Decls[1].(*ast.GenDecl)
-		k8sCfgTs = k8sCfg.Specs[0].(*ast.TypeSpec)
-		k8sCfgFs = k8sCfgTs.Type.(*ast.StructType).Fields.List
-
-		apiVersion   = k8sCfgFs[0]
-		metadata     = k8sCfgFs[3]
-		metadataName = metadata.Type.(*ast.StructType).Fields.List[0]
-		spec         = k8sCfgFs[4]
-
-		specTemplate                  = spec.Type.(*ast.StructType).Fields.List[4]
-		specTemplateMetadata          = specTemplate.Type.(*ast.StructType).Fields.List[0]
-		specTemplateMetadataLabels    = specTemplateMetadata.Type.(*ast.StructType).Fields.List[0]
-		specTemplateMetadataLabelsApp = specTemplateMetadataLabels.Type.(*ast.StructType).Fields.List[0]
-
-		specTemplateSpec                   = specTemplate.Type.(*ast.StructType).Fields.List[1]
-		specTemplateSpecContainers         = specTemplateSpec.Type.(*ast.StructType).Fields.List[0]
-		specTemplateSpecContainersItem     = specTemplateSpecContainers.Type.(*ast.ArrayType)
-		specTemplateSpecContainersItemName = specTemplateSpecContainersItem.Elt.(*ast.StructType).Fields.List[2]
-
-		specSelector               = spec.Type.(*ast.StructType).Fields.List[3]
-		specSelectorMatchLabels    = specSelector.Type.(*ast.StructType).Fields.List[0]
-		specSelectorMatchLabelsApp = specSelectorMatchLabels.Type.(*ast.StructType).Fields.List[0]
-	)
-
 	type testcase struct {
 		input string
 		want  []ast.Node
 	}
 
 	tcs := []testcase{
-		{"apiVersion", []ast.Node{apiVersion}},
-		{"metadata.name", []ast.Node{metadataName}},
+		{"apiVersion", []ast.Node{appendix.ApiVersion}},
+		{"metadata.name", []ast.Node{appendix.MetadataName}},
 
-		{"spec.template.metadata.labels.app", []ast.Node{specTemplateMetadataLabelsApp}},
-		{"spec.template.*.labels.app", []ast.Node{specTemplateMetadataLabelsApp}},
-		{"spec.*.*.labels.app", []ast.Node{specTemplateMetadataLabelsApp}},
+		{"spec.template.metadata.labels.app", []ast.Node{appendix.SpecTemplateMetadataLabelsApp}},
+		{"spec.template.*.labels.app", []ast.Node{appendix.SpecTemplateMetadataLabelsApp}},
+		{"spec.*.*.labels.app", []ast.Node{appendix.SpecTemplateMetadataLabelsApp}},
 
-		{"spec.**.app", []ast.Node{specSelectorMatchLabelsApp, specTemplateMetadataLabelsApp}},
+		{"spec.**.app", []ast.Node{appendix.SpecSelectorMatchLabelsApp, appendix.SpecTemplateMetadataLabelsApp}},
 
-		{"spec.template.spec.containers", []ast.Node{specTemplateSpecContainers}},
-		{"spec.template.spec.containers.[]", []ast.Node{specTemplateSpecContainersItem}},
-		{"spec.template.spec.containers.[].name", []ast.Node{specTemplateSpecContainersItemName}},
+		{"spec.template.spec.containers", []ast.Node{appendix.SpecTemplateSpecContainers}},
+		{"spec.template.spec.containers.[]", []ast.Node{appendix.SpecTemplateSpecContainersItem}},
+		{"spec.template.spec.containers.[].name", []ast.Node{appendix.SpecTemplateSpecContainersItemName}},
 	}
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			got := matchTypeDefHolder(k8sCfgTs, tc.input)
+			got, err := matchTypeDefHolder(appendix.K8sCfgTs, tc.input, appendix.Keys)
+			if err != nil {
+				t.Fatal(fmt.Errorf("act: %w", err))
+			}
 			if !compareMatchs(got, tc.want) {
 				t.Fatalf("want %#v got %#v", testutils.NodeSliceString(tc.want), matchitemsToString(got))
 			}

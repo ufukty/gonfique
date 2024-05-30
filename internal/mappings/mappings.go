@@ -30,10 +30,13 @@ func ReadMappings(src string) (map[Pathway]TypeName, error) {
 	return ms, nil
 }
 
-func ApplyMappings(f *files.File, mappings map[Pathway]TypeName) {
+func ApplyMappings(f *files.File, mappings map[Pathway]TypeName) error {
 	miss := map[*ast.Ident][]matchitem{}
 	for pw, tn := range mappings {
-		matches := matchTypeDefHolder(&ast.TypeSpec{Name: ast.NewIdent("Config"), Type: f.Cfg}, pw)
+		matches, err := matchTypeDefHolder(&ast.TypeSpec{Name: ast.NewIdent("Config"), Type: f.Cfg}, pw, f.Keys)
+		if err != nil {
+			return fmt.Errorf("matching the rule: %w", err)
+		}
 		if len(matches) == 0 {
 			fmt.Printf("Pattern %q (->%s) didn't match any region\n", pw, tn)
 		}
@@ -75,4 +78,6 @@ func ApplyMappings(f *files.File, mappings map[Pathway]TypeName) {
 			}},
 		})
 	}
+
+	return nil
 }
