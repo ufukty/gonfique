@@ -161,7 +161,7 @@ See outputs for different flag combinations:
 Use version tags to avoid development versions as such:
 
 ```sh
-go install github.com/ufukty/gonfique@v1.4.1
+go install github.com/ufukty/gonfique@v1.5.1
 ```
 
 ## Usage
