@@ -167,7 +167,7 @@ go install github.com/ufukty/gonfique@v1.4.1
 ## Usage
 
 ```sh
-gonfique -in config.yml -out config.go -pkg main [-use <file>] [-organize]
+gonfique -in config.yml -out config.go -pkg main [-type-name "Config"] [-use "use.go"] [-organize]
 ```
 
 ## Features
