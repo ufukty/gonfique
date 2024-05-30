@@ -170,6 +170,8 @@ go install github.com/ufukty/gonfique@v1.5.1
 gonfique -in config.yml -out config.go -pkg main [-type-name "Config"] [-use "use.go"] [-organize] [-mappings "mappings.yml"]
 ```
 
+Run `gonfique --help` for [parameter details](docs/parameter-details.txt).
+
 ## Features
 
 - Specify names for detected types via `-mapping` flag to export safely. [More](docs/mapping.md)
