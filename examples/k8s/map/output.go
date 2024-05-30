@@ -2,8 +2,9 @@ package config
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
 type ApiVersion string
@@ -83,14 +84,15 @@ type Config struct {
 }
 
 func ReadConfig(path string) (Config, error) {
-	f, err := os.Open(path)
+	file, err := os.Open(path)
 	if err != nil {
 		return Config{}, fmt.Errorf("opening config file: %w", err)
 	}
-	cfg := Config{}
-	err = yaml.NewDecoder(f).Decode(&cfg)
+	defer file.Close()
+	c := Config{}
+	err = yaml.NewDecoder(file).Decode(&c)
 	if err != nil {
 		return Config{}, fmt.Errorf("decoding config file: %w", err)
 	}
-	return cfg, nil
+	return c, nil
 }
