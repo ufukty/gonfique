@@ -7,8 +7,6 @@ import (
 	"go/token"
 	"os"
 	"slices"
-
-	"github.com/ufukty/gonfique/internal/transform"
 )
 
 func addImports(dst *ast.File, imports []string) {
@@ -54,25 +52,21 @@ func addNamedTypeSpecifications(dst *ast.File, named []*ast.GenDecl) {
 	}
 }
 
-func addConfig(dst *ast.File, cfg ast.Expr) {
+func addConfig(dst *ast.File, cfg ast.Expr, typeName string) {
 	dst.Decls = append(dst.Decls, &ast.GenDecl{
 		Tok: token.TYPE,
 		Specs: []ast.Spec{&ast.TypeSpec{
-			Name: ast.NewIdent("Config"),
+			Name: ast.NewIdent(typeName),
 			Type: cfg,
 		}},
 	})
 }
 
 func (f *File) addReaderFunction(dst *ast.File) {
-	if f.Encoding == transform.Yaml {
-		dst.Decls = append(dst.Decls, readerFuncForYaml)
-	} else if f.Encoding == transform.Json {
-		dst.Decls = append(dst.Decls, readerFuncForJson)
-	}
+	dst.Decls = append(dst.Decls, generateReaderFunc(f.TypeName, f.Encoding))
 }
 
-func (f *File) Write(dst string, pkgname string) error {
+func (f *File) Write(dst, pkgname string) error {
 	af := &ast.File{
 		Name:  ast.NewIdent(pkgname),
 		Decls: []ast.Decl{},
@@ -82,7 +76,7 @@ func (f *File) Write(dst string, pkgname string) error {
 	addIsolatedTypeSpecifications(af, f.Isolated)
 	addIteratorMethods(af, f.Iterators)
 	addNamedTypeSpecifications(af, f.Named)
-	addConfig(af, f.Cfg)
+	addConfig(af, f.Cfg, f.TypeName)
 	f.addReaderFunction(af)
 
 	o, err := os.Create(dst)

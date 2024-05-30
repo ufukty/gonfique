@@ -11,7 +11,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func readYamlConfig(src string) (*File, error) {
+func readYamlConfig(src string, typename string) (*File, error) {
 	f, err := os.Open(src)
 	if err != nil {
 		return nil, fmt.Errorf("opening input file: %w", err)
@@ -29,6 +29,7 @@ func readYamlConfig(src string) (*File, error) {
 	file := &File{
 		Encoding:      transform.Yaml,
 		Keys:          keys,
+		TypeName:      typename,
 		ConfigContent: y,
 		Cfg:           cfg,
 		Named:         nil,
@@ -40,7 +41,7 @@ func readYamlConfig(src string) (*File, error) {
 	return file, nil
 }
 
-func readJsonConfig(src string) (*File, error) {
+func readJsonConfig(src string, typename string) (*File, error) {
 	f, err := os.Open(src)
 	if err != nil {
 		return nil, fmt.Errorf("opening input file: %w", err)
@@ -58,6 +59,7 @@ func readJsonConfig(src string) (*File, error) {
 	file := &File{
 		Encoding:      transform.Json,
 		Keys:          keys,
+		TypeName:      typename,
 		ConfigContent: y,
 		Cfg:           cfg,
 		Named:         nil,
@@ -69,12 +71,12 @@ func readJsonConfig(src string) (*File, error) {
 	return file, nil
 }
 
-func ReadConfigFile(src string) (*File, error) {
+func ReadConfigFile(src string, typename string) (*File, error) {
 	switch ext := filepath.Ext(src); ext {
 	case ".json":
-		return readJsonConfig(src)
+		return readJsonConfig(src, typename)
 	case ".yaml", ".yml":
-		return readYamlConfig(src)
+		return readYamlConfig(src, typename)
 	default:
 		return nil, fmt.Errorf("unsupported file extension %q", ext)
 	}

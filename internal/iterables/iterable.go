@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"strings"
 
 	"github.com/ufukty/gonfique/internal/files"
 )
@@ -16,8 +17,9 @@ func DetectIterators(file *files.File) error {
 	}
 	gds = append(gds, &ast.GenDecl{ // temporary
 		Tok:   token.TYPE,
-		Specs: []ast.Spec{&ast.TypeSpec{Name: ast.NewIdent("Config"), Type: file.Cfg}},
+		Specs: []ast.Spec{&ast.TypeSpec{Name: ast.NewIdent(file.TypeName), Type: file.Cfg}},
 	})
+	receivername := ast.NewIdent(strings.ToLower(string(([]rune(file.TypeName))[0])))
 	for _, gd := range gds {
 		for _, s := range gd.Specs {
 			if ts, ok := s.(*ast.TypeSpec); ok {
@@ -47,11 +49,11 @@ func DetectIterators(file *files.File) error {
 							}
 							elements = append(elements, &ast.KeyValueExpr{
 								Key:   &ast.BasicLit{Kind: token.STRING, Value: fmt.Sprintf("%q", keyname)},
-								Value: &ast.SelectorExpr{X: &ast.Ident{Name: "a"}, Sel: f.Names[0]},
+								Value: &ast.SelectorExpr{X: receivername, Sel: f.Names[0]},
 							})
 						}
 						fds = append(fds, &ast.FuncDecl{
-							Recv: &ast.FieldList{List: []*ast.Field{{Names: []*ast.Ident{{Name: "a"}}, Type: ts.Name}}},
+							Recv: &ast.FieldList{List: []*ast.Field{{Names: []*ast.Ident{receivername}, Type: ts.Name}}},
 							Name: &ast.Ident{Name: "Range"},
 							Type: &ast.FuncType{
 								Params:  &ast.FieldList{},
