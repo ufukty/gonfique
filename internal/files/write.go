@@ -7,6 +7,8 @@ import (
 	"go/token"
 	"os"
 	"slices"
+
+	"github.com/ufukty/gonfique/internal/transform"
 )
 
 func addImports(dst *ast.File, imports []string) {
@@ -63,9 +65,9 @@ func addConfig(dst *ast.File, cfg ast.Expr) {
 }
 
 func (f *File) addReaderFunction(dst *ast.File) {
-	if f.Lang == Yaml {
+	if f.Encoding == transform.Yaml {
 		dst.Decls = append(dst.Decls, readerFuncForYaml)
-	} else if f.Lang == Json {
+	} else if f.Encoding == transform.Json {
 		dst.Decls = append(dst.Decls, readerFuncForJson)
 	}
 }

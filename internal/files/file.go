@@ -1,16 +1,14 @@
 package files
 
-import "go/ast"
+import (
+	"go/ast"
 
-type EncodingLang int
-
-const (
-	Yaml = EncodingLang(iota)
-	Json
+	"github.com/ufukty/gonfique/internal/transform"
 )
 
 type File struct {
-	Lang          EncodingLang
+	Encoding      transform.Encoding
+	Keys          map[ast.Node]string
 	ConfigContent any
 	Cfg           ast.Expr        // config type, needed to be placed in a TypeSpec
 	Named         []*ast.GenDecl  // Named types

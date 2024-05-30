@@ -22,12 +22,13 @@ func readYamlConfig(src string) (*File, error) {
 		return nil, fmt.Errorf("decoding input file: %w", err)
 	}
 
-	cfg, imports := transform.Transform(y)
+	cfg, imports, keys := transform.Transform(y, transform.Yaml)
 	imports = slices.Concat([]string{"fmt", "os", "gopkg.in/yaml.v3"}, imports)
 	slices.Sort(imports)
 
 	file := &File{
-		Lang:          Yaml,
+		Encoding:      transform.Yaml,
+		Keys:          keys,
 		ConfigContent: y,
 		Cfg:           cfg,
 		Named:         nil,
@@ -50,12 +51,13 @@ func readJsonConfig(src string) (*File, error) {
 		return nil, fmt.Errorf("decoding input file: %w", err)
 	}
 
-	cfg, imports := transform.Transform(y)
+	cfg, imports, keys := transform.Transform(y, transform.Json)
 	imports = slices.Concat([]string{"fmt", "os", "encoding/json"}, imports)
 	slices.Sort(imports)
 
 	file := &File{
-		Lang:          Json,
+		Encoding:      transform.Json,
+		Keys:          keys,
 		ConfigContent: y,
 		Cfg:           cfg,
 		Named:         nil,

@@ -9,11 +9,13 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/ufukty/gonfique/internal/namings"
+	"github.com/ufukty/gonfique/internal/transform/namings"
 )
 
 type transformer struct {
 	isTimeUsed bool
+	keys       map[ast.Node]string // corresponding keys for ASTs
+	tagname    string
 }
 
 func (tr *transformer) arrayType(v reflect.Value) ast.Expr {
@@ -53,14 +55,16 @@ func (tr *transformer) structType(v reflect.Value) *ast.StructType {
 	for iter.Next() {
 		ik := iter.Key()
 		iv := iter.Value()
-		st.Fields.List = append(st.Fields.List, &ast.Field{
+		f := &ast.Field{
 			Names: []*ast.Ident{ast.NewIdent(namings.SafeFieldName(ik.String()))},
 			Type:  tr.transform(iv),
 			Tag: &ast.BasicLit{
 				Kind:  token.STRING,
-				Value: fmt.Sprintf("`yaml:%q`", ik.String()),
+				Value: fmt.Sprintf("`%s:%q`", tr.tagname, ik.String()),
 			},
-		})
+		}
+		st.Fields.List = append(st.Fields.List, f)
+		tr.keys[f] = ik.String()
 	}
 	sort(st.Fields)
 	return st
@@ -122,14 +126,16 @@ func (tr *transformer) transform(v reflect.Value) ast.Expr {
 
 // reconstructs a reflect-value's type in ast.TypeSpec.
 // limited with types used by YAML decoder.
-func Transform(cfgcontent any) (ast.Expr, []string) {
+func Transform(cfgcontent any, encoding Encoding) (ast.Expr, []string, map[ast.Node]string) {
 	t := &transformer{
 		isTimeUsed: false,
+		keys:       map[ast.Node]string{},
+		tagname:    string(encoding),
 	}
 	cfg := t.transform(reflect.ValueOf(cfgcontent))
 	imports := []string{}
 	if t.isTimeUsed {
 		imports = append(imports, "time")
 	}
-	return cfg, imports
+	return cfg, imports, t.keys
 }

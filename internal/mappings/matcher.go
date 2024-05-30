@@ -1,13 +1,12 @@
 package mappings
 
 import (
+	"fmt"
 	"go/ast"
 	"log"
 	"reflect"
 	"slices"
 	"strings"
-
-	"github.com/ufukty/gonfique/internal/namings"
 )
 
 func degraded(keys []string) []string {
@@ -41,9 +40,9 @@ type matchitem struct {
 
 // return items are either *ast.Field or *ast.ArrayType.
 // use a typeswitch to replace .Type or .Elt fields.
-func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string) []matchitem {
+func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string, keys map[ast.Node]string) ([]matchitem, error) {
 	if len(rule) == 0 {
-		return []matchitem{}
+		return []matchitem{}, nil
 	}
 
 	var t ast.Expr
@@ -64,12 +63,20 @@ func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string) []mat
 	case "**": // works like Levenshtein (DP)
 		if st, ok := t.(*ast.StructType); ok {
 			for _, f := range st.Fields.List {
-				ckey, err := namings.StripKeyname(f.Tag.Value)
-				if err != nil {
-					log.Fatalf("could not get the key name out of field tag for %s", f.Tag.Value)
+				ckey, ok := keys[f]
+				if !ok {
+					return nil, fmt.Errorf("original key name is not stored for generated AST node: %p", f)
 				}
-				matches = append(matches, matchTypeDefHolderHelper(f, rule, append(pathway, ckey))...)
-				matches = append(matches, matchTypeDefHolderHelper(f, degraded(rule), append(pathway, ckey))...)
+				mis, err := matchTypeDefHolderHelper(f, rule, append(pathway, ckey), keys)
+				if err != nil {
+					return nil, fmt.Errorf("checking next segments for '**': %w", err)
+				}
+				matches = append(matches, mis...)
+				mis, err = matchTypeDefHolderHelper(f, degraded(rule), append(pathway, ckey), keys)
+				if err != nil {
+					return nil, fmt.Errorf("checking at segment results for '**': %w", err)
+				}
+				matches = append(matches, mis...)
 				// TODO: add call to check "[]" appended rule
 			}
 		}
@@ -78,14 +85,18 @@ func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string) []mat
 		switch t := t.(type) {
 		case *ast.StructType:
 			for _, f := range t.Fields.List {
-				ckey, err := namings.StripKeyname(f.Tag.Value)
-				if err != nil {
-					log.Fatalf("could not get the key name out of field tag for %s", f.Tag.Value)
+				ckey, ok := keys[f]
+				if !ok {
+					return nil, fmt.Errorf("original key name is not stored for generated AST node: %p", f)
 				}
 				if len(rule) == 1 {
 					matches = append(matches, matchitem{f, append(pathway, ckey)})
 				} else {
-					matches = append(matches, matchTypeDefHolderHelper(f, rule[1:], append(pathway, ckey))...)
+					mis, err := matchTypeDefHolderHelper(f, rule[1:], append(pathway, ckey), keys)
+					if err != nil {
+						return nil, fmt.Errorf("checking next segments for '*': %w", err)
+					}
+					matches = append(matches, mis...)
 				}
 			}
 		}
@@ -95,37 +106,45 @@ func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string) []mat
 			if len(rule) == 1 { // should be leaf
 				matches = append(matches, matchitem{at, append(pathway, "[]")})
 			} else {
-				matches = append(matches, matchTypeDefHolderHelper(at, rule[1:], append(pathway, "[]"))...)
+				mis, err := matchTypeDefHolderHelper(at, rule[1:], append(pathway, "[]"), keys)
+				if err != nil {
+					return nil, fmt.Errorf("checking matches for '[]': %w", err)
+				}
+				matches = append(matches, mis...)
 			}
 		}
 
 	default:
 		if st, ok := t.(*ast.StructType); ok {
 			for _, f := range st.Fields.List {
-				ckey, err := namings.StripKeyname(f.Tag.Value)
-				if err != nil {
-					log.Fatalf("could not get the key name out of field tag for %s", f.Tag.Value)
+				ckey, ok := keys[f]
+				if !ok {
+					return nil, fmt.Errorf("could not retrieve the original keyname for %s (AST %p)", f.Names[0].Name, f)
 				}
 				if ckey == segment {
 					if len(rule) == 1 { // should be leaf
 						matches = append(matches, matchitem{f, append(pathway, ckey)})
 					} else {
-						matches = append(matches, matchTypeDefHolderHelper(f, rule[1:], append(pathway, ckey))...)
+						mis, err := matchTypeDefHolderHelper(f, rule[1:], append(pathway, ckey), keys)
+						if err != nil {
+							return nil, fmt.Errorf("checking matches at next segments for %q: %w", strings.Join(rule[1:], "."), err)
+						}
+						matches = append(matches, mis...)
 					}
 				}
 			}
 		}
 	}
-	return matches
+	return matches, nil
 }
 
 // accepts processed form of Config type AST which:
 //   - should not have multiple names per ast.Field
 //   - array types should be defined by combining compatible item fields
-func matchTypeDefHolder(cfg *ast.TypeSpec, rule string) []matchitem {
+func matchTypeDefHolder(cfg *ast.TypeSpec, rule string, keys map[ast.Node]string) ([]matchitem, error) {
 	segments := strings.Split(rule, ".")
 	if len(segments) == 0 {
-		return []matchitem{}
+		return []matchitem{}, nil
 	}
-	return matchTypeDefHolderHelper(cfg, segments, []string{})
+	return matchTypeDefHolderHelper(cfg, segments, []string{}, keys)
 }

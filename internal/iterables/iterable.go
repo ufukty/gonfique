@@ -6,18 +6,17 @@ import (
 	"go/token"
 
 	"github.com/ufukty/gonfique/internal/files"
-	"github.com/ufukty/gonfique/internal/namings"
 )
 
-func DetectIterators(f *files.File) error {
+func DetectIterators(file *files.File) error {
 	fds := []*ast.FuncDecl{}
 	gds := []*ast.GenDecl{}
-	if f.Isolated != nil {
-		gds = append(gds, f.Isolated)
+	if file.Isolated != nil {
+		gds = append(gds, file.Isolated)
 	}
 	gds = append(gds, &ast.GenDecl{ // temporary
 		Tok:   token.TYPE,
-		Specs: []ast.Spec{&ast.TypeSpec{Name: ast.NewIdent("Config"), Type: f.Cfg}},
+		Specs: []ast.Spec{&ast.TypeSpec{Name: ast.NewIdent("Config"), Type: file.Cfg}},
 	})
 	for _, gd := range gds {
 		for _, s := range gd.Specs {
@@ -42,9 +41,9 @@ func DetectIterators(f *files.File) error {
 					if cti != nil {
 						elements := []ast.Expr{}
 						for _, f := range st.Fields.List {
-							keyname, err := namings.StripKeyname(f.Tag.Value)
-							if err != nil {
-								return fmt.Errorf("could not strip the keyname in %s.%s field tag list: %w", ts.Name.Name, f.Names[0].Name, err)
+							keyname, ok := file.Keys[f]
+							if !ok {
+								return fmt.Errorf("could not retrieve the original keyname for %s.%s (AST %p)", ts.Name.Name, f.Names[0].Name, f)
 							}
 							elements = append(elements, &ast.KeyValueExpr{
 								Key:   &ast.BasicLit{Kind: token.STRING, Value: fmt.Sprintf("%q", keyname)},
@@ -70,6 +69,6 @@ func DetectIterators(f *files.File) error {
 			}
 		}
 	}
-	f.Iterators = fds
+	file.Iterators = fds
 	return nil
 }
