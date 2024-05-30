@@ -140,6 +140,15 @@ func generateReaderFunc(typename string, encoding transform.Encoding) *ast.FuncD
 						},
 					},
 				},
+				&ast.DeferStmt{
+					Call: &ast.CallExpr{
+						Fun: &ast.SelectorExpr{
+							X:   ast.NewIdent("file"),
+							Sel: ast.NewIdent("Close"),
+						},
+						Args: []ast.Expr{},
+					},
+				},
 				&ast.AssignStmt{
 					Lhs: []ast.Expr{
 						&ast.Ident{
