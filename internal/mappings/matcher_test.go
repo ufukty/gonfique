@@ -3,6 +3,7 @@ package mappings
 import (
 	"fmt"
 	"go/ast"
+	"slices"
 	"strings"
 	"testing"
 
