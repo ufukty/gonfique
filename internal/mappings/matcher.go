@@ -30,10 +30,6 @@ func callMatcherHelperOnFields(st *ast.StructType, rule []string, pathway []stri
 // return is Field or ArrayType.
 // use a typeswitch to replace .Type or .Elt fields.
 func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string, keys map[ast.Node]string) ([]matchitem, error) {
-	fmt.Printf("%q  %q\n", strings.Join(pathway, "."), strings.Join(rule, "."))
-	// if strings.Join(rule, ".") == "name" && pathway[len(pathway)-1] == "name" {
-	// 	fmt.Println("name")
-	// }
 	matches := []matchitem{}
 
 	if len(rule) == 0 {
@@ -78,7 +74,6 @@ func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string, keys 
 			if f, ok := n.(*ast.Field); ok {
 				return []matchitem{{f, append(pathway, segment)}}, nil
 			}
-			fmt.Println("non-field leaf for * ending")
 
 		case "[]":
 			if at, ok := n.(*ast.ArrayType); ok {
@@ -86,7 +81,6 @@ func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string, keys 
 					return []matchitem{{at, append(pathway, segment)}}, nil
 				}
 			}
-			fmt.Println("non-array leaf for [] ending")
 
 		default:
 			if f, ok := n.(*ast.Field); ok {
@@ -94,7 +88,6 @@ func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string, keys 
 					return []matchitem{{f, append(pathway, keys[f])}}, nil
 				}
 			}
-			fmt.Println("no match for leaf")
 		}
 
 	} else if len(rule) > 1 {
