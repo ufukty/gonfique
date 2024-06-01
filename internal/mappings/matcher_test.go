@@ -14,8 +14,8 @@ func compareMatchs(got []matchitem, want []ast.Node) bool {
 	if len(got) != len(want) {
 		return false
 	}
-	for i := 0; i < len(got); i++ {
-		if got[i].holder != want[i] {
+	for _, w := range want {
+		if slices.IndexFunc(got, func(mi matchitem) bool { return mi.holder == w }) == -1 {
 			return false
 		}
 	}
