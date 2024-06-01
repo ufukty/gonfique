@@ -39,27 +39,47 @@ func TestMatch(t *testing.T) {
 
 	tcs := []testcase{
 		{"apiVersion", []ast.Node{appendix.ApiVersion}},
+		{"metadata", []ast.Node{appendix.Metadata}},
 		{"metadata.name", []ast.Node{appendix.MetadataName}},
-
 		{"spec.template.metadata.labels.app", []ast.Node{appendix.SpecTemplateMetadataLabelsApp}},
 		{"spec.template.*.labels.app", []ast.Node{appendix.SpecTemplateMetadataLabelsApp}},
 		{"spec.*.*.labels.app", []ast.Node{appendix.SpecTemplateMetadataLabelsApp}},
-
-		{"spec.**.app", []ast.Node{appendix.SpecSelectorMatchLabelsApp, appendix.SpecTemplateMetadataLabelsApp}},
-
 		{"spec.template.spec.containers", []ast.Node{appendix.SpecTemplateSpecContainers}},
 		{"spec.template.spec.containers.[]", []ast.Node{appendix.SpecTemplateSpecContainersItem}},
 		{"spec.template.spec.containers.[].name", []ast.Node{appendix.SpecTemplateSpecContainersItemName}},
+		{"**.configMapRef", []ast.Node{appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRef}},
+		{"**.configMapRef.Name", []ast.Node{appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRefName}},
+		{"**.configMapRef.*", []ast.Node{appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRefName}},
+		{"**.configMapRef.**", []ast.Node{appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRefName}},
+		{"spec.**.configMapRef.**", []ast.Node{appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRefName}},
+		{"**.envFrom.**", []ast.Node{
+			appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRef,
+			appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRefName,
+			appendix.SpecTemplateSpecContainersItemEnvFromItemSecretRef,
+			appendix.SpecTemplateSpecContainersItemEnvFromItemSecretRefName,
+		}},
+		{"*.name", []ast.Node{appendix.MetadataName}},
+		{"**.name", []ast.Node{
+			appendix.MetadataName,
+			appendix.SpecRulesItemHttpPathsItemBackendServiceName,
+			appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRefName,
+			appendix.SpecTemplateSpecContainersItemEnvFromItemSecretRefName,
+			appendix.SpecTemplateSpecContainersItemName,
+		}},
+		{"spec.**.app", []ast.Node{
+			appendix.SpecSelectorMatchLabelsApp,
+			appendix.SpecTemplateMetadataLabelsApp,
+		}},
 	}
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			got, err := matchTypeDefHolder(appendix.K8sCfgTs, tc.input, appendix.Keys)
+			got, err := matchTypeDefHolder(appendix.K8sCfgTs.Type, tc.input, appendix.Keys)
 			if err != nil {
 				t.Fatal(fmt.Errorf("act: %w", err))
 			}
 			if !compareMatchs(got, tc.want) {
-				t.Fatalf("want %#v got %#v", testutils.NodeSliceString(tc.want), matchitemsToString(got))
+				t.Fatalf("mismatch\nwant: %#v\ngot : %#v", testutils.NodeSliceString(tc.want), matchitemsToString(got))
 			}
 		})
 	}
