@@ -48,11 +48,12 @@ func TestMatch(t *testing.T) {
 		{"spec.template.spec.containers.[]", []ast.Node{appendix.SpecTemplateSpecContainersItem}},
 		{"spec.template.spec.containers.[].name", []ast.Node{appendix.SpecTemplateSpecContainersItemName}},
 		{"**.configMapRef", []ast.Node{appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRef}},
-		{"**.configMapRef.Name", []ast.Node{appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRefName}},
+		{"**.configMapRef.name", []ast.Node{appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRefName}},
 		{"**.configMapRef.*", []ast.Node{appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRefName}},
 		{"**.configMapRef.**", []ast.Node{appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRefName}},
 		{"spec.**.configMapRef.**", []ast.Node{appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRefName}},
 		{"**.envFrom.**", []ast.Node{
+			appendix.SpecTemplateSpecContainersItemEnvFromItem,
 			appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRef,
 			appendix.SpecTemplateSpecContainersItemEnvFromItemConfigMapRefName,
 			appendix.SpecTemplateSpecContainersItemEnvFromItemSecretRef,
