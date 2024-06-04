@@ -7,16 +7,11 @@ import (
 	"strings"
 )
 
-type matchitem struct {
-	holder  ast.Node // smallest piece of AST that holds both the type definition and the YAML key name (except *ast.ArrayType)
-	pathway []string
-}
-
-func callMatcherHelperOnFields(st *ast.StructType, rule []string, pathway []string, keys map[ast.Node]string) ([]matchitem, error) {
-	matches := []matchitem{}
+func callMatcherHelperOnFields(st *ast.StructType, rule []string, keys map[ast.Node]string) ([]ast.Node, error) {
+	matches := []ast.Node{}
 	if st.Fields != nil && st.Fields.List != nil {
 		for _, f := range st.Fields.List {
-			submatches, err := matchTypeDefHolderHelper(f, rule, append(pathway, keys[f]), keys)
+			submatches, err := matchTypeDefHolderHelper(f, rule, keys)
 			if err != nil {
 				return nil, fmt.Errorf("recurring to fields: %w", err)
 			}
@@ -29,15 +24,15 @@ func callMatcherHelperOnFields(st *ast.StructType, rule []string, pathway []stri
 // n is Field or ArrayType
 // return is Field or ArrayType.
 // use a typeswitch to replace .Type or .Elt fields.
-func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string, keys map[ast.Node]string) ([]matchitem, error) {
-	matches := []matchitem{}
+func matchTypeDefHolderHelper(n ast.Node, rule []string, keys map[ast.Node]string) ([]ast.Node, error) {
+	matches := []ast.Node{}
 
 	if len(rule) == 0 {
 		return matches, nil
 	}
 
 	if st, ok := n.(*ast.StructType); ok {
-		return callMatcherHelperOnFields(st, rule, pathway, keys)
+		return callMatcherHelperOnFields(st, rule, keys)
 	}
 
 	if len(rule) == 1 {
@@ -45,23 +40,22 @@ func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string, keys 
 		switch segment := rule[0]; segment {
 		case "**":
 			// match everything in current depth except *ast.Ident{"string"}
-			switch n.(type) {
-			case *ast.ArrayType, *ast.Field:
-				matches = append(matches, matchitem{n, append(pathway, segment)})
+
+			if f, ok := n.(*ast.Field); ok && f.Type != nil {
+				matches = append(matches, n)
+			} else if at, ok := n.(*ast.ArrayType); ok && at.Elt != nil {
+				matches = append(matches, at)
 			}
 
 			// keep the "**" for next depth in recursion
 			var next ast.Expr
-			var orgkey string
 			if f, ok := n.(*ast.Field); ok && f.Type != nil {
 				next = f.Type
-				orgkey = keys[f]
 			} else if at, ok := n.(*ast.ArrayType); ok && at.Elt != nil {
 				next = at.Elt
-				orgkey = "[]"
 			}
 			if next != nil {
-				submatches, err := matchTypeDefHolderHelper(next, rule, append(pathway, orgkey), keys)
+				submatches, err := matchTypeDefHolderHelper(next, rule, keys)
 				if err != nil {
 					return nil, fmt.Errorf("passing the '**' for next depths of all keys or the array's item type: %w", err)
 				}
@@ -72,21 +66,17 @@ func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string, keys 
 
 		case "*":
 			if f, ok := n.(*ast.Field); ok {
-				return []matchitem{{f, append(pathway, segment)}}, nil
+				return []ast.Node{f}, nil
 			}
 
 		case "[]":
 			if at, ok := n.(*ast.ArrayType); ok {
-				if at.Elt != nil {
-					return []matchitem{{at, append(pathway, segment)}}, nil
-				}
+				return []ast.Node{at}, nil
 			}
 
 		default:
-			if f, ok := n.(*ast.Field); ok {
-				if keys[f] == segment && f.Type != nil {
-					return []matchitem{{f, append(pathway, keys[f])}}, nil
-				}
+			if f, ok := n.(*ast.Field); ok && keys[f] == segment {
+				return []ast.Node{f}, nil
 			}
 		}
 
@@ -95,19 +85,18 @@ func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string, keys 
 		switch segment := rule[0]; segment {
 		case "**": // ., *, **
 			// consume the "**" at the current depth and continue recurring without it
+
 			if f, ok := n.(*ast.Field); ok && f.Type != nil {
-				if st, ok := f.Type.(*ast.StructType); ok {
-					submatches, err := callMatcherHelperOnFields(st, rule[1:], pathway, keys)
+				var next ast.Expr
+				if st, ok := f.Type.(*ast.StructType); ok && st.Fields != nil && st.Fields.List != nil {
+					next = st
+				} else if at, ok := f.Type.(*ast.ArrayType); ok && at.Elt != nil {
+					next = at.Elt
+				}
+				if next != nil {
+					submatches, err := matchTypeDefHolderHelper(next, rule[1:], keys)
 					if err != nil {
 						return nil, fmt.Errorf("consuming '**' and matching all keys in current dict: %w", err)
-					}
-					if len(submatches) > 0 {
-						matches = append(matches, submatches...)
-					}
-				} else if at, ok := f.Type.(*ast.ArrayType); ok && at.Elt != nil {
-					submatches, err := matchTypeDefHolderHelper(at.Elt, rule[1:], append(pathway, "[]"), keys)
-					if err != nil {
-						return nil, fmt.Errorf("consuming '**' and recurring into array's item type: %w", err)
 					}
 					if len(submatches) > 0 {
 						matches = append(matches, submatches...)
@@ -117,16 +106,13 @@ func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string, keys 
 
 			// keep the "**" for next depth in recursion
 			var next ast.Expr
-			var orgkey string
 			if f, ok := n.(*ast.Field); ok && f.Type != nil {
 				next = f.Type
-				orgkey = keys[f]
 			} else if at, ok := n.(*ast.ArrayType); ok && at.Elt != nil {
 				next = at.Elt
-				orgkey = "[]"
 			}
 			if next != nil {
-				submatches, err := matchTypeDefHolderHelper(next, rule, append(pathway, orgkey), keys)
+				submatches, err := matchTypeDefHolderHelper(next, rule, keys)
 				if err != nil {
 					return nil, fmt.Errorf("passing the '**' for next depths of all keys or the array's item type: %w", err)
 				}
@@ -137,14 +123,12 @@ func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string, keys 
 
 		case "*":
 			if f, ok := n.(*ast.Field); ok && f.Type != nil {
-				if st, ok := f.Type.(*ast.StructType); ok {
-					return callMatcherHelperOnFields(st, rule[1:], pathway, keys)
-				}
+				return matchTypeDefHolderHelper(f.Type, rule[1:], keys)
 			}
 
 		case "[]":
 			if at, ok := n.(*ast.ArrayType); ok && at.Elt != nil {
-				submatches, err := matchTypeDefHolderHelper(at.Elt, rule[1:], append(pathway, "[]"), keys)
+				submatches, err := matchTypeDefHolderHelper(at.Elt, rule[1:], keys)
 				if err != nil {
 					return nil, fmt.Errorf("checking matches for '[]': %w", err)
 				}
@@ -158,7 +142,7 @@ func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string, keys 
 					return nil, fmt.Errorf("could not retrieve the original keyname for %s (AST %p)", f.Names[0].Name, f)
 				}
 				if orgkey == segment && f.Type != nil {
-					return matchTypeDefHolderHelper(f.Type, rule[1:], append(pathway, segment), keys)
+					return matchTypeDefHolderHelper(f.Type, rule[1:], keys)
 				}
 			}
 		}
@@ -166,14 +150,14 @@ func matchTypeDefHolderHelper(n ast.Node, rule []string, pathway []string, keys 
 	return matches, nil
 }
 
-func uniq(src []matchitem) []matchitem {
-	mp := map[*matchitem]bool{}
-	for i := 0; i < len(src); i++ {
-		mp[&(src[i])] = true
+func uniq(nodes []ast.Node) []ast.Node {
+	mnodes := map[ast.Node]bool{}
+	for i := 0; i < len(nodes); i++ {
+		mnodes[nodes[i]] = true
 	}
-	keys := []matchitem{}
-	for mi := range mp {
-		keys = append(keys, *mi)
+	keys := []ast.Node{}
+	for mn := range mnodes {
+		keys = append(keys, mn)
 	}
 	return keys
 }
@@ -182,7 +166,7 @@ func uniq(src []matchitem) []matchitem {
 // accepts processed form of Config type AST which:
 //   - should not have multiple names per ast.Field
 //   - array types should be defined by combining compatible item fields
-func matchTypeDefHolder(root ast.Expr, rule string, keys map[ast.Node]string) ([]matchitem, error) {
+func matchTypeDefHolder(root ast.Expr, rule string, keys map[ast.Node]string) ([]ast.Node, error) {
 	switch root.(type) {
 	case *ast.ArrayType, *ast.StructType:
 		break
@@ -191,9 +175,9 @@ func matchTypeDefHolder(root ast.Expr, rule string, keys map[ast.Node]string) ([
 	}
 	segments := strings.Split(rule, ".")
 	if len(segments) == 0 {
-		return []matchitem{}, nil
+		return []ast.Node{}, fmt.Errorf("empty rule %q", rule)
 	}
-	mis, err := matchTypeDefHolderHelper(root, segments, []string{}, keys)
+	mis, err := matchTypeDefHolderHelper(root, segments, keys)
 	if err != nil {
 		return nil, fmt.Errorf("checking against rules: %w", err)
 	}

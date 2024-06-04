@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
-	"log"
 	"os"
 
 	"github.com/ufukty/gonfique/internal/compares"
@@ -31,7 +30,7 @@ func ReadMappings(src string) (map[Pathway]TypeName, error) {
 }
 
 func ApplyMappings(f *files.File, mappings map[Pathway]TypeName) error {
-	miss := map[*ast.Ident][]matchitem{}
+	matchlists := map[*ast.Ident][]ast.Node{}
 	for pw, tn := range mappings {
 		matches, err := matchTypeDefHolder(f.Cfg, pw, f.Keys)
 		if err != nil {
@@ -40,17 +39,18 @@ func ApplyMappings(f *files.File, mappings map[Pathway]TypeName) error {
 		if len(matches) == 0 {
 			fmt.Printf("Pattern %q (->%s) didn't match any region\n", pw, tn)
 		}
-		miss[ast.NewIdent(tn)] = matches
+		matchlists[ast.NewIdent(tn)] = matches
 	}
 
 	products := map[*ast.Ident]ast.Expr{}
-	for i, mis := range miss {
-		for _, mi := range mis {
-			switch holder := mi.holder.(type) {
+	for i, matchlist := range matchlists {
+		for _, match := range matchlist {
+
+			switch holder := match.(type) {
 			case *ast.Field:
 				if t, ok := products[i]; ok {
 					if !compares.Compare(t, holder.Type) {
-						log.Fatalf("conflicting schemas found for type name %q\n", i.Name)
+						return fmt.Errorf("conflicting schemas found for type name %q", i.Name)
 					}
 				} else {
 					products[i] = holder.Type
@@ -59,7 +59,7 @@ func ApplyMappings(f *files.File, mappings map[Pathway]TypeName) error {
 			case *ast.ArrayType:
 				if t, ok := products[i]; ok {
 					if !compares.Compare(t, holder.Elt) {
-						log.Fatalf("conflicting schemas found for type name %q\n", i.Name)
+						return fmt.Errorf("conflicting schemas found for type name %q", i.Name)
 					}
 				} else {
 					products[i] = holder.Elt
