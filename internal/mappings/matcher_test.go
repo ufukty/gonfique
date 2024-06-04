@@ -11,22 +11,22 @@ import (
 	"github.com/ufukty/gonfique/internal/testutils"
 )
 
-func compareMatchs(got []matchitem, want []ast.Node) bool {
+func compareMatchs(got []ast.Node, want []ast.Node) bool {
 	if len(got) != len(want) {
 		return false
 	}
 	for _, w := range want {
-		if slices.IndexFunc(got, func(mi matchitem) bool { return mi.holder == w }) == -1 {
+		if slices.IndexFunc(got, func(n ast.Node) bool { return n == w }) == -1 {
 			return false
 		}
 	}
 	return true
 }
 
-func matchitemsToString(mis []matchitem) string {
+func matchitemsToString(nodes []ast.Node) string {
 	s := []string{}
-	for _, mi := range mis {
-		s = append(s, testutils.NodeString(mi.holder))
+	for _, n := range nodes {
+		s = append(s, testutils.NodeString(n))
 	}
 	return strings.Join(s, ", ")
 }
