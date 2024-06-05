@@ -13,7 +13,7 @@ type Manager struct {
 	UserAssigned  map[ast.Node]string // user assigned types specified by `type` directive
 }
 
-func NewManager(f *files.File, df *DirectiveFile) *Manager {
+func NewManager(f *files.File, df *files.DirectiveFile) *Manager {
 	return &Manager{
 		File:          f,
 		DirectiveFile: df,
