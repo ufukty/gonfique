@@ -12,7 +12,7 @@ type File struct {
 	TypeName        string
 	TypeNameInitial string
 
-	Keys           map[ast.Node]string // mappings
+	OriginalKeys   map[ast.Node]string // mappings
 	TypeDefHolders map[string]ast.Node // keypath -> Field, ArrayType
 	TypeDefs       map[string]ast.Node // keypath -> StructType, ArrayType, Ident
 

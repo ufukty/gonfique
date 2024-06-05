@@ -32,7 +32,7 @@ func ReadMappings(src string) (map[Pathway]TypeName, error) {
 func ApplyMappings(f *files.File, mappings map[Pathway]TypeName) error {
 	matchlists := map[*ast.Ident][]ast.Node{}
 	for pw, tn := range mappings {
-		matches, err := matchTypeDefHolder(f.Cfg, pw, f.Keys)
+		matches, err := matchTypeDefHolder(f.Cfg, pw, f.OriginalKeys)
 		if err != nil {
 			return fmt.Errorf("matching the rule: %w", err)
 		}

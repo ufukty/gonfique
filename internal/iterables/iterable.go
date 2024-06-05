@@ -42,7 +42,7 @@ func DetectIterators(file *files.File) error {
 					if cti != nil {
 						elements := []ast.Expr{}
 						for _, f := range st.Fields.List {
-							keyname, ok := file.Keys[f]
+							keyname, ok := file.OriginalKeys[f]
 							if !ok {
 								return fmt.Errorf("could not retrieve the original keyname for %s.%s (AST %p)", ts.Name.Name, f.Names[0].Name, f)
 							}

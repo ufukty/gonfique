@@ -29,7 +29,7 @@ func readYamlConfig(src string, typename string) (*File, error) {
 
 	file := &File{
 		Encoding:        transform.Yaml,
-		Keys:            keys,
+		OriginalKeys:    keys,
 		TypeName:        typename,
 		TypeNameInitial: strings.ToLower(string(([]rune(typename))[0])),
 		Cfg:             cfg,
@@ -59,7 +59,7 @@ func readJsonConfig(src string, typename string) (*File, error) {
 
 	file := &File{
 		Encoding:        transform.Json,
-		Keys:            keys,
+		OriginalKeys:    keys,
 		TypeName:        typename,
 		TypeNameInitial: strings.ToLower(string(([]rune(typename))[0])),
 		Cfg:             cfg,
