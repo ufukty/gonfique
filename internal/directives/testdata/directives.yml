@@ -1,0 +1,9 @@
+account:
+  named: Account
+  embed: Service
+  parent: Parent
+  accessors: [path]
+
+"*.endpoints.*.method":
+  named: Method
+  type: http.Method
