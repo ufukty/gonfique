@@ -1,9 +1,16 @@
-account:
-  named: Account
-  embed: Service
+gateway:
+  named: Gateway
+  accessors: [path]
+
+gateway.services:
+  parent: Parent
+
+gateway.services.*:
   parent: Parent
   accessors: [path]
 
-"*.endpoints.*.method":
-  named: Method
-  type: http.Method
+gateway.services.*.endpoints:
+  parent: Parent
+
+gateway.services.*.endpoints.*:
+  named: Endpoint
