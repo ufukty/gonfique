@@ -62,10 +62,6 @@ func addConfig(dst *ast.File, cfg ast.Expr, typeName string) {
 	})
 }
 
-func (f *File) addReaderFunction(dst *ast.File) {
-	dst.Decls = append(dst.Decls, generateReaderFunc(f.TypeName, f.Encoding))
-}
-
 func (f *File) Write(dst, pkgname string) error {
 	af := &ast.File{
 		Name:  ast.NewIdent(pkgname),

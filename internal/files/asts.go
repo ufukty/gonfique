@@ -3,14 +3,13 @@ package files
 import (
 	"go/ast"
 	"go/token"
-	"strings"
 
 	"github.com/ufukty/gonfique/internal/transform"
 )
 
-func generateReaderFunc(typename string, encoding transform.Encoding) *ast.FuncDecl {
+func (f *File) addReaderFunction(dst *ast.File) {
 	var decoder *ast.SelectorExpr
-	switch encoding {
+	switch f.Encoding {
 	case transform.Json:
 		decoder = &ast.SelectorExpr{
 			X: &ast.Ident{
@@ -30,11 +29,10 @@ func generateReaderFunc(typename string, encoding transform.Encoding) *ast.FuncD
 			},
 		}
 	}
-	typeNameInitial := strings.ToLower(string(([]rune(typename))[0]))
 
-	return &ast.FuncDecl{
+	readerFunc := &ast.FuncDecl{
 		Name: &ast.Ident{
-			Name: "Read" + typename,
+			Name: "Read" + f.TypeName,
 		},
 		Type: &ast.FuncType{
 			Params: &ast.FieldList{
@@ -55,7 +53,7 @@ func generateReaderFunc(typename string, encoding transform.Encoding) *ast.FuncD
 				List: []*ast.Field{
 					{
 						Type: &ast.Ident{
-							Name: typename,
+							Name: f.TypeName,
 						},
 					},
 					{
@@ -112,7 +110,7 @@ func generateReaderFunc(typename string, encoding transform.Encoding) *ast.FuncD
 								Results: []ast.Expr{
 									&ast.CompositeLit{
 										Type: &ast.Ident{
-											Name: typename,
+											Name: f.TypeName,
 										},
 										Incomplete: false,
 									},
@@ -152,14 +150,14 @@ func generateReaderFunc(typename string, encoding transform.Encoding) *ast.FuncD
 				&ast.AssignStmt{
 					Lhs: []ast.Expr{
 						&ast.Ident{
-							Name: typeNameInitial,
+							Name: f.TypeNameInitial,
 						},
 					},
 					Tok: token.DEFINE,
 					Rhs: []ast.Expr{
 						&ast.CompositeLit{
 							Type: &ast.Ident{
-								Name: typename,
+								Name: f.TypeName,
 							},
 							Incomplete: false,
 						},
@@ -191,7 +189,7 @@ func generateReaderFunc(typename string, encoding transform.Encoding) *ast.FuncD
 								&ast.UnaryExpr{
 									Op: token.AND,
 									X: &ast.Ident{
-										Name: typeNameInitial,
+										Name: f.TypeNameInitial,
 									},
 								},
 							},
@@ -214,7 +212,7 @@ func generateReaderFunc(typename string, encoding transform.Encoding) *ast.FuncD
 								Results: []ast.Expr{
 									&ast.CompositeLit{
 										Type: &ast.Ident{
-											Name: typename,
+											Name: f.TypeName,
 										},
 										Incomplete: false,
 									},
@@ -245,7 +243,7 @@ func generateReaderFunc(typename string, encoding transform.Encoding) *ast.FuncD
 				&ast.ReturnStmt{
 					Results: []ast.Expr{
 						&ast.Ident{
-							Name: typeNameInitial,
+							Name: f.TypeNameInitial,
 						},
 						&ast.Ident{
 							Name: "nil",
@@ -255,4 +253,6 @@ func generateReaderFunc(typename string, encoding transform.Encoding) *ast.FuncD
 			},
 		},
 	}
+
+	dst.Decls = append(dst.Decls, readerFunc)
 }
