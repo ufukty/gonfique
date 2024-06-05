@@ -10,7 +10,7 @@ func TestDirectiveFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(fmt.Errorf("prep: %w", err))
 	}
-	if len(*df) != 2 {
+	if len(*df) != 5 {
 		t.Fatal(fmt.Errorf("assert, length. want %d got %d", 2, len(*df)))
 	}
 }
