@@ -28,7 +28,7 @@ func TestIterators(t *testing.T) {
 			}
 
 			organizer.Organize(f)
-			err = DetectIterators(f)
+			err = ImplementIterators(f)
 			if err != nil {
 				t.Fatal(fmt.Errorf("generating iterators for all-same-type-field structs: %w", err))
 			}
