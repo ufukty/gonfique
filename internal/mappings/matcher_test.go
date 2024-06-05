@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/mappings/testdata/appendix"
 	"github.com/ufukty/gonfique/internal/testutils"
 )
@@ -33,7 +34,7 @@ func matchitemsToString(nodes []ast.Node) string {
 
 func TestMatch(t *testing.T) {
 	type testcase struct {
-		input string
+		input files.Keypath
 		want  []ast.Node
 	}
 
@@ -74,7 +75,7 @@ func TestMatch(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		t.Run(tc.input, func(t *testing.T) {
+		t.Run(string(tc.input), func(t *testing.T) {
 			got, err := matchTypeDefHolder(appendix.K8sCfgTs.Type, tc.input, appendix.Keys)
 			if err != nil {
 				t.Fatal(fmt.Errorf("act: %w", err))

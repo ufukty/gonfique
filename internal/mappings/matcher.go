@@ -5,6 +5,8 @@ import (
 	"go/ast"
 	"reflect"
 	"strings"
+
+	"github.com/ufukty/gonfique/internal/files"
 )
 
 func callMatcherHelperOnFields(st *ast.StructType, rule []string, keys map[ast.Node]string) ([]ast.Node, error) {
@@ -166,14 +168,14 @@ func uniq(nodes []ast.Node) []ast.Node {
 // accepts processed form of Config type AST which:
 //   - should not have multiple names per ast.Field
 //   - array types should be defined by combining compatible item fields
-func matchTypeDefHolder(root ast.Expr, rule string, keys map[ast.Node]string) ([]ast.Node, error) {
+func matchTypeDefHolder(root ast.Expr, rule files.Keypath, keys map[ast.Node]string) ([]ast.Node, error) {
 	switch root.(type) {
 	case *ast.ArrayType, *ast.StructType:
 		break
 	default:
 		return nil, fmt.Errorf("unsupported root type: %s", reflect.TypeOf(root).String())
 	}
-	segments := strings.Split(rule, ".")
+	segments := strings.Split(string(rule), ".")
 	if len(segments) == 0 {
 		return []ast.Node{}, fmt.Errorf("empty rule %q", rule)
 	}

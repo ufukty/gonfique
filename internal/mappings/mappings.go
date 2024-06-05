@@ -11,16 +11,15 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Pathway = string
 type TypeName = string
 
-func ReadMappings(src string) (map[Pathway]TypeName, error) {
+func ReadMappings(src string) (map[files.Keypath]TypeName, error) {
 	f, err := os.Open(src)
 	if err != nil {
 		return nil, fmt.Errorf("opening file: %w", err)
 	}
 
-	ms := map[Pathway]TypeName{}
+	ms := map[files.Keypath]TypeName{}
 	err = yaml.NewDecoder(f).Decode(&ms)
 	if err != nil {
 		return nil, fmt.Errorf("decoding: %w", err)
@@ -29,15 +28,15 @@ func ReadMappings(src string) (map[Pathway]TypeName, error) {
 	return ms, nil
 }
 
-func ApplyMappings(f *files.File, mappings map[Pathway]TypeName) error {
+func ApplyMappings(f *files.File, mappings map[files.Keypath]TypeName) error {
 	matchlists := map[*ast.Ident][]ast.Node{}
-	for pw, tn := range mappings {
-		matches, err := matchTypeDefHolder(f.Cfg, pw, f.OriginalKeys)
+	for kp, tn := range mappings {
+		matches, err := matchTypeDefHolder(f.Cfg, kp, f.OriginalKeys)
 		if err != nil {
 			return fmt.Errorf("matching the rule: %w", err)
 		}
 		if len(matches) == 0 {
-			fmt.Printf("Pattern %q (->%s) didn't match any region\n", pw, tn)
+			fmt.Printf("Pattern %q (->%s) didn't match any region\n", kp, tn)
 		}
 		matchlists[ast.NewIdent(tn)] = matches
 	}

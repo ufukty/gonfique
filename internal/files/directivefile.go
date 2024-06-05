@@ -16,8 +16,6 @@ type Directives struct {
 	Accessors []string `yaml:"accessors"` // type-defining
 }
 
-type Keypath string
-
 type DirectiveFile map[Keypath]Directives
 
 func (df DirectiveFile) validate() error {
