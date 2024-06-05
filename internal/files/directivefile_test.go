@@ -1,4 +1,4 @@
-package directives
+package files
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestDirectiveFile(t *testing.T) {
-	df, err := ReadDirectiveFile("testdata/directives.yml")
+	df, err := ReadDirectiveFile("testdata/directivefile/directives.yml")
 	if err != nil {
 		t.Fatal(fmt.Errorf("prep: %w", err))
 	}
