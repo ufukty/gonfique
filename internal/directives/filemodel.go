@@ -47,3 +47,13 @@ func ReadDirectiveFile(path string) (*DirectiveFile, error) {
 	}
 	return df, nil
 }
+
+func (df DirectiveFile) GetAccessors() map[Keypath][]string {
+	accessors := map[Keypath][]string{}
+	for kp, dirs := range df {
+		if len(dirs.Accessors) > 0 {
+			accessors[kp] = dirs.Accessors
+		}
+	}
+	return accessors
+}
