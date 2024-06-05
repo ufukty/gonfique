@@ -1,4 +1,4 @@
-package files
+package coder
 
 import (
 	"fmt"
@@ -7,6 +7,8 @@ import (
 	"go/token"
 	"os"
 	"slices"
+
+	"github.com/ufukty/gonfique/internal/files"
 )
 
 func addImports(dst *ast.File, imports []string) {
@@ -62,7 +64,7 @@ func addConfig(dst *ast.File, cfg ast.Expr, typeName string) {
 	})
 }
 
-func (f *File) Write(dst, pkgname string) error {
+func Write(f *files.File, dst, pkgname string) error {
 	af := &ast.File{
 		Name:  ast.NewIdent(pkgname),
 		Decls: []ast.Decl{},
@@ -73,7 +75,7 @@ func (f *File) Write(dst, pkgname string) error {
 	addIteratorMethods(af, f.Iterators)
 	addNamedTypeSpecifications(af, f.Named)
 	addConfig(af, f.Cfg, f.TypeName)
-	f.addReaderFunction(af)
+	addReaderFunction(f, af)
 
 	o, err := os.Create(dst)
 	if err != nil {

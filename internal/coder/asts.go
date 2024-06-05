@@ -1,13 +1,14 @@
-package files
+package coder
 
 import (
 	"go/ast"
 	"go/token"
 
+	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/transform"
 )
 
-func (f *File) addReaderFunction(dst *ast.File) {
+func addReaderFunction(f *files.File, dst *ast.File) {
 	var decoder *ast.SelectorExpr
 	switch f.Encoding {
 	case transform.Json:

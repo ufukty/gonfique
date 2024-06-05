@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ufukty/gonfique/internal/coder"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/testutils"
 )
@@ -27,7 +28,7 @@ func TestOrganizer(t *testing.T) {
 
 			Organize(f)
 
-			if err := f.Write(filepath.Join(testloc, "config.go"), "config"); err != nil {
+			if err := coder.Write(f, filepath.Join(testloc, "config.go"), "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 

@@ -1,4 +1,4 @@
-package files
+package coder
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/testutils"
 )
 
@@ -15,12 +16,12 @@ func TestCreatation(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			f, err := ReadConfigFile(filepath.Join("testdata", tc, "config.yml"), "Config")
+			f, err := files.ReadConfigFile(filepath.Join("testdata", tc, "config.yml"), "Config")
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
 
-			if err := f.Write(os.DevNull, "config"); err != nil {
+			if err := Write(f, os.DevNull, "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 		})
@@ -32,7 +33,7 @@ func Test_CreateAndUseForYaml(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			f, err := ReadConfigFile(filepath.Join("testdata", tc, "config.yml"), "Config")
+			f, err := files.ReadConfigFile(filepath.Join("testdata", tc, "config.yml"), "Config")
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
@@ -42,7 +43,7 @@ func Test_CreateAndUseForYaml(t *testing.T) {
 				t.Error(fmt.Errorf("preparing testcase to test: :%w", err))
 			}
 
-			if err := f.Write(filepath.Join(testloc, "config.go"), "config"); err != nil {
+			if err := Write(f, filepath.Join(testloc, "config.go"), "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 
@@ -70,7 +71,7 @@ func Test_CreateAndUseForJson(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			f, err := ReadConfigFile(filepath.Join("testdata", tc, "config.json"), "Config")
+			f, err := files.ReadConfigFile(filepath.Join("testdata", tc, "config.json"), "Config")
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
@@ -80,7 +81,7 @@ func Test_CreateAndUseForJson(t *testing.T) {
 				t.Error(fmt.Errorf("preparing testcase to test: :%w", err))
 			}
 
-			if err := f.Write(filepath.Join(testloc, "config.go"), "config"); err != nil {
+			if err := Write(f, filepath.Join(testloc, "config.go"), "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ufukty/gonfique/internal/coder"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/organizer"
 	"github.com/ufukty/gonfique/internal/testutils"
@@ -33,7 +34,7 @@ func TestIterators(t *testing.T) {
 				t.Fatal(fmt.Errorf("generating iterators for all-same-type-field structs: %w", err))
 			}
 
-			if err := f.Write(filepath.Join(testloc, "config.go"), "config"); err != nil {
+			if err := coder.Write(f, filepath.Join(testloc, "config.go"), "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 

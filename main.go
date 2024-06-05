@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ufukty/gonfique/internal/coder"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/iterables"
 	"github.com/ufukty/gonfique/internal/mappings"
@@ -90,7 +91,7 @@ func perform() error {
 		}
 	}
 
-	if err := f.Write(args.Out, args.Pkg); err != nil {
+	if err := coder.Write(f, args.Out, args.Pkg); err != nil {
 		return fmt.Errorf("creating %q: %w", args.Out, err)
 	}
 
