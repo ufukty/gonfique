@@ -9,7 +9,7 @@ import (
 
 type Manager struct {
 	File          *files.File
-	DirectiveFile *DirectiveFile
+	DirectiveFile *files.DirectiveFile
 	UserAssigned  map[ast.Node]string // user assigned types specified by `type` directive
 }
 
