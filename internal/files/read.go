@@ -12,6 +12,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func initial(name string) string {
+	return strings.ToLower(string(([]rune(name))[0]))
+}
+
 func readYamlConfig(src string, typename string) (*File, error) {
 	f, err := os.Open(src)
 	if err != nil {
@@ -31,7 +35,7 @@ func readYamlConfig(src string, typename string) (*File, error) {
 		Encoding:        transform.Yaml,
 		OriginalKeys:    keys,
 		TypeName:        typename,
-		TypeNameInitial: strings.ToLower(string(([]rune(typename))[0])),
+		TypeNameInitial: initial(typename),
 		Cfg:             cfg,
 		Named:           nil,
 		Isolated:        nil,

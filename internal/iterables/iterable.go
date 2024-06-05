@@ -32,8 +32,12 @@ func getCommonTypeOfFields(st *ast.StructType) *ast.Ident {
 	return ct
 }
 
+func initial(name string) string {
+	return strings.ToLower(string(([]rune(name))[0]))
+}
+
 func generateIterator(ts *ast.TypeSpec, commonType *ast.Ident, originalKeys map[ast.Node]string) *ast.FuncDecl {
-	typeSpecNameInitial := ast.NewIdent(strings.ToLower(string(([]rune(ts.Name.Name))[0])))
+	typeSpecNameInitial := ast.NewIdent(initial(ts.Name.Name))
 	keyValuePairs := []ast.Expr{}
 	for _, f := range ts.Type.(*ast.StructType).Fields.List {
 		keyValuePairs = append(keyValuePairs, &ast.KeyValueExpr{
