@@ -52,12 +52,12 @@ Availability of each key in item types is subject to [array type defining behavi
 
 ## Directives
 
-| Directive                     | Function                                                                                                                                                             |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <nobr>`named: [name]`</nobr>  | Create a named type instead inline type with the type definition resolved from config file. Eg. `named: Employee`                                                    |
-| <nobr>`type: [name]`</nobr>   | Assign specified type name instead resolving from YAML file. Eg. `type: http.Method`                                                                                 |
-| <nobr>`parent: [name]`</nobr> | Assign a field which is named as `[name]` that it's value will get set as the pointer of parent (containing) struct in the ReadConfig function. Eg. `parent: Parent` |
-| <nobr>`embed: [name]`</nobr>  | Defined type will contain `[name]` as embedded struct. Eg. ``                                                                                                        |
+| Directive                        | Function                                                                                                                                                                |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <nobr>`named: TypeName`</nobr>   | Create a named type instead inline type with the type definition resolved from config file. Eg. `named: Employee`                                                       |
+| <nobr>`type: TypeName`</nobr>    | Assign specified type name instead resolving from YAML file. Eg. `type: http.Method`                                                                                    |
+| <nobr>`parent: FieldName`</nobr> | Assign a field which is named as `FieldName` that it's value will get set as the pointer of parent (containing) struct in the ReadConfig function. Eg. `parent: Parent` |
+| <nobr>`embed: TypeName`</nobr>   | Defined type will contain `TypeName` as embedded struct. Eg. `embed: Base`                                                                                              |
 
 Note that combining `type` directive with many other directives is not possible as explained in the next section.
 
@@ -65,7 +65,7 @@ Note that combining `type` directive with many other directives is not possible 
 
 Types are either "assigned" manually or "resolved" by looking to the value in config file. Default behavior is automatic resolution. So, gonfique inspects the value in config file.
 
-To change the behavior, to force assigning a type of your choice, use `type: [TypeName]` directive. For example: `type: int` or `type: http.Method`.
+To change the behavior, to force assigning a type of your choice, use `type: TypeName` directive. For example: `type: int` or `type: http.Method`.
 
 Limitations:
 
@@ -84,7 +84,7 @@ organization.employees.*:
 
 ### `parent` directive
 
-Use `parent: name` directive to add a reference of parent to child. This will be useful when the data defines a hierarchy that a traceback from a child to root is needed.
+Use `parent: FieldName` directive to add a reference of parent to child. This will be useful when the data defines a hierarchy that a traceback from a child to root is needed.
 
 Considering the config file...
 
