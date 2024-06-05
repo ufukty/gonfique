@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 
 	"github.com/ufukty/gonfique/internal/transform"
 	"gopkg.in/yaml.v3"
@@ -27,15 +28,15 @@ func readYamlConfig(src string, typename string) (*File, error) {
 	slices.Sort(imports)
 
 	file := &File{
-		Encoding:      transform.Yaml,
-		Keys:          keys,
-		TypeName:      typename,
-		ConfigContent: y,
-		Cfg:           cfg,
-		Named:         nil,
-		Isolated:      nil,
-		Iterators:     nil,
-		Imports:       imports,
+		Encoding:        transform.Yaml,
+		Keys:            keys,
+		TypeName:        typename,
+		TypeNameInitial: strings.ToLower(string(([]rune(typename))[0])),
+		Cfg:             cfg,
+		Named:           nil,
+		Isolated:        nil,
+		Iterators:       nil,
+		Imports:         imports,
 	}
 
 	return file, nil
@@ -57,15 +58,15 @@ func readJsonConfig(src string, typename string) (*File, error) {
 	slices.Sort(imports)
 
 	file := &File{
-		Encoding:      transform.Json,
-		Keys:          keys,
-		TypeName:      typename,
-		ConfigContent: y,
-		Cfg:           cfg,
-		Named:         nil,
-		Isolated:      nil,
-		Iterators:     nil,
-		Imports:       imports,
+		Encoding:        transform.Json,
+		Keys:            keys,
+		TypeName:        typename,
+		TypeNameInitial: strings.ToLower(string(([]rune(typename))[0])),
+		Cfg:             cfg,
+		Named:           nil,
+		Isolated:        nil,
+		Iterators:       nil,
+		Imports:         imports,
 	}
 
 	return file, nil

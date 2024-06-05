@@ -7,13 +7,20 @@ import (
 )
 
 type File struct {
-	Encoding      transform.Encoding
-	TypeName      string
-	Keys          map[ast.Node]string
-	ConfigContent any
-	Cfg           ast.Expr        // config type, needed to be placed in a TypeSpec
-	Named         []*ast.GenDecl  // Named types
-	Isolated      *ast.GenDecl    // Product of organization process
-	Iterators     []*ast.FuncDecl // .Range() methods
-	Imports       []string        // package paths
+	Encoding transform.Encoding
+
+	TypeName        string
+	TypeNameInitial string
+
+	Keys           map[ast.Node]string // mappings
+	TypeDefHolders map[string]ast.Node // keypath -> Field, ArrayType
+	TypeDefs       map[string]ast.Node // keypath -> StructType, ArrayType, Ident
+
+	Imports []string // package paths
+	Cfg     ast.Expr // config type, needed to be placed in a TypeSpec
+
+	Isolated  *ast.GenDecl    // organization
+	Iterators []*ast.FuncDecl // .Range() methods
+	Named     []*ast.GenDecl  // mappings, directives
+	Accessors []*ast.FuncDecl // directives
 }

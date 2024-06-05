@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
-	"strings"
 
 	"github.com/ufukty/gonfique/internal/files"
 )
@@ -19,7 +18,7 @@ func DetectIterators(file *files.File) error {
 		Tok:   token.TYPE,
 		Specs: []ast.Spec{&ast.TypeSpec{Name: ast.NewIdent(file.TypeName), Type: file.Cfg}},
 	})
-	receivername := ast.NewIdent(strings.ToLower(string(([]rune(file.TypeName))[0])))
+	receivername := ast.NewIdent(file.TypeNameInitial)
 	for _, gd := range gds {
 		for _, s := range gd.Specs {
 			if ts, ok := s.(*ast.TypeSpec); ok {
