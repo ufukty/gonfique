@@ -8,6 +8,7 @@ import (
 
 	"github.com/ufukty/gonfique/internal/compares"
 	"github.com/ufukty/gonfique/internal/files"
+	"github.com/ufukty/gonfique/internal/matcher"
 	"gopkg.in/yaml.v3"
 )
 
@@ -31,7 +32,7 @@ func ReadMappings(src string) (map[files.Keypath]TypeName, error) {
 func ApplyMappings(f *files.File, mappings map[files.Keypath]TypeName) error {
 	matchlists := map[*ast.Ident][]ast.Node{}
 	for kp, tn := range mappings {
-		matches, err := matchTypeDefHolder(f.Cfg, kp, f.OriginalKeys)
+		matches, err := matcher.FindTypeDefHoldersForKeypath(f.Cfg, kp, f.OriginalKeys)
 		if err != nil {
 			return fmt.Errorf("matching the rule: %w", err)
 		}

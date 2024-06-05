@@ -1,4 +1,4 @@
-package mappings
+package matcher
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/ufukty/gonfique/internal/files"
-	"github.com/ufukty/gonfique/internal/mappings/testdata/appendix"
+	"github.com/ufukty/gonfique/internal/matcher/testdata/appendix"
 	"github.com/ufukty/gonfique/internal/testutils"
 )
 
@@ -76,7 +76,7 @@ func TestMatch(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(string(tc.input), func(t *testing.T) {
-			got, err := matchTypeDefHolder(appendix.K8sCfgTs.Type, tc.input, appendix.Keys)
+			got, err := FindTypeDefHoldersForKeypath(appendix.K8sCfgTs.Type, tc.input, appendix.Keys)
 			if err != nil {
 				t.Fatal(fmt.Errorf("act: %w", err))
 			}
