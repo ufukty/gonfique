@@ -9,10 +9,11 @@ import (
 
 type Directives struct {
 	Named     string   `yaml:"named"`
-	Type      string   `yaml:"type"`   // type-assigning
-	Embed     string   `yaml:"embed"`  // type-defining
-	Parent    string   `yaml:"parent"` // type-defining
-	Accessors []string // type-defining
+	Type      string   `yaml:"type"`      // type-assigning
+	Import    string   `yaml:"import"`    // type-assigning (optional)
+	Embed     string   `yaml:"embed"`     // type-defining
+	Parent    string   `yaml:"parent"`    // type-defining
+	Accessors []string `yaml:"accessors"` // type-defining
 }
 
 type Keypath string
