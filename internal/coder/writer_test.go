@@ -76,7 +76,7 @@ func Test_CreateAndUseForJson(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			cfgcontent, encoding, err := files.ReadConfigFile(filepath.Join("testdata", tc, "config.yml"))
+			cfgcontent, encoding, err := files.ReadConfigFile(filepath.Join("testdata", tc, "config.json"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
