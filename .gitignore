@@ -40,6 +40,7 @@ go.work
 Icon
 Network Trash Folder
 Temporary Items
+todo.md
 
 !.vscode/*.code-snippets
 !.vscode/extensions.json
