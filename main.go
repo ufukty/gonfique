@@ -85,6 +85,9 @@ func perform() error {
 
 	if args.Org {
 		organizer.Organize(f)
+	}
+
+	if args.Org || args.Mappings != "" {
 		err := iterables.ImplementIterators(f)
 		if err != nil {
 			return fmt.Errorf("creating iterators: %w", err)
