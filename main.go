@@ -76,7 +76,7 @@ func perform() error {
 	}
 
 	if args.Mappings != "" {
-		rules, err := mappings.ReadMappings(args.Mappings)
+		rules, err := files.ReadMappings(args.Mappings)
 		if err != nil {
 			return fmt.Errorf("reading -mappings file %q: %w", args.Mappings, err)
 		}
