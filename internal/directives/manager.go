@@ -4,18 +4,19 @@ import (
 	"fmt"
 	"go/ast"
 
+	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/files"
 )
 
 type Manager struct {
-	File          *files.File
+	Bundle        *bundle.Bundle
 	DirectiveFile *files.DirectiveFile
 	UserAssigned  map[ast.Node]string // user assigned types specified by `type` directive
 }
 
-func NewManager(f *files.File, df *files.DirectiveFile) *Manager {
+func NewManager(b *bundle.Bundle, df *files.DirectiveFile) *Manager {
 	return &Manager{
-		File:          f,
+		Bundle:        b,
 		DirectiveFile: df,
 		UserAssigned:  map[ast.Node]string{},
 	}
