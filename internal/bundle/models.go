@@ -3,9 +3,9 @@ package bundle
 import (
 	"go/ast"
 	"slices"
-	"strings"
 
 	"github.com/ufukty/gonfique/internal/models"
+	"github.com/ufukty/gonfique/internal/namings"
 	"github.com/ufukty/gonfique/internal/transform"
 )
 
@@ -28,10 +28,6 @@ type Bundle struct {
 	Accessors []*ast.FuncDecl // directives
 }
 
-func initial(name string) string {
-	return strings.ToLower(string(([]rune(name))[0]))
-}
-
 func New(cfgcontent any, encoding models.Encoding, typename string) *Bundle {
 	if encoding == models.Yaml {
 		cfg, imports, keys := transform.Transform(cfgcontent, encoding)
@@ -42,7 +38,7 @@ func New(cfgcontent any, encoding models.Encoding, typename string) *Bundle {
 			Encoding:        models.Yaml,
 			OriginalKeys:    keys,
 			TypeName:        typename,
-			TypeNameInitial: initial(typename),
+			TypeNameInitial: namings.Initial(typename),
 			Cfg:             cfg,
 			Named:           nil,
 			Isolated:        nil,
@@ -59,7 +55,7 @@ func New(cfgcontent any, encoding models.Encoding, typename string) *Bundle {
 			Encoding:        models.Json,
 			OriginalKeys:    keys,
 			TypeName:        typename,
-			TypeNameInitial: initial(typename),
+			TypeNameInitial: namings.Initial(typename),
 			Cfg:             cfg,
 			Named:           nil,
 			Isolated:        nil,

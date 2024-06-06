@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
-	"strings"
 
 	"github.com/ufukty/gonfique/internal/bundle"
+	"github.com/ufukty/gonfique/internal/namings"
 )
 
 // returns nil if all field types are not same
@@ -32,12 +32,8 @@ func getCommonTypeOfFields(st *ast.StructType) *ast.Ident {
 	return ct
 }
 
-func initial(name string) string {
-	return strings.ToLower(string(([]rune(name))[0]))
-}
-
 func generateIterator(ts *ast.TypeSpec, commonType *ast.Ident, originalKeys map[ast.Node]string) *ast.FuncDecl {
-	typeSpecNameInitial := ast.NewIdent(initial(ts.Name.Name))
+	typeSpecNameInitial := ast.NewIdent(namings.Initial(ts.Name.Name))
 	keyValuePairs := []ast.Expr{}
 	for _, f := range ts.Type.(*ast.StructType).Fields.List {
 		keyValuePairs = append(keyValuePairs, &ast.KeyValueExpr{

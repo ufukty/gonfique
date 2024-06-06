@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/ufukty/gonfique/internal/models"
-	"github.com/ufukty/gonfique/internal/transform/namings"
+	"github.com/ufukty/gonfique/internal/namings"
 )
 
 type transformer struct {
