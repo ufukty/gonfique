@@ -33,7 +33,7 @@ func ReadTypes(path string) ([]*ast.TypeSpec, error) {
 
 func UserProvided(b *bundle.Bundle, existing []*ast.TypeSpec) {
 	// substitute on dfs traceback
-	astutil.Apply(b.Cfg, nil, func(c *astutil.Cursor) bool {
+	astutil.Apply(b.CfgType, nil, func(c *astutil.Cursor) bool {
 		for _, e := range existing {
 			if c.Node() != nil && compares.Compare(c.Node(), e.Type) {
 				c.Replace(e.Name)

@@ -1,6 +1,6 @@
-package organizer
+package namings
 
-func bijective26(i int) string {
+func Bijective26(i int) string {
 	const q = 26
 	i++
 	s := ""

@@ -1,5 +1,10 @@
 package models
 
+import (
+	"go/ast"
+	"strings"
+)
+
 type Encoding string
 
 var (
@@ -9,4 +14,12 @@ var (
 
 type Keypath string
 
-type TypeName = string
+func (kp Keypath) Segments() []string {
+	return strings.Split(string(kp), ".")
+}
+
+type TypeName string
+
+func (tn TypeName) Ident() *ast.Ident {
+	return ast.NewIdent(string(tn))
+}

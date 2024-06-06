@@ -14,14 +14,14 @@ import (
 func ApplyMappings(b *bundle.Bundle, mappings map[models.Keypath]models.TypeName) error {
 	matchlists := map[*ast.Ident][]ast.Node{}
 	for kp, tn := range mappings {
-		matches, err := matcher.FindTypeDefHoldersForKeypath(b.Cfg, kp, b.OriginalKeys)
+		matches, err := matcher.FindTypeDefHoldersForKeypath(b.CfgType, kp, b.OriginalKeys)
 		if err != nil {
 			return fmt.Errorf("matching the rule: %w", err)
 		}
 		if len(matches) == 0 {
 			fmt.Printf("Pattern %q (->%s) didn't match any region\n", kp, tn)
 		}
-		matchlists[ast.NewIdent((tn))] = matches
+		matchlists[tn.Ident()] = matches
 	}
 
 	products := map[*ast.Ident]ast.Expr{}

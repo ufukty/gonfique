@@ -1,4 +1,4 @@
-package organizer
+package namings
 
 import (
 	"fmt"
@@ -18,16 +18,16 @@ func TestAlphabetical(t *testing.T) {
 		{702, "AAA"}}
 
 	for _, tc := range tcs {
-		g := bijective26(tc.i)
+		g := Bijective26(tc.i)
 		if g != tc.o {
 			t.Fatal("for:", tc.i, "expected:", tc.o, "got:", g)
 		}
 	}
 }
 
-func Examplebijective26() {
+func ExampleBijective26() {
 	for i := 0; i < 100; i++ {
-		fmt.Println(i, bijective26(i))
+		fmt.Println(i, Bijective26(i))
 	}
 	// Output:
 	// 0 A

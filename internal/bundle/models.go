@@ -2,7 +2,6 @@ package bundle
 
 import (
 	"go/ast"
-	"slices"
 
 	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/namings"
@@ -15,13 +14,16 @@ type Bundle struct {
 	TypeName        string
 	TypeNameInitial string
 
-	OriginalKeys   map[ast.Node]string // mappings
-	TypeDefHolders map[string]ast.Node // keypath -> Field, ArrayType
-	TypeDefs       map[string]ast.Node // keypath -> StructType, ArrayType, Ident
+	OriginalKeys   map[ast.Node]string         // holder -> key
+	Keypaths       map[ast.Node]models.Keypath // holder -> keypath
+	TypeDefHolders map[models.Keypath]ast.Node // keypath -> Field, ArrayType
 
 	Imports []string // package paths
-	Cfg     ast.Expr // config type, needed to be placed in a TypeSpec
 
+	// type declarations
+	CfgType ast.Expr // config type, needed to be placed in a TypeSpec
+
+	// function declarations
 	Isolated  *ast.GenDecl    // organization
 	Iterators []*ast.FuncDecl // .Range() methods
 	Named     []*ast.GenDecl  // mappings, directives
@@ -29,38 +31,30 @@ type Bundle struct {
 }
 
 func New(cfgcontent any, encoding models.Encoding, typename string) *Bundle {
-	if encoding == models.Yaml {
-		cfg, imports, keys := transform.Transform(cfgcontent, encoding)
-		imports = slices.Concat([]string{"fmt", "os", "gopkg.in/yaml.v3"}, imports)
-		slices.Sort(imports)
+	cfg, imports, keys := transform.Transform(cfgcontent, encoding)
+	imports = append(imports, "fmt", "os") // ReadConfig
 
-		return &Bundle{
-			Encoding:        models.Yaml,
-			OriginalKeys:    keys,
-			TypeName:        typename,
-			TypeNameInitial: namings.Initial(typename),
-			Cfg:             cfg,
-			Named:           nil,
-			Isolated:        nil,
-			Iterators:       nil,
-			Imports:         imports,
-		}
-
-	} else {
-		cfg, imports, keys := transform.Transform(cfgcontent, encoding)
-		imports = slices.Concat([]string{"fmt", "os", "encoding/json"}, imports)
-		slices.Sort(imports)
-
-		return &Bundle{
-			Encoding:        models.Json,
-			OriginalKeys:    keys,
-			TypeName:        typename,
-			TypeNameInitial: namings.Initial(typename),
-			Cfg:             cfg,
-			Named:           nil,
-			Isolated:        nil,
-			Iterators:       nil,
-			Imports:         imports,
-		}
+	b := &Bundle{
+		Encoding:        encoding,
+		TypeName:        typename,
+		TypeNameInitial: namings.Initial(typename),
+		OriginalKeys:    keys,
+		Keypaths:        map[ast.Node]models.Keypath{},
+		TypeDefHolders:  nil,
+		Imports:         imports,
+		CfgType:         cfg,
+		Isolated:        nil,
+		Iterators:       nil,
+		Named:           nil,
+		Accessors:       nil,
 	}
+
+	if b.Encoding == models.Yaml {
+		b.Imports = append(b.Imports, "gopkg.in/yaml.v3")
+	} else {
+		b.Imports = append(b.Imports, "encoding/json")
+	}
+
+	return b
 }
+

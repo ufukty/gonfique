@@ -22,6 +22,7 @@ func uniq(ss []string) []string {
 
 func addImports(dst *ast.File, imports []string) {
 	specs := []ast.Spec{}
+	slices.Sort(imports)
 	imports = uniq(imports)
 	for _, imp := range imports {
 		specs = append(specs, &ast.ImportSpec{
@@ -74,18 +75,18 @@ func addConfig(dst *ast.File, cfg ast.Expr, typeName string) {
 	})
 }
 
-func Write(f *bundle.Bundle, dst, pkgname string) error {
+func Write(b *bundle.Bundle, dst, pkgname string) error {
 	af := &ast.File{
 		Name:  ast.NewIdent(pkgname),
 		Decls: []ast.Decl{},
 	}
 
-	addImports(af, f.Imports)
-	addIsolatedTypeSpecifications(af, f.Isolated)
-	addIteratorMethods(af, f.Iterators)
-	addNamedTypeSpecifications(af, f.Named)
-	addConfig(af, f.Cfg, f.TypeName)
-	addReaderFunction(f, af)
+	addImports(af, b.Imports)
+	addIsolatedTypeSpecifications(af, b.Isolated)
+	addIteratorMethods(af, b.Iterators)
+	addNamedTypeSpecifications(af, b.Named)
+	addConfig(af, b.CfgType, b.TypeName)
+	addReaderFunction(b, af)
 
 	o, err := os.Create(dst)
 	if err != nil {

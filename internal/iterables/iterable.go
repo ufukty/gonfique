@@ -70,7 +70,7 @@ func ImplementIterators(b *bundle.Bundle) error {
 	}
 	gds = append(gds, &ast.GenDecl{ // temporary
 		Tok:   token.TYPE,
-		Specs: []ast.Spec{&ast.TypeSpec{Name: ast.NewIdent(b.TypeName), Type: b.Cfg}},
+		Specs: []ast.Spec{&ast.TypeSpec{Name: ast.NewIdent(b.TypeName), Type: b.CfgType}},
 	})
 	for _, gd := range gds {
 		for _, s := range gd.Specs {
