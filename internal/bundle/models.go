@@ -67,5 +67,4 @@ func New(cfgcontent any, encoding models.Encoding, typename string) *Bundle {
 			Imports:         imports,
 		}
 	}
-	return nil
 }
