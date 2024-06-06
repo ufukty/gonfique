@@ -24,3 +24,14 @@ type File struct {
 	Named     []*ast.GenDecl  // mappings, directives
 	Accessors []*ast.FuncDecl // directives
 }
+
+func demo() {
+	_ = *&ast.GenDecl{
+		Tok: 0,
+		Specs: []ast.Spec{&ast.TypeSpec{
+			Name:       &ast.Ident{},
+			TypeParams: nil,
+			Type:       nil,
+		}},
+	}
+}

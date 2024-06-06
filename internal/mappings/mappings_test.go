@@ -24,7 +24,7 @@ func TestMappings(t *testing.T) {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
 
-			ms, err := ReadMappings(filepath.Join("testdata", tc, "mappings.gonfique.yml"))
+			ms, err := files.ReadMappings(filepath.Join("testdata", tc, "mappings.gonfique.yml"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("reading mappings from user-provided file: %w", err))
 			}

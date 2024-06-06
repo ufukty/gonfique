@@ -4,32 +4,13 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
-	"os"
 
 	"github.com/ufukty/gonfique/internal/compares"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/matcher"
-	"gopkg.in/yaml.v3"
 )
 
-type TypeName = string
-
-func ReadMappings(src string) (map[files.Keypath]TypeName, error) {
-	f, err := os.Open(src)
-	if err != nil {
-		return nil, fmt.Errorf("opening file: %w", err)
-	}
-
-	ms := map[files.Keypath]TypeName{}
-	err = yaml.NewDecoder(f).Decode(&ms)
-	if err != nil {
-		return nil, fmt.Errorf("decoding: %w", err)
-	}
-
-	return ms, nil
-}
-
-func ApplyMappings(f *files.File, mappings map[files.Keypath]TypeName) error {
+func ApplyMappings(f *files.File, mappings map[files.Keypath]files.TypeName) error {
 	matchlists := map[*ast.Ident][]ast.Node{}
 	for kp, tn := range mappings {
 		matches, err := matcher.FindTypeDefHoldersForKeypath(f.Cfg, kp, f.OriginalKeys)
@@ -39,7 +20,7 @@ func ApplyMappings(f *files.File, mappings map[files.Keypath]TypeName) error {
 		if len(matches) == 0 {
 			fmt.Printf("Pattern %q (->%s) didn't match any region\n", kp, tn)
 		}
-		matchlists[ast.NewIdent(tn)] = matches
+		matchlists[ast.NewIdent((tn))] = matches
 	}
 
 	products := map[*ast.Ident]ast.Expr{}
