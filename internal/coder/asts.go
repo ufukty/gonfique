@@ -4,14 +4,14 @@ import (
 	"go/ast"
 	"go/token"
 
-	"github.com/ufukty/gonfique/internal/files"
-	"github.com/ufukty/gonfique/internal/transform"
+	"github.com/ufukty/gonfique/internal/bundle"
+	"github.com/ufukty/gonfique/internal/models"
 )
 
-func addReaderFunction(f *files.File, dst *ast.File) {
+func addReaderFunction(b *bundle.Bundle, dst *ast.File) {
 	var decoder *ast.SelectorExpr
-	switch f.Encoding {
-	case transform.Json:
+	switch b.Encoding {
+	case models.Json:
 		decoder = &ast.SelectorExpr{
 			X: &ast.Ident{
 				Name: "json",
@@ -20,7 +20,7 @@ func addReaderFunction(f *files.File, dst *ast.File) {
 				Name: "NewDecoder",
 			},
 		}
-	case transform.Yaml:
+	case models.Yaml:
 		decoder = &ast.SelectorExpr{
 			X: &ast.Ident{
 				Name: "yaml",
@@ -33,7 +33,7 @@ func addReaderFunction(f *files.File, dst *ast.File) {
 
 	readerFunc := &ast.FuncDecl{
 		Name: &ast.Ident{
-			Name: "Read" + f.TypeName,
+			Name: "Read" + b.TypeName,
 		},
 		Type: &ast.FuncType{
 			Params: &ast.FieldList{
@@ -54,7 +54,7 @@ func addReaderFunction(f *files.File, dst *ast.File) {
 				List: []*ast.Field{
 					{
 						Type: &ast.Ident{
-							Name: f.TypeName,
+							Name: b.TypeName,
 						},
 					},
 					{
@@ -111,7 +111,7 @@ func addReaderFunction(f *files.File, dst *ast.File) {
 								Results: []ast.Expr{
 									&ast.CompositeLit{
 										Type: &ast.Ident{
-											Name: f.TypeName,
+											Name: b.TypeName,
 										},
 										Incomplete: false,
 									},
@@ -151,14 +151,14 @@ func addReaderFunction(f *files.File, dst *ast.File) {
 				&ast.AssignStmt{
 					Lhs: []ast.Expr{
 						&ast.Ident{
-							Name: f.TypeNameInitial,
+							Name: b.TypeNameInitial,
 						},
 					},
 					Tok: token.DEFINE,
 					Rhs: []ast.Expr{
 						&ast.CompositeLit{
 							Type: &ast.Ident{
-								Name: f.TypeName,
+								Name: b.TypeName,
 							},
 							Incomplete: false,
 						},
@@ -190,7 +190,7 @@ func addReaderFunction(f *files.File, dst *ast.File) {
 								&ast.UnaryExpr{
 									Op: token.AND,
 									X: &ast.Ident{
-										Name: f.TypeNameInitial,
+										Name: b.TypeNameInitial,
 									},
 								},
 							},
@@ -213,7 +213,7 @@ func addReaderFunction(f *files.File, dst *ast.File) {
 								Results: []ast.Expr{
 									&ast.CompositeLit{
 										Type: &ast.Ident{
-											Name: f.TypeName,
+											Name: b.TypeName,
 										},
 										Incomplete: false,
 									},
@@ -244,7 +244,7 @@ func addReaderFunction(f *files.File, dst *ast.File) {
 				&ast.ReturnStmt{
 					Results: []ast.Expr{
 						&ast.Ident{
-							Name: f.TypeNameInitial,
+							Name: b.TypeNameInitial,
 						},
 						&ast.Ident{
 							Name: "nil",

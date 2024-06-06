@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/ufukty/gonfique/internal/files"
+	"github.com/ufukty/gonfique/internal/models"
 )
 
 func callMatcherHelperOnFields(st *ast.StructType, kp []string, keys map[ast.Node]string) ([]ast.Node, error) {
@@ -168,7 +168,7 @@ func uniq(nodes []ast.Node) []ast.Node {
 // accepts processed form of Config type AST which:
 //   - should not have multiple names per ast.Field
 //   - array types should be defined by combining compatible item fields
-func FindTypeDefHoldersForKeypath(root ast.Expr, kp files.Keypath, keys map[ast.Node]string) ([]ast.Node, error) {
+func FindTypeDefHoldersForKeypath(root ast.Expr, kp models.Keypath, keys map[ast.Node]string) ([]ast.Node, error) {
 	switch root.(type) {
 	case *ast.ArrayType, *ast.StructType:
 		break

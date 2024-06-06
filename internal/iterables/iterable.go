@@ -6,7 +6,7 @@ import (
 	"go/token"
 	"strings"
 
-	"github.com/ufukty/gonfique/internal/files"
+	"github.com/ufukty/gonfique/internal/bundle"
 )
 
 // returns nil if all field types are not same
@@ -63,18 +63,18 @@ func generateIterator(ts *ast.TypeSpec, commonType *ast.Ident, originalKeys map[
 	}
 }
 
-func ImplementIterators(f *files.File) error {
+func ImplementIterators(b *bundle.Bundle) error {
 	fds := []*ast.FuncDecl{}
 	gds := []*ast.GenDecl{}
-	if f.Isolated != nil {
-		gds = append(gds, f.Isolated)
+	if b.Isolated != nil {
+		gds = append(gds, b.Isolated)
 	}
-	if f.Named != nil {
-		gds = append(gds, f.Named...)
+	if b.Named != nil {
+		gds = append(gds, b.Named...)
 	}
 	gds = append(gds, &ast.GenDecl{ // temporary
 		Tok:   token.TYPE,
-		Specs: []ast.Spec{&ast.TypeSpec{Name: ast.NewIdent(f.TypeName), Type: f.Cfg}},
+		Specs: []ast.Spec{&ast.TypeSpec{Name: ast.NewIdent(b.TypeName), Type: b.Cfg}},
 	})
 	for _, gd := range gds {
 		for _, s := range gd.Specs {
@@ -84,12 +84,12 @@ func ImplementIterators(f *files.File) error {
 					// generate a FuncDecl which its body consists by a ReturnStmt of map[string]ct
 					// the map has the exact same amount of Fields struct type has
 					if ct := getCommonTypeOfFields(st); ct != nil {
-						fds = append(fds, generateIterator(ts, ct, f.OriginalKeys))
+						fds = append(fds, generateIterator(ts, ct, b.OriginalKeys))
 					}
 				}
 			}
 		}
 	}
-	f.Iterators = fds
+	b.Iterators = fds
 	return nil
 }

@@ -5,15 +5,16 @@ import (
 	"go/ast"
 	"go/token"
 
+	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/compares"
-	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/matcher"
+	"github.com/ufukty/gonfique/internal/models"
 )
 
-func ApplyMappings(f *files.File, mappings map[files.Keypath]files.TypeName) error {
+func ApplyMappings(b *bundle.Bundle, mappings map[models.Keypath]models.TypeName) error {
 	matchlists := map[*ast.Ident][]ast.Node{}
 	for kp, tn := range mappings {
-		matches, err := matcher.FindTypeDefHoldersForKeypath(f.Cfg, kp, f.OriginalKeys)
+		matches, err := matcher.FindTypeDefHoldersForKeypath(b.Cfg, kp, b.OriginalKeys)
 		if err != nil {
 			return fmt.Errorf("matching the rule: %w", err)
 		}
@@ -51,7 +52,7 @@ func ApplyMappings(f *files.File, mappings map[files.Keypath]files.TypeName) err
 	}
 
 	for i, t := range products {
-		f.Named = append(f.Named, &ast.GenDecl{
+		b.Named = append(b.Named, &ast.GenDecl{
 			Tok: token.TYPE,
 			Specs: []ast.Spec{&ast.TypeSpec{
 				Name: i,

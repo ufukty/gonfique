@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/coder"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/iterables"
@@ -62,17 +63,19 @@ func perform() error {
 		return fmt.Errorf("checking args: %w", err)
 	}
 
-	f, err := files.ReadConfigFile(args.In, args.TypeName)
+	cfgcontent, encoding, err := files.ReadConfigFile(args.In)
 	if err != nil {
 		return fmt.Errorf("reading input file: %w", err)
 	}
+
+	b := bundle.New(cfgcontent, encoding, args.TypeName)
 
 	if args.Use != "" {
 		tss, err := substitude.ReadTypes(args.Use)
 		if err != nil {
 			return fmt.Errorf("reading -use file %q: %w", args.Use, err)
 		}
-		substitude.UserProvided(f, tss)
+		substitude.UserProvided(b, tss)
 	}
 
 	if args.Mappings != "" {
@@ -80,21 +83,21 @@ func perform() error {
 		if err != nil {
 			return fmt.Errorf("reading -mappings file %q: %w", args.Mappings, err)
 		}
-		mappings.ApplyMappings(f, rules)
+		mappings.ApplyMappings(b, rules)
 	}
 
 	if args.Org {
-		organizer.Organize(f)
+		organizer.Organize(b)
 	}
 
 	if args.Org || args.Mappings != "" {
-		err := iterables.ImplementIterators(f)
+		err := iterables.ImplementIterators(b)
 		if err != nil {
 			return fmt.Errorf("creating iterators: %w", err)
 		}
 	}
 
-	if err := coder.Write(f, args.Out, args.Pkg); err != nil {
+	if err := coder.Write(b, args.Out, args.Pkg); err != nil {
 		return fmt.Errorf("creating %q: %w", args.Out, err)
 	}
 

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/coder"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/organizer"
@@ -18,23 +19,24 @@ func TestIterators(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			f, err := files.ReadConfigFile(filepath.Join("testdata", tc, "config.yml"), "Config")
+			cfgcontent, encoding, err := files.ReadConfigFile(filepath.Join("testdata", tc, "config.yml"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
 
+			b := bundle.New(cfgcontent, encoding, "Config")
 			testloc, err := testutils.PrepareTestCase(tc, []string{"go.mod", "go.sum", "config_test.go", "config.yml"})
 			if err != nil {
 				t.Error(fmt.Errorf("preparing testcase to test: :%w", err))
 			}
 
-			organizer.Organize(f)
-			err = ImplementIterators(f)
+			organizer.Organize(b)
+			err = ImplementIterators(b)
 			if err != nil {
 				t.Fatal(fmt.Errorf("generating iterators for all-same-type-field structs: %w", err))
 			}
 
-			if err := coder.Write(f, filepath.Join(testloc, "config.go"), "config"); err != nil {
+			if err := coder.Write(b, filepath.Join(testloc, "config.go"), "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 

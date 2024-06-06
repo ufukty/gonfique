@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/matcher/testdata/appendix"
+	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/testutils"
 )
 
@@ -34,7 +34,7 @@ func matchitemsToString(nodes []ast.Node) string {
 
 func TestMatch(t *testing.T) {
 	type testcase struct {
-		input files.Keypath
+		input models.Keypath
 		want  []ast.Node
 	}
 

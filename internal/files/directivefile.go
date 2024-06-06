@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ufukty/gonfique/internal/models"
 	"gopkg.in/yaml.v3"
 )
 
@@ -16,7 +17,7 @@ type Directives struct {
 	Accessors []string `yaml:"accessors"` // type-defining
 }
 
-type DirectiveFile map[Keypath]Directives
+type DirectiveFile map[models.Keypath]Directives
 
 func (df DirectiveFile) validate() error {
 	for kp, dir := range df {
@@ -46,8 +47,8 @@ func ReadDirectiveFile(path string) (*DirectiveFile, error) {
 	return df, nil
 }
 
-func (df DirectiveFile) GetAccessors() map[Keypath][]string {
-	accessors := map[Keypath][]string{}
+func (df DirectiveFile) GetAccessors() map[models.Keypath][]string {
+	accessors := map[models.Keypath][]string{}
 	for kp, dirs := range df {
 		if len(dirs.Accessors) > 0 {
 			accessors[kp] = dirs.Accessors

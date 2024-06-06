@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/transform/namings"
 )
 
@@ -126,7 +127,7 @@ func (tr *transformer) transform(v reflect.Value) ast.Expr {
 
 // reconstructs a reflect-value's type in ast.TypeSpec.
 // limited with types used by YAML decoder.
-func Transform(cfgcontent any, encoding Encoding) (ast.Expr, []string, map[ast.Node]string) {
+func Transform(cfgcontent any, encoding models.Encoding) (ast.Expr, []string, map[ast.Node]string) {
 	t := &transformer{
 		isTimeUsed: false,
 		keys:       map[ast.Node]string{},

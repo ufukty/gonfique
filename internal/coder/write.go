@@ -8,7 +8,7 @@ import (
 	"os"
 	"slices"
 
-	"github.com/ufukty/gonfique/internal/files"
+	"github.com/ufukty/gonfique/internal/bundle"
 	"golang.org/x/exp/maps"
 )
 
@@ -74,7 +74,7 @@ func addConfig(dst *ast.File, cfg ast.Expr, typeName string) {
 	})
 }
 
-func Write(f *files.File, dst, pkgname string) error {
+func Write(f *bundle.Bundle, dst, pkgname string) error {
 	af := &ast.File{
 		Name:  ast.NewIdent(pkgname),
 		Decls: []ast.Decl{},
