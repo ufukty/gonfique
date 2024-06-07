@@ -8,6 +8,7 @@ import (
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/coder"
 	"github.com/ufukty/gonfique/internal/datas"
+	"github.com/ufukty/gonfique/internal/directives"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/iterables"
 	"github.com/ufukty/gonfique/internal/mappings"
@@ -19,13 +20,14 @@ import (
 )
 
 type Args struct {
-	In       string
-	Out      string
-	Pkg      string
-	TypeName string
-	Use      string
-	Org      bool
-	Mappings string
+	In         string
+	Out        string
+	Pkg        string
+	TypeName   string
+	Use        string
+	Org        bool
+	Mappings   string
+	Directives string
 }
 
 func getArgs() Args {
@@ -36,6 +38,7 @@ func getArgs() Args {
 	flag.StringVar(&args.TypeName, "type-name", "Config", "will be used to name generated type")
 	flag.StringVar(&args.Use, "use", "", "(optional) use type definitions found in <file>")
 	flag.StringVar(&args.Mappings, "mappings", "", "(optional) use typenames found in the <file>. see examples for mapping file structure")
+	flag.StringVar(&args.Directives, "directives", "", "(optional) use a directives file")
 	flag.BoolVar(&args.Org, "organize", false, "(optional) defines the types of struct fields that are also structs separately instead inline, with auto generated UNSTABLE names.")
 	flag.Parse()
 	return args
@@ -91,6 +94,21 @@ func Run() error {
 			return fmt.Errorf("reading -use file %q: %w", args.Use, err)
 		}
 		substitude.UserProvided(b, tss)
+	}
+
+	if args.Directives != "" && args.Mappings != "" {
+		return fmt.Errorf("using 'directives' and 'mappings' together is not allowed")
+	}
+
+	if args.Directives != "" {
+		df, err := files.ReadDirectiveFile(args.Directives)
+		if err != nil {
+			return fmt.Errorf("reading directives file: %w", err)
+		}
+		err = directives.Apply(b, df)
+		if err != nil {
+			return fmt.Errorf("applying directives: %w", err)
+		}
 	}
 
 	if args.Mappings != "" {

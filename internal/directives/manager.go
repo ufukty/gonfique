@@ -8,37 +8,37 @@ import (
 	"github.com/ufukty/gonfique/internal/files"
 )
 
-type Manager struct {
+type manager struct {
 	Bundle        *bundle.Bundle
 	DirectiveFile *files.DirectiveFile
-	UserAssigned  map[ast.Node]string // user assigned types specified by `type` directive
+	UserAssigned  []ast.Node // user assigned types specified by `type` directive
 }
 
-func NewManager(b *bundle.Bundle, df *files.DirectiveFile) *Manager {
-	return &Manager{
+func newManager(b *bundle.Bundle, df *files.DirectiveFile) *manager {
+	return &manager{
 		Bundle:        b,
 		DirectiveFile: df,
-		UserAssigned:  map[ast.Node]string{},
+		UserAssigned:  []ast.Node{},
 	}
 }
 
-func (m *Manager) accessors() error {
+func (m *manager) accessors() error {
 	return nil
 }
 
-func (m *Manager) typeAssigning() error {
+func (m *manager) typeAssigning() error {
 	return nil
 }
 
-func (m *Manager) embedding() error {
+func (m *manager) embedding() error {
 	return nil
 }
 
-func (m *Manager) named() error {
+func (m *manager) named() error {
 	return nil
 }
 
-func (m *Manager) ApplyDirectives() error {
+func (m *manager) ApplyDirectives() error {
 	if err := m.named(); err != nil {
 		return fmt.Errorf(": %w", err)
 	}
@@ -52,4 +52,8 @@ func (m *Manager) ApplyDirectives() error {
 		return fmt.Errorf(": %w", err)
 	}
 	return nil
+}
+
+func Apply(b *bundle.Bundle, df *files.DirectiveFile) error {
+	return newManager(b, df).ApplyDirectives()
 }
