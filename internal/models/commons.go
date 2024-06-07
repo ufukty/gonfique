@@ -23,3 +23,9 @@ type TypeName string
 func (tn TypeName) Ident() *ast.Ident {
 	return ast.NewIdent(string(tn))
 }
+
+type FieldName string
+
+func (fn FieldName) Ident() *ast.Ident {
+	return ast.NewIdent(string(fn))
+}

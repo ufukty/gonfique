@@ -9,12 +9,12 @@ import (
 )
 
 type Directives struct {
-	Named     string   `yaml:"named"`
-	Type      string   `yaml:"type"`      // type-assigning
-	Import    string   `yaml:"import"`    // type-assigning (optional)
-	Embed     string   `yaml:"embed"`     // type-defining
-	Parent    string   `yaml:"parent"`    // type-defining
-	Accessors []string `yaml:"accessors"` // type-defining
+	Named     models.TypeName    `yaml:"named"`
+	Type      models.TypeName    `yaml:"type"`      // type-assigning
+	Import    string             `yaml:"import"`    // type-assigning (optional)
+	Embed     models.TypeName    `yaml:"embed"`     // type-defining
+	Parent    models.FieldName   `yaml:"parent"`    // type-defining
+	Accessors []models.FieldName `yaml:"accessors"` // type-defining
 }
 
 type DirectiveFile map[models.Keypath]Directives
@@ -47,8 +47,8 @@ func ReadDirectiveFile(path string) (*DirectiveFile, error) {
 	return df, nil
 }
 
-func (df DirectiveFile) GetAccessors() map[models.Keypath][]string {
-	accessors := map[models.Keypath][]string{}
+func (df DirectiveFile) GetAccessors() map[models.Keypath][]models.FieldName {
+	accessors := map[models.Keypath][]models.FieldName{}
 	for kp, dirs := range df {
 		if len(dirs.Accessors) > 0 {
 			accessors[kp] = dirs.Accessors
