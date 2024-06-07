@@ -105,7 +105,7 @@ func Run() error {
 		organizer.Organize(b)
 	}
 
-	if args.Org || args.Mappings != "" {
+	if b.Isolated != nil || b.Named != nil {
 		err := iterables.ImplementIterators(b)
 		if err != nil {
 			return fmt.Errorf("creating iterators: %w", err)
