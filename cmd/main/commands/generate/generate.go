@@ -1,9 +1,8 @@
-package main
+package generate
 
 import (
 	"flag"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/ufukty/gonfique/internal/bundle"
@@ -13,14 +12,11 @@ import (
 	"github.com/ufukty/gonfique/internal/iterables"
 	"github.com/ufukty/gonfique/internal/mappings"
 	"github.com/ufukty/gonfique/internal/models"
-	"github.com/ufukty/gonfique/internal/namings"
 	"github.com/ufukty/gonfique/internal/organizer"
 	"github.com/ufukty/gonfique/internal/resolver"
 	"github.com/ufukty/gonfique/internal/substitude"
 	"github.com/ufukty/gonfique/internal/transform"
 )
-
-var Version = ""
 
 type Args struct {
 	In       string
@@ -62,7 +58,7 @@ func checkMissingArgs(args Args) error {
 	return nil
 }
 
-func perform() error {
+func Run() error {
 	args := getArgs()
 	if err := checkMissingArgs(args); err != nil {
 		return fmt.Errorf("checking args: %w", err)
@@ -87,7 +83,7 @@ func perform() error {
 	b.Holders = datas.Invmap(b.Keypaths)
 
 	// after directive/named
-	namings.GenerateTypenames()
+	// namings.GenerateTypenames()
 
 	if args.Use != "" {
 		tss, err := substitude.ReadTypes(args.Use)
@@ -121,22 +117,4 @@ func perform() error {
 	}
 
 	return nil
-}
-
-func dispatch() error {
-	if len(os.Args) < 2 {
-		return fmt.Errorf("needs more arguments")
-	}
-	if os.Args[1] == "version" {
-		fmt.Println(Version)
-		return nil
-	}
-	return perform()
-}
-
-func main() {
-	if err := dispatch(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
 }
