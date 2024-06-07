@@ -24,30 +24,38 @@ type Bundle struct {
 	CfgType ast.Expr // config type, needed to be placed in a TypeSpec
 
 	// function declarations
-	Isolated  *ast.GenDecl    // organization
+	Isolated *ast.GenDecl   // organization
+	Named    []*ast.GenDecl // mappings, directives
+
 	Iterators []*ast.FuncDecl // .Range() methods
-	Named     []*ast.GenDecl  // mappings, directives
 	Accessors []*ast.FuncDecl // directives
 }
 
 func New(cfgcontent any, encoding models.Encoding, typename string) *Bundle {
-	cfg, imports, keys := transform.Transform(cfgcontent, encoding)
-	imports = append(imports, "fmt", "os") // ReadConfig
 
 	b := &Bundle{
-		Encoding:        encoding,
+		Encoding: encoding,
+
 		TypeName:        typename,
 		TypeNameInitial: namings.Initial(typename),
-		OriginalKeys:    keys,
-		Keypaths:        map[ast.Node]models.Keypath{},
-		TypeDefHolders:  nil,
-		Imports:         imports,
-		CfgType:         cfg,
-		Isolated:        nil,
-		Iterators:       nil,
-		Named:           nil,
-		Accessors:       nil,
+
+		OriginalKeys:   nil,
+		Keypaths:       nil,
+		TypeDefHolders: nil,
+
+		Imports: nil,
+
+		CfgType: nil,
+
+		Isolated: nil,
+		Named:    nil,
+
+		Iterators: nil,
+		Accessors: nil,
 	}
+
+	b.CfgType, b.Imports, b.OriginalKeys = transform.Transform(cfgcontent, encoding)
+	b.Imports = append(b.Imports, "fmt", "os") // ReadConfig
 
 	if b.Encoding == models.Yaml {
 		b.Imports = append(b.Imports, "gopkg.in/yaml.v3")
@@ -57,4 +65,3 @@ func New(cfgcontent any, encoding models.Encoding, typename string) *Bundle {
 
 	return b
 }
-
