@@ -21,6 +21,10 @@ func newresolver(originalKeys map[ast.Node]string) *resolver {
 }
 
 func (r *resolver) dfs(n ast.Node, holder ast.Node, path []string) {
+	if holder != nil {
+		r.keypaths[holder] = models.Keypath(strings.Join(path, "."))
+	}
+
 	switch n := n.(type) {
 	case *ast.StructType:
 		if n.Fields != nil && n.Fields.List != nil {
@@ -33,14 +37,6 @@ func (r *resolver) dfs(n ast.Node, holder ast.Node, path []string) {
 
 	case *ast.ArrayType:
 		r.dfs(n.Elt, n, append(path, "[]"))
-
-	case *ast.Ident: // leaf
-		if holder != nil {
-			r.keypaths[holder] = models.Keypath(strings.Join(path, "."))
-		}
-
-	default:
-		panic("unexpected type in AST")
 	}
 }
 
