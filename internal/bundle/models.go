@@ -5,7 +5,6 @@ import (
 
 	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/namings"
-	"github.com/ufukty/gonfique/internal/transform"
 )
 
 type Bundle struct {
@@ -37,14 +36,6 @@ func New(cfgcontent any, encoding models.Encoding, typename string) *Bundle {
 		Encoding:        encoding,
 		TypeName:        typename,
 		TypeNameInitial: namings.Initial(typename),
-	}
-
-	b.CfgType, b.Imports, b.OriginalKeys = transform.Transform(cfgcontent, encoding)
-	b.Imports = append(b.Imports, "fmt", "os") // ReadConfig
-	if b.Encoding == models.Yaml {
-		b.Imports = append(b.Imports, "gopkg.in/yaml.v3")
-	} else {
-		b.Imports = append(b.Imports, "encoding/json")
 	}
 
 	return b

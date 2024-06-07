@@ -8,11 +8,16 @@ import (
 
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/coder"
+	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/iterables"
 	"github.com/ufukty/gonfique/internal/mappings"
+	"github.com/ufukty/gonfique/internal/models"
+	"github.com/ufukty/gonfique/internal/namings"
 	"github.com/ufukty/gonfique/internal/organizer"
+	"github.com/ufukty/gonfique/internal/resolver"
 	"github.com/ufukty/gonfique/internal/substitude"
+	"github.com/ufukty/gonfique/internal/transform"
 )
 
 var Version = ""
@@ -69,6 +74,20 @@ func perform() error {
 	}
 
 	b := bundle.New(cfgcontent, encoding, args.TypeName)
+
+	b.CfgType, b.Imports, b.OriginalKeys = transform.Transform(cfgcontent, encoding)
+	b.Imports = append(b.Imports, "fmt", "os") // ReadConfig
+	if b.Encoding == models.Yaml {
+		b.Imports = append(b.Imports, "gopkg.in/yaml.v3")
+	} else {
+		b.Imports = append(b.Imports, "encoding/json")
+	}
+
+	b.Keypaths = resolver.AllKeypathsForHolders(b.CfgType, b.OriginalKeys)
+	b.Holders = datas.Invmap(b.Keypaths)
+
+	// after directive/named
+	namings.GenerateTypenames()
 
 	if args.Use != "" {
 		tss, err := substitude.ReadTypes(args.Use)
