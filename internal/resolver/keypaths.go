@@ -4,7 +4,6 @@ import (
 	"go/ast"
 	"strings"
 
-	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/models"
 )
 
@@ -40,8 +39,8 @@ func (r *resolver) dfs(n ast.Node, holder ast.Node, path []string) {
 	}
 }
 
-func AllKeypathsForHolders(b bundle.Bundle) map[ast.Node]models.Keypath {
-	resolver := newresolver(b.OriginalKeys)
-	resolver.dfs(b.CfgType, nil, []string{})
+func AllKeypathsForHolders(cfgtype ast.Expr, originalKeys map[ast.Node]string) map[ast.Node]models.Keypath {
+	resolver := newresolver(originalKeys)
+	resolver.dfs(cfgtype, nil, []string{})
 	return resolver.keypaths
 }

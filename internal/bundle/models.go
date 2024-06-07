@@ -14,9 +14,9 @@ type Bundle struct {
 	TypeName        string
 	TypeNameInitial string
 
-	OriginalKeys   map[ast.Node]string         // holder -> key
-	Keypaths       map[ast.Node]models.Keypath // holder -> keypath
-	TypeDefHolders map[models.Keypath]ast.Node // keypath -> Field, ArrayType
+	OriginalKeys map[ast.Node]string         // holder -> key
+	Keypaths     map[ast.Node]models.Keypath // holder -> keypath
+	Holders      map[models.Keypath]ast.Node // keypath -> Field, ArrayType
 
 	Imports []string // package paths
 
@@ -34,29 +34,13 @@ type Bundle struct {
 func New(cfgcontent any, encoding models.Encoding, typename string) *Bundle {
 
 	b := &Bundle{
-		Encoding: encoding,
-
+		Encoding:        encoding,
 		TypeName:        typename,
 		TypeNameInitial: namings.Initial(typename),
-
-		OriginalKeys:   nil,
-		Keypaths:       nil,
-		TypeDefHolders: nil,
-
-		Imports: nil,
-
-		CfgType: nil,
-
-		Isolated: nil,
-		Named:    nil,
-
-		Iterators: nil,
-		Accessors: nil,
 	}
 
 	b.CfgType, b.Imports, b.OriginalKeys = transform.Transform(cfgcontent, encoding)
 	b.Imports = append(b.Imports, "fmt", "os") // ReadConfig
-
 	if b.Encoding == models.Yaml {
 		b.Imports = append(b.Imports, "gopkg.in/yaml.v3")
 	} else {
