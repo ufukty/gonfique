@@ -61,10 +61,21 @@ func checkMissingArgs(args Args) error {
 	return nil
 }
 
+func checkConflictingFeatures(args Args) error {
+	if args.Directives != "" && args.Mappings != "" {
+		return fmt.Errorf("using 'directives' and 'mappings' together is not allowed")
+	}
+	return nil
+}
+
 func Run() error {
 	args := getArgs()
 	if err := checkMissingArgs(args); err != nil {
 		return fmt.Errorf("checking args: %w", err)
+	}
+
+	if err := checkConflictingFeatures(args); err != nil {
+		return fmt.Errorf("checking conflicting features: %w", err)
 	}
 
 	cfgcontent, encoding, err := files.ReadConfigFile(args.In)
@@ -94,10 +105,6 @@ func Run() error {
 			return fmt.Errorf("reading -use file %q: %w", args.Use, err)
 		}
 		substitude.UserProvided(b, tss)
-	}
-
-	if args.Directives != "" && args.Mappings != "" {
-		return fmt.Errorf("using 'directives' and 'mappings' together is not allowed")
 	}
 
 	if args.Directives != "" {
