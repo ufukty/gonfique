@@ -9,10 +9,10 @@ import (
 	"github.com/ufukty/gonfique/internal/coder"
 	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/directives/accessors"
+	"github.com/ufukty/gonfique/internal/directives/directivefile"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/iterables"
 	"github.com/ufukty/gonfique/internal/mappings"
-	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/namings"
 	"github.com/ufukty/gonfique/internal/organizer"
 	"github.com/ufukty/gonfique/internal/resolver"
@@ -79,26 +79,20 @@ func Run() error {
 		return fmt.Errorf("checking conflicting features: %w", err)
 	}
 
-	cfgcontent, encoding, err := files.ReadConfigFile(args.In)
+	b := bundle.New(args.TypeName)
+
+	err := files.ReadConfigFile(b, args.In)
 	if err != nil {
 		return fmt.Errorf("reading input file: %w", err)
 	}
 
-	b := bundle.New(cfgcontent, encoding, args.TypeName)
-
-	b.CfgType, b.Imports, b.OriginalKeys = transform.Transform(cfgcontent, encoding)
-	b.Imports = append(b.Imports, "fmt", "os") // ReadConfig
-	if b.Encoding == models.Yaml {
-		b.Imports = append(b.Imports, "gopkg.in/yaml.v3")
-	} else {
-		b.Imports = append(b.Imports, "encoding/json")
-	}
+	transform.Transform(b)
 
 	b.Keypaths = resolver.AllKeypathsForHolders(b.CfgType, b.OriginalKeys)
 	b.Holders = datas.Invmap(b.Keypaths)
 
 	if args.Directives != "" {
-		b.Df, err = files.ReadDirectiveFile(args.Directives)
+		b.Df, err = directivefile.ReadDirectiveFile(args.Directives)
 		if err != nil {
 			return fmt.Errorf("reading directives file: %w", err)
 		}

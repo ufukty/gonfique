@@ -13,6 +13,7 @@ import (
 )
 
 func addImports(dst *ast.File, imports []string) {
+	imports = append(imports, "fmt", "os") // ReadConfig
 	specs := []ast.Spec{}
 	slices.Sort(imports)
 	imports = datas.Uniq(imports)

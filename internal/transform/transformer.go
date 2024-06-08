@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/ufukty/gonfique/internal/models"
+	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/namings"
 )
 
@@ -127,16 +127,15 @@ func (tr *transformer) transform(v reflect.Value) ast.Expr {
 
 // reconstructs a reflect-value's type in ast.TypeSpec.
 // limited with types used by YAML decoder.
-func Transform(cfgcontent any, encoding models.Encoding) (ast.Expr, []string, map[ast.Node]string) {
+func Transform(b *bundle.Bundle) {
 	t := &transformer{
 		isTimeUsed: false,
 		keys:       map[ast.Node]string{},
-		tagname:    string(encoding),
+		tagname:    string(b.Encoding),
 	}
-	cfg := t.transform(reflect.ValueOf(cfgcontent))
-	imports := []string{}
+	b.CfgType = t.transform(reflect.ValueOf(b.Cfgcontent))
 	if t.isTimeUsed {
-		imports = append(imports, "time")
+		b.AddImports("time")
 	}
-	return cfg, imports, t.keys
+	b.OriginalKeys = t.keys
 }

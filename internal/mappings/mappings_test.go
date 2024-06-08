@@ -11,6 +11,7 @@ import (
 	"github.com/ufukty/gonfique/internal/coder"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/testutils"
+	"github.com/ufukty/gonfique/internal/transform"
 )
 
 func TestMappings(t *testing.T) {
@@ -19,19 +20,19 @@ func TestMappings(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
+			b := bundle.New("Config")
 
-			cfgcontent, encoding, err := files.ReadConfigFile(filepath.Join("testdata", tc, "config.yml"))
+			err := files.ReadConfigFile(b, filepath.Join("testdata", tc, "config.yml"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
-
-			b := bundle.New(cfgcontent, encoding, "Config")
 
 			ms, err := files.ReadMappings(filepath.Join("testdata", tc, "mappings.gonfique.yml"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("reading mappings from user-provided file: %w", err))
 			}
 
+			transform.Transform(b)
 			// apply mappings before "organize" & "iterate"
 			ApplyMappings(b, ms)
 

@@ -3,7 +3,7 @@ package bundle
 import (
 	"go/ast"
 
-	"github.com/ufukty/gonfique/internal/files"
+	"github.com/ufukty/gonfique/internal/directives/directivefile"
 	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/namings"
 )
@@ -22,7 +22,8 @@ type Bundle struct {
 	Imports []string // package paths
 
 	// type declarations
-	CfgType ast.Expr // config type, needed to be placed in a TypeSpec
+	Cfgcontent any      // produced by yaml.Decoder
+	CfgType    ast.Expr // config type, needed to be placed in a TypeSpec
 
 	// function declarations
 	Isolated *ast.GenDecl   // organization
@@ -31,17 +32,18 @@ type Bundle struct {
 	Iterators []*ast.FuncDecl // .Range() methods
 	Accessors []*ast.FuncDecl // directives
 
-	Df             *files.DirectiveFile
+	Df             *directivefile.DirectiveFile
 	NeedsToBeNamed []models.Keypath // filled by directives.preprocess
 }
 
-func New(cfgcontent any, encoding models.Encoding, typename string) *Bundle {
-
-	b := &Bundle{
-		Encoding:        encoding,
+func New(typename string) *Bundle {
+	return &Bundle{
 		TypeName:        typename,
 		TypeNameInitial: namings.Initial(typename),
+		Imports:         []string{},
 	}
+}
 
-	return b
+func (b *Bundle) AddImports(path ...string) {
+	b.Imports = append(b.Imports, path...)
 }
