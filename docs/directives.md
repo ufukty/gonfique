@@ -6,11 +6,16 @@
 A directive file is a YAML file that contains a dictionary of keypaths and directives. Example file contains one keypath and 4 directives for it:
 
 ```yaml
+infra.servers:
+  export: True
+
 infra.servers.*:
   named: Vps
   embed: Basic
-  parent: Servers
   accessors: [Cores, Ram, Disk]
+  
+"**":
+  parent: Parent
 ```
 
 ## Keypath
