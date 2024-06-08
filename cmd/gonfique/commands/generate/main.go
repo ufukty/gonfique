@@ -13,6 +13,7 @@ import (
 	"github.com/ufukty/gonfique/internal/iterables"
 	"github.com/ufukty/gonfique/internal/mappings"
 	"github.com/ufukty/gonfique/internal/models"
+	"github.com/ufukty/gonfique/internal/namings"
 	"github.com/ufukty/gonfique/internal/organizer"
 	"github.com/ufukty/gonfique/internal/resolver"
 	"github.com/ufukty/gonfique/internal/substitude"
@@ -104,8 +105,9 @@ func Run() error {
 		b.NeedsToBeNamed = b.Df.NeededTypes()
 	}
 
-	// after directive/named
-	// namings.GenerateTypenames()
+	if b.NeedsToBeNamed != nil {
+		b.Typenames = namings.GenerateTypenames(b.NeedsToBeNamed)
+	}
 
 	if args.Use != "" {
 		tss, err := substitude.ReadTypes(args.Use)
