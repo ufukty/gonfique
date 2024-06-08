@@ -9,16 +9,8 @@ import (
 	"slices"
 
 	"github.com/ufukty/gonfique/internal/bundle"
-	"golang.org/x/exp/maps"
+	"github.com/ufukty/gonfique/internal/datas"
 )
-
-func uniq(ss []string) []string {
-	m := make(map[string]bool, len(ss))
-	for _, s := range ss {
-		m[s] = true
-	}
-	return maps.Keys(m)
-}
 
 func addImports(dst *ast.File, imports []string) {
 	specs := []ast.Spec{}

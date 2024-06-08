@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/models"
 )
 
@@ -150,18 +151,6 @@ func matchTypeDefHolderHelper(n ast.Node, kp []string, keys map[ast.Node]string)
 		}
 	}
 	return matches, nil
-}
-
-func uniq(nodes []ast.Node) []ast.Node {
-	mnodes := map[ast.Node]bool{}
-	for i := 0; i < len(nodes); i++ {
-		mnodes[nodes[i]] = true
-	}
-	keys := []ast.Node{}
-	for mn := range mnodes {
-		keys = append(keys, mn)
-	}
-	return keys
 }
 
 // root should be either of ArrayType or StructType
