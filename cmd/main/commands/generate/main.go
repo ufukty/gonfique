@@ -116,7 +116,7 @@ func Run() error {
 	}
 
 	if args.Directives != "" {
-		if err = directives.Apply(b, b.Df); err != nil {
+		if err = directives.Apply(b); err != nil {
 			return fmt.Errorf("applying directives: %w", err)
 		}
 	}

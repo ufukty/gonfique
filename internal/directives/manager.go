@@ -8,10 +8,9 @@ import (
 	"github.com/ufukty/gonfique/internal/directives/assignment"
 	"github.com/ufukty/gonfique/internal/directives/embedding"
 	"github.com/ufukty/gonfique/internal/directives/named"
-	"github.com/ufukty/gonfique/internal/files"
 )
 
-func Apply(b *bundle.Bundle, df *files.DirectiveFile) error {
+func Apply(b *bundle.Bundle) error {
 	if err := named.Implement(); err != nil {
 		return fmt.Errorf(": %w", err)
 	}
