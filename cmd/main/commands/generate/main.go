@@ -8,7 +8,7 @@ import (
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/coder"
 	"github.com/ufukty/gonfique/internal/datas"
-	"github.com/ufukty/gonfique/internal/directives"
+	"github.com/ufukty/gonfique/internal/directives/accessors"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/iterables"
 	"github.com/ufukty/gonfique/internal/mappings"
@@ -116,7 +116,7 @@ func Run() error {
 	}
 
 	if args.Directives != "" {
-		if err = directives.Apply(b); err != nil {
+		if err = accessors.Implement(b); err != nil {
 			return fmt.Errorf("applying directives: %w", err)
 		}
 	}
