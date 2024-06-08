@@ -52,59 +52,173 @@ Availability of each key in item types is subject to [array type defining behavi
 
 ## Directives
 
-| Directive                        | Function                                                                                                                                                                |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <nobr>`named: TypeName`</nobr>   | Create a named type instead inline type with the type definition resolved from config file. Eg. `named: Employee`                                                       |
-| <nobr>`type: TypeName`</nobr>    | Assign specified type name instead resolving from YAML file. Eg. `type: http.Method`                                                                                    |
-| <nobr>`parent: FieldName`</nobr> | Assign a field which is named as `FieldName` that it's value will get set as the pointer of parent (containing) struct in the ReadConfig function. Eg. `parent: Parent` |
-| <nobr>`embed: TypeName`</nobr>   | Defined type will contain `TypeName` as embedded struct. Eg. `embed: Base`                                                                                              |
-
-Note that combining `type` directive with many other directives is not possible as explained in the next section.
-
-### `type` directive
-
-Types are either "assigned" manually or "resolved" by looking to the value in config file. Default behavior is automatic resolution. So, gonfique inspects the value in config file.
-
-To change the behavior, to force assigning a type of your choice, use `type: TypeName` directive. For example: `type: int` or `type: http.Method`.
-
-Limitations:
-
-- Combining `type` directive with either of `parent`, `embed` or `accessors` is not allowed.
-
-- When a dict/list type is "assigned", no other directives are allowed on keys/item of that dict/list.
-
-### `accessors` directive
-
-Accessors are Getters and Setters for fields. To make gonfique to implement accessors on desired keys of a dict, use `accessors` directive as such:
+There are 6 different directive that can be set on a keypath. See explanations for conflicting directives.
 
 ```yaml
-organization.employees.*:
-  accessors:
+a.key.path:
+  named: TypeName
+  accessors: [FieldName, FieldName, ...]
+  parent: FieldName
+  embed: TypeName
+  import: PackageName
+  type: TypeName
 ```
 
-### `parent` directive
-
-Use `parent: FieldName` directive to add a reference of parent to child. This will be useful when the data defines a hierarchy that a traceback from a child to root is needed.
-
-Considering the config file...
+### `named`
 
 ```yaml
-eve:
-  frank: ...
+a.key.path:
+  named: TypeName
 ```
 
-...this directive file...
+Create a named type instead inline type with the type definition resolved from config file. Eg. `named: Employee`
+
+### `accessors`
 
 ```yaml
-eve:
-  named: Eve
-
-eve.frank:
-  named: Frank
-  parent: MyParent
+a.key.path:
+  accessors: [FieldName, FieldName, ...]
 ```
 
-...will result with the type `Frank` getting a field named `MyParent` and in type of `*Eve`. Also, `ReadConfig` function will get a statement added, which will assign the reference of parent to child:
+Accessors are Getters and Setters for fields. Gonfique can implement getters and setters on any field of a struct. The code will contain input and output parameter types that is nicely matching the field type.
+
+### `embed`
+
+```yaml
+a.key.path:
+  embed: TypeName
+```
+
+Use embed directive to make gonfique to define keys for the struct without the fields in embedded struct. Embedded type should be a struct, not an interface. TypeName could be either declared inside or [outside](#import) the package.
+
+### `parent`
+
+```yaml
+a.key.path:
+  parent: FieldName
+```
+
+Add a field `FieldName` to the generated type which will be assigned the pointer of parent, `a.key`. This will also change the body of ReadConfig function. This will be useful when the data defines a hierarchy that a traceback from a child to root is needed.
+
+### `export`
+
+```yaml
+a.key.path:
+  export: True/False
+```
+
+Directs [automatic type name generation](#automatically-generated-type-names) to generate exported (capitalized) type name. This has no effect when `named` or `type` is also set.
+
+### `import`
+
+```yaml
+a.key.path:
+  import: PackageName
+```
+
+Adds the package name (or path) into import list that will be in the top of generated file. The package will be imported only if the rule gets any match in the config file. Usefull when combined with `type`, `embed` to refer to types outside of package.
+
+### `type`
+
+```yaml
+a.key.path:
+  type: TypeName
+```
+
+Assign specified type name instead resolving from YAML file. For example: `type: int` or `type: http.Method`. Note that, `type` directive can only be combined with `import`. Other directives will be ignored.
+
+## Internal Concepts
+
+### Automatic type resolution vs. manual type assignment
+
+Gonfique can resolve any key/list/value's type by simply looking to it. While this behaviour is the default, Gonfique users can choose to opt-out automatic type resolution for any dict/list/value in the config file.
+
+When type resolution disabled by using `type` directive on any dict/list, Gonfique won't apply any directives for their "children" (that is all dicts, lists and values eventually belong to that object).
+
+### Automatically generated type names
+
+Gonfique needs to move inline type definitions of field/item types to named type definitions in order to implement methods on them (or refer to them in other contexts in general).
+
+Some of the cases that gonfique automatically create a type name for a field/item type:
+
+- Implementing accessors needs Gonfique to refer type names of struct and field. So `accessor` enables automatic type name generation on the field and struct type.
+
+- Using `parent` (on child) without `named` (on the parent) will result with gonfique assign an automatically generated type name for the parent type.
+
+The name will be based on the keypath, the minimum number of last segments that won't collide with other typenames. As the choosen name is bound to context, it can change next time the config file gets a key with same name. Thus, the generated type name is unexported.
+
+## Full example
+
+Config file:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+  namespace: my-namespace
+type: Opaque
+data:
+  my-key: my-value
+  password: cGFzc3dvcmQ=
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  rules:
+    - host: myapp.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: my-service
+                port:
+                  number: 80
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: my-container
+          image: my-image
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: my-config
+            - secretRef:
+                name: my-secret
+```
+
+Directive file:
+
+```yaml
+# export each auto generated type name by default
+"**":
+  exported: true
+
+# add a '.Parent' field to each struct type that is under 'spec' key
+spec.**:
+  parent: Parent
+
+# make the item type of ports list named 'Port'
+spec.ports.[]:
+  named: Port
+
+# assign the type 'Protocol' to 'protocol' field of item type
+spec.ports.[].protocol:
+  type: Protocol
+```
+
+Output:
 
 ```go
 type Eve struct {
@@ -120,46 +234,4 @@ func ReadConfig() (Config, error) {
   cfg.A.Eve.Frank.MyParent = &cfg.A.Eve // notice
   ...
 }
-```
-
-## Full example
-
-Given the config file:
-
-```yaml
-a:
-  b:
-    c: 2.0
-    d: 0.5
-  e:
-    f:
-      g: dolor
-      h: consectetur
-i:
-  - j: vusce1
-    k: nam
-  - j: vusce2
-    l: ac
-```
-
-and directive file:
-
-```yaml
-a.b:
-  named: Blowfish
-a.b.c:
-  named: C
-a.b.d:
-  named: C
-
-a.e:
-  named: Eve
-
-a.e.f:
-  named: Frank
-  parent: Parent
-```
-
-```
-
 ```
