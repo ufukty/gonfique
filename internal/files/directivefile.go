@@ -49,16 +49,6 @@ func ReadDirectiveFile(path string) (*DirectiveFile, error) {
 	return df, nil
 }
 
-func (df DirectiveFile) GetAccessors() map[models.Keypath][]models.FieldName {
-	accessors := map[models.Keypath][]models.FieldName{}
-	for kp, dirs := range df {
-		if len(dirs.Accessors) > 0 {
-			accessors[kp] = dirs.Accessors
-		}
-	}
-	return accessors
-}
-
 func (df DirectiveFile) neededTypesForAccessorsDirective() []models.Keypath {
 	needed := []models.Keypath{}
 	for kp, drs := range df {
