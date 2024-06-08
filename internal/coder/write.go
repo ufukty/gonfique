@@ -23,7 +23,7 @@ func uniq(ss []string) []string {
 func addImports(dst *ast.File, imports []string) {
 	specs := []ast.Spec{}
 	slices.Sort(imports)
-	imports = uniq(imports)
+	imports = datas.Uniq(imports)
 	for _, imp := range imports {
 		specs = append(specs, &ast.ImportSpec{
 			Name:    nil,

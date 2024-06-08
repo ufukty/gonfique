@@ -183,5 +183,5 @@ func FindTypeDefHoldersForKeypath(root ast.Expr, kp models.Keypath, keys map[ast
 	if err != nil {
 		return nil, fmt.Errorf("checking against keypath: %w", err)
 	}
-	return uniq(mis), nil
+	return datas.Uniq(mis), nil
 }
