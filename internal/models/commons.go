@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"go/ast"
 	"strings"
 )
@@ -16,6 +17,16 @@ type Keypath string
 
 func (kp Keypath) Segments() []string {
 	return strings.Split(string(kp), ".")
+}
+
+func (kp Keypath) WithField(f FieldName) Keypath {
+	return Keypath(fmt.Sprintf("%s.%s", kp, f))
+}
+
+func (kp Keypath) Parent() Keypath {
+	ss := kp.Segments()
+	l := max(len(ss)-1, 0)
+	return Keypath(strings.Join(ss[:l], "."))
 }
 
 type TypeName string

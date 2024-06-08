@@ -3,6 +3,7 @@ package bundle
 import (
 	"go/ast"
 
+	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/namings"
 )
@@ -16,6 +17,7 @@ type Bundle struct {
 	OriginalKeys map[ast.Node]string         // holder -> key
 	Keypaths     map[ast.Node]models.Keypath // holder -> keypath
 	Holders      map[models.Keypath]ast.Node // keypath -> Field, ArrayType
+	Typenames    map[models.Keypath]models.TypeName
 
 	Imports []string // package paths
 
@@ -28,6 +30,9 @@ type Bundle struct {
 
 	Iterators []*ast.FuncDecl // .Range() methods
 	Accessors []*ast.FuncDecl // directives
+
+	Df             *files.DirectiveFile
+	NeedsToBeNamed []models.Keypath // filled by directives.preprocess
 }
 
 func New(cfgcontent any, encoding models.Encoding, typename string) *Bundle {

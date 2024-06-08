@@ -96,6 +96,14 @@ func Run() error {
 	b.Keypaths = resolver.AllKeypathsForHolders(b.CfgType, b.OriginalKeys)
 	b.Holders = datas.Invmap(b.Keypaths)
 
+	if args.Directives != "" {
+		b.Df, err = files.ReadDirectiveFile(args.Directives)
+		if err != nil {
+			return fmt.Errorf("reading directives file: %w", err)
+		}
+		b.NeedsToBeNamed = b.Df.NeededTypes()
+	}
+
 	// after directive/named
 	// namings.GenerateTypenames()
 
@@ -108,12 +116,7 @@ func Run() error {
 	}
 
 	if args.Directives != "" {
-		df, err := files.ReadDirectiveFile(args.Directives)
-		if err != nil {
-			return fmt.Errorf("reading directives file: %w", err)
-		}
-		err = directives.Apply(b, df)
-		if err != nil {
+		if err = directives.Apply(b, b.Df); err != nil {
 			return fmt.Errorf("applying directives: %w", err)
 		}
 	}

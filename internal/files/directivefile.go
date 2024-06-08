@@ -3,7 +3,9 @@ package files
 import (
 	"fmt"
 	"os"
+	"slices"
 
+	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/models"
 	"gopkg.in/yaml.v3"
 )
@@ -55,4 +57,35 @@ func (df DirectiveFile) GetAccessors() map[models.Keypath][]models.FieldName {
 		}
 	}
 	return accessors
+}
+
+func (df DirectiveFile) neededTypesForAccessorsDirective() []models.Keypath {
+	needed := []models.Keypath{}
+	for kp, drs := range df {
+		if drs.Accessors != nil {
+			needed = append(needed, kp) // struct
+			for _, field := range drs.Accessors {
+				needed = append(needed, kp.WithField(field)) // its field
+			}
+		}
+	}
+	return needed
+}
+
+func (df DirectiveFile) neededTypesForParentDirective() []models.Keypath {
+	needed := []models.Keypath{}
+	for kp, drs := range df {
+		if drs.Parent != "" {
+			needed = append(needed, kp.Parent())
+		}
+	}
+	return needed
+}
+
+// both the struct and field types at each directive needs to be declared as named (not inline)
+func (df DirectiveFile) NeededTypes() []models.Keypath {
+	return datas.Uniq(slices.Concat(
+		df.neededTypesForAccessorsDirective(),
+		df.neededTypesForParentDirective(),
+	))
 }
