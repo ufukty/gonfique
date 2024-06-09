@@ -34,7 +34,7 @@ func matchitemsToString(nodes []ast.Node) string {
 
 func TestMatch(t *testing.T) {
 	type testcase struct {
-		input models.Keypath
+		input models.WildcardKeypath
 		want  []ast.Node
 	}
 

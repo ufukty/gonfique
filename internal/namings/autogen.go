@@ -7,22 +7,22 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-func groupKeypathsByDepth(kps []models.Keypath) map[int][]models.Keypath {
-	groups := map[int][]models.Keypath{}
+func groupKeypathsByDepth(kps []models.FlattenKeypath) map[int][]models.FlattenKeypath {
+	groups := map[int][]models.FlattenKeypath{}
 	for _, kp := range kps {
 		depth := len(kp.Segments())
 		if _, ok := groups[depth]; !ok {
-			groups[depth] = []models.Keypath{}
+			groups[depth] = []models.FlattenKeypath{}
 		}
 		groups[depth] = append(groups[depth], kp)
 	}
 	return groups
 }
 
-func orderKeypaths(kps []models.Keypath) []models.Keypath {
+func orderKeypaths(kps []models.FlattenKeypath) []models.FlattenKeypath {
 	// 1. group by depth
 	// 2. order each group alphabetically
-	ordered := []models.Keypath{}
+	ordered := []models.FlattenKeypath{}
 	grouped := groupKeypathsByDepth(kps)
 	depths := maps.Keys(grouped)
 	slices.Sort(depths)
@@ -44,9 +44,9 @@ func typenameForSegments(segments []string) models.TypeName {
 	return models.TypeName(tn)
 }
 
-func GenerateTypenames(keypaths []models.Keypath) map[models.Keypath]models.TypeName {
+func GenerateTypenames(keypaths []models.FlattenKeypath) map[models.FlattenKeypath]models.TypeName {
 	ordered := orderKeypaths(keypaths)
-	tns := map[models.Keypath]models.TypeName{}
+	tns := map[models.FlattenKeypath]models.TypeName{}
 	reserved := map[models.TypeName]bool{}
 	for _, kp := range ordered {
 		segments := kp.Segments()

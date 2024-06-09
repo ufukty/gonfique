@@ -157,7 +157,7 @@ func matchTypeDefHolderHelper(n ast.Node, kp []string, keys map[ast.Node]string)
 // accepts processed form of Config type AST which:
 //   - should not have multiple names per ast.Field
 //   - array types should be defined by combining compatible item fields
-func FindTypeDefHoldersForKeypath(root ast.Expr, kp models.Keypath, keys map[ast.Node]string) ([]ast.Node, error) {
+func FindTypeDefHoldersForKeypath(root ast.Expr, kp models.WildcardKeypath, keys map[ast.Node]string) ([]ast.Node, error) {
 	switch root.(type) {
 	case *ast.ArrayType, *ast.StructType:
 		break

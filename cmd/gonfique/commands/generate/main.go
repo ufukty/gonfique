@@ -7,9 +7,9 @@ import (
 
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/coder"
-	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/directives/accessors"
 	"github.com/ufukty/gonfique/internal/directives/directivefile"
+	"github.com/ufukty/gonfique/internal/directives/expansion"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/iterables"
 	"github.com/ufukty/gonfique/internal/mappings"
@@ -18,6 +18,7 @@ import (
 	"github.com/ufukty/gonfique/internal/resolver"
 	"github.com/ufukty/gonfique/internal/substitude"
 	"github.com/ufukty/gonfique/internal/transform"
+	"golang.org/x/exp/maps"
 )
 
 type Args struct {
@@ -88,15 +89,20 @@ func Run() error {
 
 	transform.Transform(b)
 
-	b.Keypaths = resolver.AllKeypathsForHolders(b.CfgType, b.OriginalKeys)
-	b.Holders = datas.Invmap(b.Keypaths)
-
 	if args.Directives != "" {
 		b.Df, err = directivefile.ReadDirectiveFile(args.Directives)
 		if err != nil {
 			return fmt.Errorf("reading directives file: %w", err)
 		}
-		b.NeedsToBeNamed = b.Df.NeededTypes()
+		resolver.AllKeypathsForHolders(b)
+		if expansion.ExpandKeypathsInDirectives(b); err != nil {
+			return fmt.Errorf("expanding wildcard containing keypaths: %w", err)
+		}
+		// b.NeedsToBeNamed = b.Df.NeededTypes()
+		b.Typenames = namings.GenerateTypenames(maps.Values(b.Keypaths))
+		if err = accessors.Implement(b); err != nil {
+			return fmt.Errorf("implementing accessors: %w", err)
+		}
 	}
 
 	if b.NeedsToBeNamed != nil {

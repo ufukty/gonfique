@@ -9,7 +9,7 @@ import (
 )
 
 func TestAutogen(t *testing.T) {
-	type testcase map[models.Keypath]models.TypeName
+	type testcase map[models.FlattenKeypath]models.TypeName
 
 	tcs := map[string]testcase{
 		"empty": {}, // empty

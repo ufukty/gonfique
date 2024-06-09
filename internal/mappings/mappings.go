@@ -11,7 +11,7 @@ import (
 	"github.com/ufukty/gonfique/internal/models"
 )
 
-func ApplyMappings(b *bundle.Bundle, mappings map[models.Keypath]models.TypeName) error {
+func ApplyMappings(b *bundle.Bundle, mappings map[models.WildcardKeypath]models.TypeName) error {
 	matchlists := map[*ast.Ident][]ast.Node{}
 	for kp, tn := range mappings {
 		matches, err := matcher.FindTypeDefHoldersForKeypath(b.CfgType, kp, b.OriginalKeys)

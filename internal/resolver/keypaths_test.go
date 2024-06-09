@@ -3,11 +3,17 @@ package resolver
 import (
 	"testing"
 
+	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/resolver/testdata/appendix"
 )
 
 func TestAllKeypathsForHolders(t *testing.T) {
-	got := AllKeypathsForHolders(appendix.ConfigType, appendix.Keys)
+	b := &bundle.Bundle{
+		CfgType:      appendix.ConfigType,
+		OriginalKeys: appendix.Keys,
+	}
+	AllKeypathsForHolders(b)
+	got := b.Keypaths
 	if len(got) != len(appendix.Keypaths) {
 		t.Errorf("assert 1, length. want %d got %d", len(appendix.Keys), len(got))
 	}

@@ -13,20 +13,36 @@ var (
 	Yaml = Encoding("yaml")
 )
 
-type Keypath string
+type WildcardKeypath string
 
-func (kp Keypath) Segments() []string {
+func (kp WildcardKeypath) Segments() []string {
 	return strings.Split(string(kp), ".")
 }
 
-func (kp Keypath) WithField(f FieldName) Keypath {
-	return Keypath(fmt.Sprintf("%s.%s", kp, f))
+func (kp WildcardKeypath) WithField(f FieldName) WildcardKeypath {
+	return WildcardKeypath(fmt.Sprintf("%s.%s", kp, f))
 }
 
-func (kp Keypath) Parent() Keypath {
+func (kp WildcardKeypath) Parent() WildcardKeypath {
 	ss := kp.Segments()
 	l := max(len(ss)-1, 0)
-	return Keypath(strings.Join(ss[:l], "."))
+	return WildcardKeypath(strings.Join(ss[:l], "."))
+}
+
+type FlattenKeypath string
+
+func (kp FlattenKeypath) Segments() []string {
+	return strings.Split(string(kp), ".")
+}
+
+func (kp FlattenKeypath) WithField(f FieldName) FlattenKeypath {
+	return FlattenKeypath(fmt.Sprintf("%s.%s", kp, f))
+}
+
+func (kp FlattenKeypath) Parent() FlattenKeypath {
+	ss := kp.Segments()
+	l := max(len(ss)-1, 0)
+	return FlattenKeypath(strings.Join(ss[:l], "."))
 }
 
 type TypeName string

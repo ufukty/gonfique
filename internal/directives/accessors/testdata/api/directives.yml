@@ -1,0 +1,8 @@
+public:
+  accessors: [path]
+
+"**.services.*":
+  accessors: [path]
+
+"**.endpoints.*":
+  accessors: [path]

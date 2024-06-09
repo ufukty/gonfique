@@ -4,24 +4,25 @@ import (
 	"go/ast"
 	"strings"
 
+	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/models"
 )
 
 type resolver struct {
 	originalKeys map[ast.Node]string
-	keypaths     map[ast.Node]models.Keypath
+	keypaths     map[ast.Node]models.FlattenKeypath
 }
 
 func newresolver(originalKeys map[ast.Node]string) *resolver {
 	return &resolver{
 		originalKeys: originalKeys,
-		keypaths:     map[ast.Node]models.Keypath{},
+		keypaths:     map[ast.Node]models.FlattenKeypath{},
 	}
 }
 
 func (r *resolver) dfs(n ast.Node, holder ast.Node, path []string) {
 	if holder != nil {
-		r.keypaths[holder] = models.Keypath(strings.Join(path, "."))
+		r.keypaths[holder] = models.FlattenKeypath(strings.Join(path, "."))
 	}
 
 	switch n := n.(type) {
@@ -39,8 +40,8 @@ func (r *resolver) dfs(n ast.Node, holder ast.Node, path []string) {
 	}
 }
 
-func AllKeypathsForHolders(cfgtype ast.Expr, originalKeys map[ast.Node]string) map[ast.Node]models.Keypath {
-	resolver := newresolver(originalKeys)
-	resolver.dfs(cfgtype, nil, []string{})
-	return resolver.keypaths
+func AllKeypathsForHolders(b *bundle.Bundle) {
+	resolver := newresolver(b.OriginalKeys)
+	resolver.dfs(b.CfgType, nil, []string{})
+	b.Keypaths = resolver.keypaths
 }

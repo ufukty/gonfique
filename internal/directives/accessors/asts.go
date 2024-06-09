@@ -22,7 +22,7 @@ func generateGetter(typename models.TypeName, fieldname models.FieldName, fieldt
 			Params: &ast.FieldList{},
 			Results: &ast.FieldList{
 				List: []*ast.Field{{
-					Type: fieldname.Ident(),
+					Type: fieldtype.Ident(),
 				}},
 			},
 		},

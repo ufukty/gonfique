@@ -8,13 +8,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func ReadMappings(src string) (map[models.Keypath]models.TypeName, error) {
+func ReadMappings(src string) (map[models.WildcardKeypath]models.TypeName, error) {
 	f, err := os.Open(src)
 	if err != nil {
 		return nil, fmt.Errorf("opening file: %w", err)
 	}
 
-	ms := map[models.Keypath]models.TypeName{}
+	ms := map[models.WildcardKeypath]models.TypeName{}
 	err = yaml.NewDecoder(f).Decode(&ms)
 	if err != nil {
 		return nil, fmt.Errorf("decoding: %w", err)

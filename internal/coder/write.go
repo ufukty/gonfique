@@ -68,6 +68,12 @@ func addConfig(dst *ast.File, cfg ast.Expr, typeName string) {
 	})
 }
 
+func addAccessors(dst *ast.File, accessors []*ast.FuncDecl) {
+	for _, fd := range accessors {
+		dst.Decls = append(dst.Decls, fd)
+	}
+}
+
 func Write(b *bundle.Bundle, dst, pkgname string) error {
 	af := &ast.File{
 		Name:  ast.NewIdent(pkgname),
@@ -80,6 +86,9 @@ func Write(b *bundle.Bundle, dst, pkgname string) error {
 	addNamedTypeSpecifications(af, b.Named)
 	addConfig(af, b.CfgType, b.TypeName)
 	addReaderFunction(b, af)
+	if b.Accessors != nil {
+		addAccessors(af, b.Accessors)
+	}
 
 	o, err := os.Create(dst)
 	if err != nil {

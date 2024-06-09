@@ -908,7 +908,7 @@ var Keys = map[ast.Node]string{
 	Type: "type",
 }
 
-var Keypaths = map[ast.Node]models.Keypath{
+var Keypaths = map[ast.Node]models.FlattenKeypath{
 	ApiVersion:                               "apiVersion",
 	Data:                                     "data",
 	DataMyKey:                                "data.my-key",
