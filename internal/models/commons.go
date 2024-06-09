@@ -23,12 +23,6 @@ func (kp WildcardKeypath) WithField(f FieldName) WildcardKeypath {
 	return WildcardKeypath(fmt.Sprintf("%s.%s", kp, f))
 }
 
-func (kp WildcardKeypath) Parent() WildcardKeypath {
-	ss := kp.Segments()
-	l := max(len(ss)-1, 0)
-	return WildcardKeypath(strings.Join(ss[:l], "."))
-}
-
 type FlattenKeypath string
 
 func (kp FlattenKeypath) Segments() []string {
