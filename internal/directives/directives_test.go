@@ -1,4 +1,4 @@
-package accessors
+package directives
 
 import (
 	"fmt"
@@ -9,6 +9,8 @@ import (
 
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/coder"
+	"github.com/ufukty/gonfique/internal/directives/accessors"
+	"github.com/ufukty/gonfique/internal/directives/check"
 	"github.com/ufukty/gonfique/internal/directives/directivefile"
 	"github.com/ufukty/gonfique/internal/directives/expansion"
 	"github.com/ufukty/gonfique/internal/files"
@@ -39,11 +41,12 @@ func TestImplement(t *testing.T) {
 			resolver.AllKeypathsForHolders(b)
 			if err = expansion.ExpandKeypathsInDirectives(b); err != nil {
 				t.Fatal(fmt.Errorf("expanding: %w", err))
-			}
+				}
+			check.MarkNeededNamedTypes(b)
 			// FIXME: move inline type definitions to named declarations
 			// b.NeedsToBeNamed = b.Df.NeededTypes()
 			b.Typenames = namings.GenerateTypenames(maps.Values(b.Keypaths))
-			if err = Implement(b); err != nil {
+			if err = accessors.Implement(b); err != nil {
 				t.Fatal(fmt.Errorf("implement: %w", err))
 			}
 
