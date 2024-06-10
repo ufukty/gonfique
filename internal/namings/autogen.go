@@ -57,7 +57,32 @@ func GenerateTypenames(keypaths []models.FlattenKeypath) map[models.FlattenKeypa
 	ordered := orderKeypaths(keypaths)
 	tns := map[models.FlattenKeypath]models.TypeName{}
 	reserved := map[models.TypeName]bool{
-		"": true, // defect
+		"":            true, // defect
+		"break":       true,
+		"case":        true,
+		"chan":        true,
+		"const":       true,
+		"continue":    true,
+		"default":     true,
+		"defer":       true,
+		"else":        true,
+		"fallthrough": true,
+		"for":         true,
+		"func":        true,
+		"go":          true,
+		"goto":        true,
+		"if":          true,
+		"import":      true,
+		"interface":   true,
+		"map":         true,
+		"package":     true,
+		"range":       true,
+		"return":      true,
+		"select":      true,
+		"struct":      true,
+		"switch":      true,
+		"type":        true,
+		"var":         true,
 	}
 	for _, kp := range ordered {
 		segments := kp.Segments()
