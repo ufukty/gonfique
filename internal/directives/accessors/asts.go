@@ -48,7 +48,7 @@ func generateSetter(typename models.TypeName, fieldname models.FieldName, fieldt
 		Recv: &ast.FieldList{
 			List: []*ast.Field{{
 				Names: []*ast.Ident{{Name: recvname}},
-				Type:  typename.Ident(),
+				Type:  &ast.StarExpr{X: typename.Ident()},
 			}},
 		},
 		Name: &ast.Ident{Name: "Set" + string(fieldname)},
