@@ -97,26 +97,22 @@ func Run() error {
 			return fmt.Errorf("reading directives file: %w", err)
 		}
 		resolver.AllKeypathsForHolders(b)
-		err = check.PopulateExprs(b)
-		if err != nil {
+		if err := check.PopulateExprs(b); err != nil {
 			return fmt.Errorf("collecting type expressions for each keypaths: %w", err)
 		}
-		if expansion.ExpandKeypathsInDirectives(b); err != nil {
+		if err := expansion.ExpandKeypathsInDirectives(b); err != nil {
 			return fmt.Errorf("expanding wildcard containing keypaths: %w", err)
 		}
-		check.MarkNeededNamedTypes(b)
+		if err := check.MarkNeededNamedTypes(b); err != nil {
+			return fmt.Errorf("marking needed named type declarations: %w", err)
+		}
 		b.GeneratedTypenames = namings.GenerateTypenames(maps.Values(b.Keypaths))
-		err = named.Implement(b)
-		if err != nil {
+		if err := named.Implement(b); err != nil {
 			return fmt.Errorf("declaring named types: %w", err)
 		}
-		if err = accessors.Implement(b); err != nil {
+		if err := accessors.Implement(b); err != nil {
 			return fmt.Errorf("implement: %w", err)
 		}
-	}
-
-	if b.NeedsToBeNamed != nil {
-		b.GeneratedTypenames = namings.GenerateTypenames(b.NeedsToBeNamed)
 	}
 
 	if args.Use != "" {
