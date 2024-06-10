@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/ufukty/gonfique/internal/bundle"
+	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/models"
 )
 
@@ -44,4 +45,5 @@ func AllKeypathsForHolders(b *bundle.Bundle) {
 	resolver := newresolver(b.OriginalKeys)
 	resolver.dfs(b.CfgType, nil, []string{})
 	b.Keypaths = resolver.keypaths
+	b.Holders = datas.Invmap(b.Keypaths)
 }
