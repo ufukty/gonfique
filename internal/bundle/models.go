@@ -14,11 +14,12 @@ type Bundle struct {
 	TypeName        string
 	TypeNameInitial string
 
-	OriginalKeys map[ast.Node]string                       // holder -> key
-	Keypaths     map[ast.Node]models.FlattenKeypath        // holder -> keypath (resolver)
-	Holders      map[models.WildcardKeypath]ast.Node       // keypath -> Field, ArrayType (inverse Keypaths)
-	Typenames    map[models.FlattenKeypath]models.TypeName // provided by `namings`
-	Expansions   map[models.WildcardKeypath][]ast.Node     // keypath (wildcards) -> []match
+	OriginalKeys       map[ast.Node]string                       // holder -> key
+	Keypaths           map[ast.Node]models.FlattenKeypath        // holder -> keypath (resolver)
+	Holders            map[models.FlattenKeypath]ast.Node        // keypath -> Field, ArrayType (inverse Keypaths)
+	GeneratedTypenames map[models.FlattenKeypath]models.TypeName // provided by `namings`. each value is not to necessarily be assigned
+	Expansions         map[models.WildcardKeypath][]ast.Node     // keypath (wildcards) -> []match
+	TypeExprs          map[models.FlattenKeypath]ast.Expr        // populated and used by directives.named
 
 	Imports []string // package paths
 
@@ -42,6 +43,7 @@ func New(typename string) *Bundle {
 		TypeName:        typename,
 		TypeNameInitial: namings.Initial(typename),
 		Imports:         []string{},
+		TypeExprs:       map[models.FlattenKeypath]ast.Expr{},
 	}
 }
 

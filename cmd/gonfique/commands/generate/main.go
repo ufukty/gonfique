@@ -99,14 +99,14 @@ func Run() error {
 			return fmt.Errorf("expanding wildcard containing keypaths: %w", err)
 		}
 		// b.NeedsToBeNamed = b.Df.NeededTypes()
-		b.Typenames = namings.GenerateTypenames(maps.Values(b.Keypaths))
+		b.GeneratedTypenames = namings.GenerateTypenames(maps.Values(b.Keypaths))
 		if err = accessors.Implement(b); err != nil {
 			return fmt.Errorf("implementing accessors: %w", err)
 		}
 	}
 
 	if b.NeedsToBeNamed != nil {
-		b.Typenames = namings.GenerateTypenames(b.NeedsToBeNamed)
+		b.GeneratedTypenames = namings.GenerateTypenames(b.NeedsToBeNamed)
 	}
 
 	if args.Use != "" {

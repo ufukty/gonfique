@@ -13,6 +13,7 @@ import (
 	"github.com/ufukty/gonfique/internal/directives/check"
 	"github.com/ufukty/gonfique/internal/directives/directivefile"
 	"github.com/ufukty/gonfique/internal/directives/expansion"
+	"github.com/ufukty/gonfique/internal/directives/named"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/namings"
 	"github.com/ufukty/gonfique/internal/resolver"
@@ -39,13 +40,20 @@ func TestImplement(t *testing.T) {
 				t.Fatal(fmt.Errorf("reading directive file: %w", err))
 			}
 			resolver.AllKeypathsForHolders(b)
+			err = check.PopulateExprs(b)
+			if err != nil {
+				t.Fatal(fmt.Errorf("collecting type expressions for each keypaths: %w", err))
+			}
 			if err = expansion.ExpandKeypathsInDirectives(b); err != nil {
 				t.Fatal(fmt.Errorf("expanding: %w", err))
-				}
+			}
 			check.MarkNeededNamedTypes(b)
-			// FIXME: move inline type definitions to named declarations
-			// b.NeedsToBeNamed = b.Df.NeededTypes()
-			b.Typenames = namings.GenerateTypenames(maps.Values(b.Keypaths))
+			b.GeneratedTypenames = namings.GenerateTypenames(maps.Values(b.Keypaths))
+
+			err = named.Implement(b)
+			if err != nil {
+				t.Fatal(fmt.Errorf("declaring named types: %w", err))
+			}
 			if err = accessors.Implement(b); err != nil {
 				t.Fatal(fmt.Errorf("implement: %w", err))
 			}
