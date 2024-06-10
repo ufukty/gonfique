@@ -2,6 +2,8 @@ package check
 
 import (
 	"fmt"
+	"go/ast"
+	"reflect"
 	"slices"
 
 	"github.com/ufukty/gonfique/internal/bundle"
@@ -18,13 +20,20 @@ func neededTypesForAccessorsDirective(b *bundle.Bundle) ([]models.FlattenKeypath
 				return nil, fmt.Errorf("expansions are not found for wildcard containing keypath: %s", wckp)
 			}
 			for _, match := range matches {
+				if _, ok := match.(*ast.Ident); ok {
+					continue
+				}
 				kp, ok := b.Keypaths[match]
 				if !ok {
 					return nil, fmt.Errorf("flatten keypath is not found for wildcard containing keypath: %s", kp)
 				}
 				needed = append(needed, kp) // struct
 				for _, field := range drs.Accessors {
-					needed = append(needed, kp.WithField(field)) // its field
+					fkp := kp.WithField(field)
+					if _, ok := b.TypeExprs[fkp].(*ast.Ident); ok {
+						continue
+					}
+					needed = append(needed, fkp) // its field
 				}
 			}
 		}
