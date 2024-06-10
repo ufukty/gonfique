@@ -3,9 +3,25 @@ package accessors
 import (
 	"fmt"
 	"go/ast"
+	"slices"
 
 	"github.com/ufukty/gonfique/internal/bundle"
+	"github.com/ufukty/gonfique/internal/models"
 )
+
+func lookFieldTypename(b *bundle.Bundle, kp models.FlattenKeypath) (models.TypeName, error) {
+	if slices.Contains(b.NeedsToBeNamed, kp) {
+		tn, ok := b.GeneratedTypenames[kp]
+		if !ok {
+			return "", fmt.Errorf("generated typename is not found for keyapth: %s", kp)
+		}
+		return tn, nil
+	} else if ident, ok := b.TypeExprs[kp].(*ast.Ident); ok {
+		return models.TypeName(ident.Name), nil
+	} else {
+		return "", fmt.Errorf("type name is not found")
+	}
+}
 
 func Implement(b *bundle.Bundle) error {
 	if b.Df == nil {
@@ -34,9 +50,9 @@ func Implement(b *bundle.Bundle) error {
 
 				for _, fieldname := range directives.Accessors {
 
-					fieldtypename, ok := b.GeneratedTypenames[kp.WithField(fieldname)]
-					if !ok {
-						return fmt.Errorf("can't find the assigned type name for field %q in struct: %s", fieldname, wildcardkp)
+					fieldtypename, err := lookFieldTypename(b, kp.WithField(fieldname))
+					if err != nil {
+						return fmt.Errorf("looking for correct typename: %w", err)
 					}
 
 					b.Accessors = append(b.Accessors,
