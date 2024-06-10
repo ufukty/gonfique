@@ -1,4 +1,4 @@
-# `gonfique` - Type checked configs for Go programs
+# `gonfique`
 
 <img src="assets/Gonfique.png" alt="Gonfique logo" height="300px">
 
