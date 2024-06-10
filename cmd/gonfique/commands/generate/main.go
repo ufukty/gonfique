@@ -8,8 +8,10 @@ import (
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/coder"
 	"github.com/ufukty/gonfique/internal/directives/accessors"
+	"github.com/ufukty/gonfique/internal/directives/check"
 	"github.com/ufukty/gonfique/internal/directives/directivefile"
 	"github.com/ufukty/gonfique/internal/directives/expansion"
+	"github.com/ufukty/gonfique/internal/directives/named"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/iterables"
 	"github.com/ufukty/gonfique/internal/mappings"
@@ -95,13 +97,21 @@ func Run() error {
 			return fmt.Errorf("reading directives file: %w", err)
 		}
 		resolver.AllKeypathsForHolders(b)
+		err = check.PopulateExprs(b)
+		if err != nil {
+			return fmt.Errorf("collecting type expressions for each keypaths: %w", err)
+		}
 		if expansion.ExpandKeypathsInDirectives(b); err != nil {
 			return fmt.Errorf("expanding wildcard containing keypaths: %w", err)
 		}
-		// b.NeedsToBeNamed = b.Df.NeededTypes()
+		check.MarkNeededNamedTypes(b)
 		b.GeneratedTypenames = namings.GenerateTypenames(maps.Values(b.Keypaths))
+		err = named.Implement(b)
+		if err != nil {
+			return fmt.Errorf("declaring named types: %w", err)
+		}
 		if err = accessors.Implement(b); err != nil {
-			return fmt.Errorf("implementing accessors: %w", err)
+			return fmt.Errorf("implement: %w", err)
 		}
 	}
 
