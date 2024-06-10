@@ -23,6 +23,7 @@ func dispatch() error {
 	}
 
 	arg := os.Args[1]
+	os.Args = os.Args[1:]
 	command, ok := commands[arg]
 	if !ok {
 		return fmt.Errorf("command %q doesn't exist. run: gonfique help", arg)
