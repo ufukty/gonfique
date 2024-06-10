@@ -29,7 +29,7 @@ func neededTypesForAccessorsDirective(b *bundle.Bundle) ([]models.FlattenKeypath
 				}
 				needed = append(needed, kp) // struct
 				for _, field := range drs.Accessors {
-					fkp := kp.WithField(field)
+					fkp := kp.WithFieldPath(field)
 					if _, ok := b.TypeExprs[fkp].(*ast.Ident); ok {
 						continue
 					}

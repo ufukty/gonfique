@@ -29,7 +29,7 @@ func (kp FlattenKeypath) Segments() []string {
 	return strings.Split(string(kp), ".")
 }
 
-func (kp FlattenKeypath) WithField(f FieldName) FlattenKeypath {
+func (kp FlattenKeypath) WithFieldPath(f FieldPath) FlattenKeypath {
 	return FlattenKeypath(fmt.Sprintf("%s.%s", kp, f))
 }
 
@@ -39,11 +39,17 @@ func (kp FlattenKeypath) Parent() FlattenKeypath {
 	return FlattenKeypath(strings.Join(ss[:l], "."))
 }
 
+type FieldPath string
+
 type TypeName string
 
 func (tn TypeName) Ident() *ast.Ident {
 	return ast.NewIdent(string(tn))
 }
+
+// func (tn FieldName) Capitilized() FieldName {
+// 	return FieldName(cases.Title(language.English, cases.NoLower).String(string(tn)))
+// }
 
 type FieldName string
 

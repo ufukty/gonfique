@@ -14,7 +14,7 @@ type Directives struct {
 	Import    string             `yaml:"import"`    // type-assigning (optional)
 	Embed     models.TypeName    `yaml:"embed"`     // type-defining
 	Parent    models.FieldName   `yaml:"parent"`    // type-defining
-	Accessors []models.FieldName `yaml:"accessors"` // type-defining
+	Accessors []models.FieldPath `yaml:"accessors"` // type-defining
 }
 
 type DirectiveFile map[models.WildcardKeypath]Directives

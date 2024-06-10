@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ufukty/gonfique/internal/bundle"
+	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/namings"
 )
 
@@ -17,6 +18,7 @@ type transformer struct {
 	isTimeUsed bool
 	keys       map[ast.Node]string // corresponding keys for ASTs
 	tagname    string
+	fieldnames map[ast.Node]models.FieldName
 }
 
 func (tr *transformer) arrayType(v reflect.Value) ast.Expr {
@@ -56,8 +58,9 @@ func (tr *transformer) structType(v reflect.Value) *ast.StructType {
 	for iter.Next() {
 		ik := iter.Key()
 		iv := iter.Value()
+		fieldname := models.FieldName(namings.SafeFieldName(ik.String()))
 		f := &ast.Field{
-			Names: []*ast.Ident{ast.NewIdent(namings.SafeFieldName(ik.String()))},
+			Names: []*ast.Ident{fieldname.Ident()},
 			Type:  tr.transform(iv),
 			Tag: &ast.BasicLit{
 				Kind:  token.STRING,
@@ -66,6 +69,7 @@ func (tr *transformer) structType(v reflect.Value) *ast.StructType {
 		}
 		st.Fields.List = append(st.Fields.List, f)
 		tr.keys[f] = ik.String()
+		tr.fieldnames[f] = fieldname
 	}
 	sort(st.Fields)
 	return st
@@ -132,10 +136,12 @@ func Transform(b *bundle.Bundle) {
 		isTimeUsed: false,
 		keys:       map[ast.Node]string{},
 		tagname:    string(b.Encoding),
+		fieldnames: map[ast.Node]models.FieldName{},
 	}
 	b.CfgType = t.transform(reflect.ValueOf(b.Cfgcontent))
 	if t.isTimeUsed {
 		b.AddImports("time")
 	}
 	b.OriginalKeys = t.keys
+	b.Fieldnames = t.fieldnames
 }

@@ -48,16 +48,19 @@ func Implement(b *bundle.Bundle) error {
 					return fmt.Errorf("can't find the assigned type name for struct: %s", wildcardkp)
 				}
 
-				for _, fieldname := range directives.Accessors {
+				for _, fieldpath := range directives.Accessors {
 
-					fieldtypename, err := lookFieldTypename(b, kp.WithField(fieldname))
+					fieldtypename, err := lookFieldTypename(b, kp.WithFieldPath(fieldpath))
 					if err != nil {
 						return fmt.Errorf("looking for correct typename: %w", err)
 					}
 
+					field := b.Holders[kp.WithFieldPath(fieldpath)]
+					assignedFieldName := b.Fieldnames[field]
+
 					b.Accessors = append(b.Accessors,
-						generateGetter(structtypename, fieldname, fieldtypename),
-						generateSetter(structtypename, fieldname, fieldtypename),
+						generateGetter(structtypename, assignedFieldName, fieldtypename),
+						generateSetter(structtypename, assignedFieldName, fieldtypename),
 					)
 				}
 			}

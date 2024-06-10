@@ -15,6 +15,7 @@ type Bundle struct {
 	TypeNameInitial string
 
 	OriginalKeys       map[ast.Node]string                       // holder -> key
+	Fieldnames         map[ast.Node]models.FieldName             // populated by transformer
 	Keypaths           map[ast.Node]models.FlattenKeypath        // holder -> keypath (resolver)
 	Holders            map[models.FlattenKeypath]ast.Node        // keypath -> Field, ArrayType (inverse Keypaths)
 	GeneratedTypenames map[models.FlattenKeypath]models.TypeName // provided by `namings`. each value is not to necessarily be assigned
