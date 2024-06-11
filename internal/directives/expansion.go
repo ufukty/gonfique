@@ -1,4 +1,4 @@
-package expansion
+package directives
 
 import (
 	"fmt"

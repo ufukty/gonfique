@@ -1,4 +1,4 @@
-package named
+package directives
 
 import (
 	"fmt"
@@ -85,7 +85,7 @@ func handleUserSpecified(b *bundle.Bundle) error {
 	return nil
 }
 
-func Implement(b *bundle.Bundle) error {
+func ImplementNamedTypeDeclarations(b *bundle.Bundle) error {
 	if b.Holders == nil {
 		return fmt.Errorf("holders is needed")
 	}

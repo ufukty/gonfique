@@ -7,20 +7,13 @@ import (
 
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/coder"
-	"github.com/ufukty/gonfique/internal/directives/accessors"
-	"github.com/ufukty/gonfique/internal/directives/check"
 	"github.com/ufukty/gonfique/internal/directives/directivefile"
-	"github.com/ufukty/gonfique/internal/directives/expansion"
-	"github.com/ufukty/gonfique/internal/directives/named"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/iterables"
 	"github.com/ufukty/gonfique/internal/mappings"
-	"github.com/ufukty/gonfique/internal/namings"
 	"github.com/ufukty/gonfique/internal/organizer"
-	"github.com/ufukty/gonfique/internal/resolver"
 	"github.com/ufukty/gonfique/internal/substitude"
 	"github.com/ufukty/gonfique/internal/transform"
-	"golang.org/x/exp/maps"
 )
 
 type Args struct {
@@ -96,22 +89,8 @@ func Run() error {
 		if err != nil {
 			return fmt.Errorf("reading directives file: %w", err)
 		}
-		resolver.AllKeypathsForHolders(b)
-		if err := check.PopulateExprs(b); err != nil {
-			return fmt.Errorf("collecting type expressions for each keypaths: %w", err)
-		}
-		if err := expansion.ExpandKeypathsInDirectives(b); err != nil {
-			return fmt.Errorf("expanding wildcard containing keypaths: %w", err)
-		}
-		if err := check.MarkNeededNamedTypes(b); err != nil {
-			return fmt.Errorf("marking needed named type declarations: %w", err)
-		}
-		b.GeneratedTypenames = namings.GenerateTypenames(maps.Values(b.Keypaths))
-		if err := named.Implement(b); err != nil {
-			return fmt.Errorf("declaring named types: %w", err)
-		}
-		if err := accessors.Implement(b); err != nil {
-			return fmt.Errorf("implement: %w", err)
+		if err != nil {
+			return fmt.Errorf("applying directives: %w", err)
 		}
 	}
 
@@ -121,12 +100,6 @@ func Run() error {
 			return fmt.Errorf("reading -use file %q: %w", args.Use, err)
 		}
 		substitude.UserProvided(b, tss)
-	}
-
-	if args.Directives != "" {
-		if err = accessors.Implement(b); err != nil {
-			return fmt.Errorf("applying directives: %w", err)
-		}
 	}
 
 	if args.Mappings != "" {

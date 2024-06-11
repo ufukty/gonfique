@@ -9,17 +9,10 @@ import (
 
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/coder"
-	"github.com/ufukty/gonfique/internal/directives/accessors"
-	"github.com/ufukty/gonfique/internal/directives/check"
 	"github.com/ufukty/gonfique/internal/directives/directivefile"
-	"github.com/ufukty/gonfique/internal/directives/expansion"
-	"github.com/ufukty/gonfique/internal/directives/named"
 	"github.com/ufukty/gonfique/internal/files"
-	"github.com/ufukty/gonfique/internal/namings"
-	"github.com/ufukty/gonfique/internal/resolver"
 	"github.com/ufukty/gonfique/internal/testutils"
 	"github.com/ufukty/gonfique/internal/transform"
-	"golang.org/x/exp/maps"
 )
 
 func TestImplement(t *testing.T) {
@@ -35,27 +28,15 @@ func TestImplement(t *testing.T) {
 			}
 
 			transform.Transform(b)
+
 			b.Df, err = directivefile.ReadDirectiveFile(filepath.Join("testdata", tc, "directives.yml"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("reading directive file: %w", err))
 			}
-			resolver.AllKeypathsForHolders(b)
-			err = check.PopulateExprs(b)
-			if err != nil {
-				t.Fatal(fmt.Errorf("collecting type expressions for each keypaths: %w", err))
-			}
-			if err = expansion.ExpandKeypathsInDirectives(b); err != nil {
-				t.Fatal(fmt.Errorf("expanding: %w", err))
-			}
-			check.MarkNeededNamedTypes(b)
-			b.GeneratedTypenames = namings.GenerateTypenames(maps.Values(b.Keypaths))
 
-			err = named.Implement(b)
+			err = Apply(b)
 			if err != nil {
-				t.Fatal(fmt.Errorf("declaring named types: %w", err))
-			}
-			if err = accessors.Implement(b); err != nil {
-				t.Fatal(fmt.Errorf("implement: %w", err))
+				t.Fatal(fmt.Errorf("act: %w", err))
 			}
 
 			testloc, err := testutils.PrepareTestCase(tc, []string{"go.mod", "go.sum", "config_test.go", "config.yml"})
