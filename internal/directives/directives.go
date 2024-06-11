@@ -5,12 +5,11 @@ import (
 
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/namings"
-	"github.com/ufukty/gonfique/internal/resolver"
 	"golang.org/x/exp/maps"
 )
 
 func Apply(b *bundle.Bundle) error {
-	resolver.AllKeypathsForHolders(b)
+	AllKeypathsForHolders(b)
 	err := PopulateExprs(b)
 	if err != nil {
 		return fmt.Errorf("collecting type expressions for each keypaths: %w", err)
@@ -23,7 +22,7 @@ func Apply(b *bundle.Bundle) error {
 
 	populateProvidedTypeNames(b)
 	electTypeNames(b)
-	
+
 	err = ImplementNamedTypeDeclarations(b)
 	if err != nil {
 		return fmt.Errorf("declaring named types: %w", err)

@@ -1,10 +1,10 @@
-package resolver
+package directives
 
 import (
 	"testing"
 
 	"github.com/ufukty/gonfique/internal/bundle"
-	"github.com/ufukty/gonfique/internal/resolver/testdata/appendix"
+	"github.com/ufukty/gonfique/internal/directives/testdata/appendix"
 )
 
 func TestAllKeypathsForHolders(t *testing.T) {

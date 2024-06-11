@@ -1,4 +1,4 @@
-package resolver
+package directives
 
 import (
 	"go/ast"
