@@ -1,10 +1,10 @@
 <sub>Leave a :star: for Gonfique's future development</sub>
 
-# `gonfique`
+# Gonfique
 
 <img src="assets/Gonfique.png" alt="Gonfique logo" height="300px">
 
-`gonfique` is a CLI tool for Go developers to automatically build exact **struct definitions** in Go that will match the provided YAML or JSON config. Makes instant to notice **when and where a breaking change** occurs. Since compiler warns whenever it happens by type-checking, and source control shows where the change exactly is.
+Gonfique is a CLI tool for Go developers to automatically build exact **struct definitions** in Go that will match the provided YAML or JSON config. Makes instant to notice **when and where a breaking change** occurs. Since compiler warns whenever it happens by type-checking, and source control shows where the change exactly is.
 
 ## Example
 
@@ -189,7 +189,7 @@ Run `gonfique --help` for [parameter details](docs/parameter-details.txt).
 
 ## Docs
 
-- [Why gonfique?](docs/why-gonfique.md)
+- [Why Gonfique?](docs/why-gonfique.md)
 - [Arrays](docs/arrays.md)
 - [Mapping file](docs/mapping.md)
 - [Suggestions](docs/suggestions.md)
