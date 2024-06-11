@@ -1,6 +1,6 @@
-# `gonfique`
+<sub>Leave a :star: for Gonfique's future development</sub>
 
-Leave a :star: for Gonfique's future development
+# `gonfique`
 
 <img src="assets/Gonfique.png" alt="Gonfique logo" height="300px">
 
