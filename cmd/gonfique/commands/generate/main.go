@@ -89,6 +89,7 @@ func Run() error {
 		if err != nil {
 			return fmt.Errorf("reading directives file: %w", err)
 		}
+		err = directives.Apply(b)
 		if err != nil {
 			return fmt.Errorf("applying directives: %w", err)
 		}
