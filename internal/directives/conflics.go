@@ -62,7 +62,7 @@ func neededTypesForParentDirective(b *bundle.Bundle) ([]models.FlattenKeypath, e
 }
 
 // both the struct and field types at each directive needs to be declared as named (not inline)
-func MarkNeededNamedTypes(b *bundle.Bundle) error {
+func markNeededNamedTypes(b *bundle.Bundle) error {
 	accessors, err := neededTypesForAccessorsDirective(b)
 	if err != nil {
 		return fmt.Errorf("accessors: %w", err)

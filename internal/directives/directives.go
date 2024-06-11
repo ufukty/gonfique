@@ -17,7 +17,7 @@ func Apply(b *bundle.Bundle) error {
 	if err = expandKeypathsInDirectives(b); err != nil {
 		return fmt.Errorf("expanding: %w", err)
 	}
-	MarkNeededNamedTypes(b)
+	markNeededNamedTypes(b)
 	b.GeneratedTypenames = namings.GenerateTypenames(maps.Values(b.Keypaths))
 
 	populateProvidedTypeNames(b)
