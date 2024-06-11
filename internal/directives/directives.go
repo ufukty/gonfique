@@ -21,7 +21,7 @@ func Apply(b *bundle.Bundle) error {
 	b.GeneratedTypenames = namings.GenerateTypenames(maps.Values(b.Keypaths))
 
 	populateProvidedTypeNames(b)
-	electTypeNames(b)
+	populateElectedTypeNames(b)
 
 	err = implementNamedTypeDeclarations(b)
 	if err != nil {
