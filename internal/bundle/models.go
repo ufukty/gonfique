@@ -14,15 +14,19 @@ type Bundle struct {
 	TypeName        string
 	TypeNameInitial string
 
-	OriginalKeys       map[ast.Node]string                       // holder -> key
-	Fieldnames         map[ast.Node]models.FieldName             // populated by transformer
-	Keypaths           map[ast.Node]models.FlattenKeypath        // holder -> keypath (resolver)
-	Holders            map[models.FlattenKeypath]ast.Node        // keypath -> Field, ArrayType (inverse Keypaths)
+	OriginalKeys map[ast.Node]string           // holder -> key
+	Fieldnames   map[ast.Node]models.FieldName // populated by transformer
+
+	Keypaths map[ast.Node]models.FlattenKeypath // holder -> keypath (resolver)
+	Holders  map[models.FlattenKeypath]ast.Node // keypath -> Field, ArrayType (inverse Keypaths)
+
+	NeedsToBeNamed     []models.FlattenKeypath                   // filled by directives.preprocess
 	GeneratedTypenames map[models.FlattenKeypath]models.TypeName // provided by `namings`. each value is not to necessarily be assigned
 	ProvidedTypenames  map[models.FlattenKeypath]models.TypeName
 	ElectedTypenames   map[models.FlattenKeypath]models.TypeName
-	Expansions         map[models.WildcardKeypath][]ast.Node // keypath (wildcards) -> []match (holders)
-	TypeExprs          map[models.FlattenKeypath]ast.Expr    // populated and used by directives.named
+
+	Expansions map[models.WildcardKeypath][]ast.Node // keypath (wildcards) -> []match (holders)
+	TypeExprs  map[models.FlattenKeypath]ast.Expr    // populated and used by directives.named
 
 	Imports []string // package paths
 
@@ -37,8 +41,7 @@ type Bundle struct {
 	Iterators []*ast.FuncDecl // .Range() methods
 	Accessors []*ast.FuncDecl // directives
 
-	Df             *directivefile.DirectiveFile
-	NeedsToBeNamed []models.FlattenKeypath // filled by directives.preprocess
+	Df *directivefile.DirectiveFile
 }
 
 func New(typename string) *Bundle {
