@@ -1,4 +1,4 @@
-<sub>Leave a :star: for Gonfique's future development</sub>
+Leave a :star: for Gonfique's future development
 
 # Gonfique
 
