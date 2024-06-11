@@ -92,7 +92,7 @@ func MarkNeededNamedTypes(b *bundle.Bundle) error {
 // 	keypaths := (b.Expansions)
 // }
 
-func PopulateExprs(b *bundle.Bundle) error {
+func populateExprs(b *bundle.Bundle) error {
 	for kp, n := range b.Holders {
 		switch n := n.(type) {
 		case *ast.Field:

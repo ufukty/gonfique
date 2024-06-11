@@ -9,12 +9,12 @@ import (
 )
 
 func Apply(b *bundle.Bundle) error {
-	AllKeypathsForHolders(b)
-	err := PopulateExprs(b)
+	populateKeypathsAndHolders(b)
+	err := populateExprs(b)
 	if err != nil {
 		return fmt.Errorf("collecting type expressions for each keypaths: %w", err)
 	}
-	if err = ExpandKeypathsInDirectives(b); err != nil {
+	if err = expandKeypathsInDirectives(b); err != nil {
 		return fmt.Errorf("expanding: %w", err)
 	}
 	MarkNeededNamedTypes(b)
@@ -23,11 +23,11 @@ func Apply(b *bundle.Bundle) error {
 	populateProvidedTypeNames(b)
 	electTypeNames(b)
 
-	err = ImplementNamedTypeDeclarations(b)
+	err = implementNamedTypeDeclarations(b)
 	if err != nil {
 		return fmt.Errorf("declaring named types: %w", err)
 	}
-	if err = ImplementAccessors(b); err != nil {
+	if err = implementAccessors(b); err != nil {
 		return fmt.Errorf("implement: %w", err)
 	}
 

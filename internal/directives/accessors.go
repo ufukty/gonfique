@@ -92,7 +92,7 @@ func lookFieldTypename(b *bundle.Bundle, kp models.FlattenKeypath) (models.TypeN
 	}
 }
 
-func ImplementAccessors(b *bundle.Bundle) error {
+func implementAccessors(b *bundle.Bundle) error {
 	if b.Df == nil {
 		return fmt.Errorf("directive file is not populated")
 	} else if b.GeneratedTypenames == nil {

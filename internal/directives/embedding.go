@@ -1,5 +1,5 @@
 package directives
 
-func Implement() error {
+func implementEmbedding() error {
 	return nil
 }

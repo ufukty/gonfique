@@ -41,7 +41,7 @@ func (r *resolver) dfs(n ast.Node, holder ast.Node, path []string) {
 	}
 }
 
-func AllKeypathsForHolders(b *bundle.Bundle) {
+func populateKeypathsAndHolders(b *bundle.Bundle) {
 	resolver := newresolver(b.OriginalKeys)
 	resolver.dfs(b.CfgType, nil, []string{})
 	b.Keypaths = resolver.keypaths

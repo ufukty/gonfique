@@ -9,7 +9,7 @@ import (
 	"github.com/ufukty/gonfique/internal/models"
 )
 
-func ExpandKeypathsInDirectives(b *bundle.Bundle) error {
+func expandKeypathsInDirectives(b *bundle.Bundle) error {
 	b.Expansions = map[models.WildcardKeypath][]ast.Node{}
 	for kp := range *b.Df {
 		matches, err := matcher.FindTypeDefHoldersForKeypath(b.CfgType, kp, b.OriginalKeys)

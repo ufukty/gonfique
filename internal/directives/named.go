@@ -85,7 +85,7 @@ func handleUserSpecified(b *bundle.Bundle) error {
 	return nil
 }
 
-func ImplementNamedTypeDeclarations(b *bundle.Bundle) error {
+func implementNamedTypeDeclarations(b *bundle.Bundle) error {
 	if b.Holders == nil {
 		return fmt.Errorf("holders is needed")
 	}
