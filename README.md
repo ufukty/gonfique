@@ -1,5 +1,7 @@
 # `gonfique`
 
+Leave a :star: for Gonfique's future development
+
 <img src="assets/Gonfique.png" alt="Gonfique logo" height="300px">
 
 `gonfique` is a CLI tool for Go developers to automatically build exact **struct definitions** in Go that will match the provided YAML or JSON config. Makes instant to notice **when and where a breaking change** occurs. Since compiler warns whenever it happens by type-checking, and source control shows where the change exactly is.
