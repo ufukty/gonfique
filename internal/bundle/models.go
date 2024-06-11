@@ -19,8 +19,10 @@ type Bundle struct {
 	Keypaths           map[ast.Node]models.FlattenKeypath        // holder -> keypath (resolver)
 	Holders            map[models.FlattenKeypath]ast.Node        // keypath -> Field, ArrayType (inverse Keypaths)
 	GeneratedTypenames map[models.FlattenKeypath]models.TypeName // provided by `namings`. each value is not to necessarily be assigned
-	Expansions         map[models.WildcardKeypath][]ast.Node     // keypath (wildcards) -> []match
-	TypeExprs          map[models.FlattenKeypath]ast.Expr        // populated and used by directives.named
+	ProvidedTypenames  map[models.FlattenKeypath]models.TypeName
+	ElectedTypenames   map[models.FlattenKeypath]models.TypeName
+	Expansions         map[models.WildcardKeypath][]ast.Node // keypath (wildcards) -> []match (holders)
+	TypeExprs          map[models.FlattenKeypath]ast.Expr    // populated and used by directives.named
 
 	Imports []string // package paths
 

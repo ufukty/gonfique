@@ -21,6 +21,9 @@ func Apply(b *bundle.Bundle) error {
 	MarkNeededNamedTypes(b)
 	b.GeneratedTypenames = namings.GenerateTypenames(maps.Values(b.Keypaths))
 
+	populateProvidedTypeNames(b)
+	electTypeNames(b)
+	
 	err = ImplementNamedTypeDeclarations(b)
 	if err != nil {
 		return fmt.Errorf("declaring named types: %w", err)
