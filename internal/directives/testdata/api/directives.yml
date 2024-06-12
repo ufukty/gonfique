@@ -5,4 +5,5 @@ public:
   accessors: [path]
 
 "**.endpoints.*":
+  named: Endpoint
   accessors: [path]
