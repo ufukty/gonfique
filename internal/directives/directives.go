@@ -21,7 +21,6 @@ func Apply(b *bundle.Bundle) error {
 		return fmt.Errorf("checking for typenames needed to be either referred or declared: %w", err)
 	}
 
-	checkTypenameRequirements(b)
 	electTypenames(b)
 
 	err = typedecls.Implement(b)
