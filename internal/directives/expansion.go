@@ -2,7 +2,6 @@ package directives
 
 import (
 	"fmt"
-	"go/ast"
 
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/matcher"
@@ -10,7 +9,6 @@ import (
 )
 
 func expandKeypathsInDirectives(b *bundle.Bundle) error {
-	b.Expansions = map[models.WildcardKeypath][]ast.Node{}
 	for kp := range *b.Df {
 		matches, err := matcher.FindTypeDefHoldersForKeypath(b.CfgType, kp, b.OriginalKeys)
 		if err != nil {
@@ -19,7 +17,11 @@ func expandKeypathsInDirectives(b *bundle.Bundle) error {
 		if len(matches) == 0 {
 			fmt.Printf("No match for keypath: %s\n", kp)
 		}
-		b.Expansions[kp] = matches
+		kps := []models.FlattenKeypath{}
+		for _, match := range matches {
+			kps = append(kps, b.Keypaths[match])
+		}
+		b.Expansions[kp] = kps
 	}
 	return nil
 }

@@ -20,13 +20,19 @@ type Bundle struct {
 	Keypaths map[ast.Node]models.FlattenKeypath // holder -> keypath (resolver)
 	Holders  map[models.FlattenKeypath]ast.Node // keypath -> Field, ArrayType (inverse Keypaths)
 
-	NeedsToBeNamed     []models.FlattenKeypath                   // filled by directives.preprocess
-	GeneratedTypenames map[models.FlattenKeypath]models.TypeName // provided by `namings`. each value is not to necessarily be assigned
-	ProvidedTypenames  map[models.FlattenKeypath]models.TypeName
-	ElectedTypenames   map[models.FlattenKeypath]models.TypeName
+	// either declared or a built-in basic types
+	NeededToBeReferred []models.FlattenKeypath
+	// those can't stay inline (if they are composite)
+	NeededToBeDeclared []models.FlattenKeypath
 
-	Expansions map[models.WildcardKeypath][]ast.Node // keypath (wildcards) -> []match (holders)
-	TypeExprs  map[models.FlattenKeypath]ast.Expr    // populated and used by directives.named
+	GeneratedTypenames map[models.FlattenKeypath]models.TypeName
+	ProvidedTypenames  map[models.FlattenKeypath]models.TypeName
+
+	// final typenames to refer (user-provided > auto-generated > basic/built-in)
+	ElectedTypenames map[models.FlattenKeypath]models.TypeName
+
+	Expansions map[models.WildcardKeypath][]models.FlattenKeypath // matches
+	TypeExprs  map[models.FlattenKeypath]ast.Expr
 
 	Imports []string // package paths
 
@@ -48,8 +54,14 @@ func New(typename string) *Bundle {
 	return &Bundle{
 		TypeName:        typename,
 		TypeNameInitial: namings.Initial(typename),
-		Imports:         []string{},
-		TypeExprs:       map[models.FlattenKeypath]ast.Expr{},
+
+		NeededToBeReferred: []models.FlattenKeypath{},
+		NeededToBeDeclared: []models.FlattenKeypath{},
+
+		Expansions: map[models.WildcardKeypath][]models.FlattenKeypath{},
+		TypeExprs:  map[models.FlattenKeypath]ast.Expr{},
+
+		Imports: []string{},
 	}
 }
 
