@@ -38,7 +38,7 @@ func typenames(b *bundle.Bundle) error {
 
 	// election
 	for _, kp := range b.NeededToBeReferred {
-		tn, ok := providedTypenames[kp.Parent()]
+		tn, ok := providedTypenames[kp]
 		if ok {
 			b.ElectedTypenames[kp] = tn
 			continue
