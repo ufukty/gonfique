@@ -25,17 +25,6 @@ func checkTypenameRequirements(b *bundle.Bundle) error {
 	return nil
 }
 
-func union(a, b []models.FlattenKeypath) []models.FlattenKeypath {
-	ks := map[models.FlattenKeypath]bool{}
-	for _, a := range a {
-		ks[a] = true
-	}
-	for _, b := range b {
-		ks[b] = true
-	}
-	return maps.Keys(ks)
-}
-
 func electTypenames(b *bundle.Bundle) {
 	generatedTypenames := namings.GenerateTypenames(maps.Values(b.Keypaths))
 	providedTypenames := map[models.FlattenKeypath]models.TypeName{}
@@ -62,16 +51,9 @@ func electTypenames(b *bundle.Bundle) {
 		b.ElectedTypenames[kp] = generatedTypenames[kp]
 	}
 
-	// for _, kp := range union(b.NeededToBeDeclared, b.NeededToBeReferred) {
-	// 	toRefer := slices.Contains(b.NeededToBeReferred, kp)
-	// 	toDeclare := slices.Contains(b.NeededToBeDeclared, kp)
-
-	// 	if toRefer && toDeclare {
-
-	// 	} else if toRefer {
-
-	// 	} else if toDeclare {
-
-	// 	}
-	// }
+	for _, kp := range b.NeededToBeReferred {
+		if _, ok := b.TypeExprs[kp].(*ast.Ident); !ok {
+			b.NeededToBeDeclared = append(b.NeededToBeDeclared, kp)
+		}
+	}
 }
