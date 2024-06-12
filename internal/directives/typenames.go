@@ -13,7 +13,7 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-func checkTypenameRequirements(b *bundle.Bundle) error {
+func typenames(b *bundle.Bundle) error {
 	if err := accessors.TypenameRequirements(b); err != nil {
 		return fmt.Errorf("checking for accessors: %w", err)
 	}
@@ -22,10 +22,7 @@ func checkTypenameRequirements(b *bundle.Bundle) error {
 	}
 	b.NeededToBeReferred = datas.Uniq(b.NeededToBeReferred)
 	b.NeededToBeDeclared = datas.Uniq(b.NeededToBeDeclared)
-	return nil
-}
 
-func electTypenames(b *bundle.Bundle) {
 	generatedTypenames := namings.GenerateTypenames(maps.Values(b.Keypaths))
 	providedTypenames := map[models.FlattenKeypath]models.TypeName{}
 	for wckp, dirs := range *b.Df {
@@ -56,4 +53,6 @@ func electTypenames(b *bundle.Bundle) {
 			b.NeededToBeDeclared = append(b.NeededToBeDeclared, kp)
 		}
 	}
+
+	return nil
 }

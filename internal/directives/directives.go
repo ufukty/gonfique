@@ -10,24 +10,20 @@ import (
 
 func Apply(b *bundle.Bundle) error {
 	populateKeypathsAndHolders(b)
-	err := populateExprs(b)
-	if err != nil {
+
+	if err := populateExprs(b); err != nil {
 		return fmt.Errorf("collecting type expressions for each keypaths: %w", err)
 	}
-	if err = expandKeypathsInDirectives(b); err != nil {
+	if err := expandKeypathsInDirectives(b); err != nil {
 		return fmt.Errorf("expanding keypaths: %w", err)
 	}
-	if err := checkTypenameRequirements(b); err != nil {
-		return fmt.Errorf("checking for typenames needed to be either referred or declared: %w", err)
+	if err := typenames(b); err != nil {
+		return fmt.Errorf("listing, declaring typenames and swapping definitions: %w", err)
 	}
-
-	electTypenames(b)
-
-	err = typedecls.Implement(b)
-	if err != nil {
+	if err := typedecls.Implement(b); err != nil {
 		return fmt.Errorf("declaring named types: %w", err)
 	}
-	if err = accessors.Implement(b); err != nil {
+	if err := accessors.Implement(b); err != nil {
 		return fmt.Errorf("implement: %w", err)
 	}
 
