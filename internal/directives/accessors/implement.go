@@ -10,8 +10,6 @@ import (
 func Implement(b *bundle.Bundle) error {
 	if b.Df == nil {
 		return fmt.Errorf("directive file is not populated")
-	} else if b.GeneratedTypenames == nil {
-		return fmt.Errorf("typenames is missing")
 	} else if b.ElectedTypenames == nil {
 		return fmt.Errorf("elected type names are missing")
 	}
@@ -23,7 +21,7 @@ func Implement(b *bundle.Bundle) error {
 				return fmt.Errorf("expansion is not found for %q", wildcardkp)
 			}
 			for _, kp := range kps {
-				structtypename, ok := b.GeneratedTypenames[kp]
+				structtypename, ok := b.ElectedTypenames[kp]
 				if !ok {
 					return fmt.Errorf("generated typename is not found for %q", kp)
 				}

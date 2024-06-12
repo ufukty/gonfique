@@ -6,8 +6,6 @@ import (
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/directives/accessors"
 	"github.com/ufukty/gonfique/internal/directives/typedecls"
-	"github.com/ufukty/gonfique/internal/namings"
-	"golang.org/x/exp/maps"
 )
 
 func Apply(b *bundle.Bundle) error {
@@ -22,10 +20,9 @@ func Apply(b *bundle.Bundle) error {
 	if err := checkTypenameRequirements(b); err != nil {
 		return fmt.Errorf("checking for typenames needed to be either referred or declared: %w", err)
 	}
-	b.GeneratedTypenames = namings.GenerateTypenames(maps.Values(b.Keypaths))
 
 	checkTypenameRequirements(b)
-	electedTypenames(b)
+	electTypenames(b)
 
 	err = typedecls.Implement(b)
 	if err != nil {

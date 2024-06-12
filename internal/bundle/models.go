@@ -25,9 +25,6 @@ type Bundle struct {
 	// those can't stay inline (if they are composite)
 	NeededToBeDeclared []models.FlattenKeypath
 
-	GeneratedTypenames map[models.FlattenKeypath]models.TypeName
-	ProvidedTypenames  map[models.FlattenKeypath]models.TypeName
-
 	// final typenames to refer (user-provided > auto-generated > basic/built-in)
 	ElectedTypenames map[models.FlattenKeypath]models.TypeName
 
@@ -57,6 +54,8 @@ func New(typename string) *Bundle {
 
 		NeededToBeReferred: []models.FlattenKeypath{},
 		NeededToBeDeclared: []models.FlattenKeypath{},
+
+		ElectedTypenames: map[models.FlattenKeypath]models.TypeName{},
 
 		Expansions: map[models.WildcardKeypath][]models.FlattenKeypath{},
 		TypeExprs:  map[models.FlattenKeypath]ast.Expr{},
