@@ -37,7 +37,6 @@ func Implement(b *bundle.Bundle) error {
 		typesToInstances[tn] = append(typesToInstances[tn], kp)
 	}
 
-	// TODO: check all kps share the same type expression
 	for tn, kps := range typesToInstances {
 		for i := 1; i < len(kps); i++ {
 			if !compares.Compare(b.TypeExprs[kps[0]], b.TypeExprs[kps[i]]) {
