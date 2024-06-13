@@ -2,6 +2,7 @@ package parent
 
 import (
 	"fmt"
+	"go/ast"
 
 	"github.com/ufukty/gonfique/internal/bundle"
 )
@@ -14,7 +15,11 @@ func TypenameRequirements(b *bundle.Bundle) error {
 				return fmt.Errorf("expansions are not found for wildcard containing keypath: %s", wckp)
 			}
 			for _, kp := range kps {
-				b.NeededToBeDeclared = append(b.NeededToBeDeclared, kp)          // it to declare
+				if _, ok = b.TypeExprs[kp].(*ast.StructType); !ok {
+					fmt.Printf("warning: keypath %q directs to add a parent ref to a non-struct type (%s) is ignored\n", wckp, kp)
+					continue
+				}
+				b.NeededToBeDeclared = append(b.NeededToBeDeclared, kp)          // itself to declare
 				b.NeededToBeReferred = append(b.NeededToBeReferred, kp.Parent()) // parent to refer
 			}
 		}

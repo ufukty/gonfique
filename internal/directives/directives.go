@@ -5,6 +5,7 @@ import (
 
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/directives/accessors"
+	"github.com/ufukty/gonfique/internal/directives/parent"
 	"github.com/ufukty/gonfique/internal/directives/typedecls"
 )
 
@@ -24,7 +25,10 @@ func Apply(b *bundle.Bundle) error {
 		return fmt.Errorf("declaring named types: %w", err)
 	}
 	if err := accessors.Implement(b); err != nil {
-		return fmt.Errorf("implement: %w", err)
+		return fmt.Errorf("implementing accessor methods: %w", err)
+	}
+	if err := parent.Implement(b); err != nil {
+		return fmt.Errorf("adding parent refs as fields: %w", err)
 	}
 
 	return nil

@@ -1,0 +1,12 @@
+"gateways.public":
+  accessors: [path]
+
+"**.services.*":
+  accessors: [path]
+
+"**.endpoints.*":
+  named: Endpoint
+  accessors: [path]
+
+"*.**":
+  parent: Parent

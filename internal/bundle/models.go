@@ -27,6 +27,7 @@ type Bundle struct {
 
 	// final typenames to refer (user-provided > auto-generated > basic/built-in)
 	ElectedTypenames map[models.FlattenKeypath]models.TypeName
+	Usages           map[models.TypeName][]models.FlattenKeypath
 
 	Expansions map[models.WildcardKeypath][]models.FlattenKeypath // matches
 	TypeExprs  map[models.FlattenKeypath]ast.Expr
