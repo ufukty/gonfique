@@ -13,8 +13,8 @@ infra.servers.*:
   named: Vps
   embed: Basic
   accessors: [Cores, Ram, Disk]
-  
-"**":
+
+"*.**":
   parent: Parent
 ```
 
@@ -85,7 +85,7 @@ a.key.path:
   accessors: [FieldName, FieldName, ...]
 ```
 
-Accessors are Getters and Setters for fields. Gonfique can implement getters and setters on any field of a struct. The code will contain input and output parameter types that is nicely matching the field type.
+Accessors are getters and setters for fields. Gonfique can implement getters and setters on any field of a struct. The code will contain input and output parameter types that is nicely matching the field type. Since accessors will be defined on the type; all keypaths directs a target, should be aware will be merged.
 
 ### `embed`
 
@@ -103,7 +103,7 @@ a.key.path:
   parent: FieldName
 ```
 
-Add a field `FieldName` to the generated type which will be assigned the pointer of parent, `a.key`. This will also change the body of ReadConfig function. This will be useful when the data defines a hierarchy that a traceback from a child to root is needed.
+Add a field `FieldName` to the generated type which will be assigned the pointer of parent, `a.key`. This will also change the body of ReadConfig function. This will be useful when the data defines a hierarchy that a traceback from a child to root is needed. If the keypath contains wildcards; parents of all matches should be in same type.
 
 ### `export`
 
@@ -130,7 +130,7 @@ a.key.path:
   type: TypeName
 ```
 
-Assign specified type name instead resolving from YAML file. For example: `type: int` or `type: http.Method`. Note that, `type` directive can only be combined with `import`. Other directives will be ignored.
+Assign specified type name instead resolving from YAML file. For example: `type: int` or `type: http.Method`. Note that, `type` directive can only be combined with `import`.
 
 ## Internal Concepts
 
@@ -151,6 +151,15 @@ Some of the cases that gonfique automatically create a type name for a field/ite
 - Using `parent` (on child) without `named` (on the parent) will result with gonfique assign an automatically generated type name for the parent type.
 
 The name will be based on the keypath, the minimum number of last segments that won't collide with other typenames. As the choosen name is bound to context, it can change next time the config file gets a key with same name. Thus, the generated type name is unexported.
+
+### Resolving Conflicts
+
+- **When multiple keypaths match with same target:**
+  - Returns error, if two rules contains conflicting directives.
+  - Combines directives, if none conflicts.
+- **When one keypath match with multiple targets**
+  - Returns error, if not all of the targets are not sharing same type
+- **When one keypath match a target in addition to another which its type or type name is provided by user at another rule**
 
 ## Full example
 
