@@ -3,10 +3,29 @@ package accessors
 import (
 	"fmt"
 	"go/ast"
+	"slices"
+	"strings"
 
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/models"
+	"golang.org/x/exp/maps"
 )
+
+func caseInsensitiveCompareTypenames(a, b models.TypeName) int {
+	if strings.ToLower(string(a)) < strings.ToLower(string(b)) {
+		return -1
+	} else {
+		return +1
+	}
+}
+
+func caseInsensitiveCompareFieldnames(a, b models.FieldName) int {
+	if strings.ToLower(string(a)) < strings.ToLower(string(b)) {
+		return -1
+	} else {
+		return +1
+	}
+}
 
 func Implement(b *bundle.Bundle) error {
 	if b.Df == nil {
@@ -34,8 +53,14 @@ func Implement(b *bundle.Bundle) error {
 		}
 	}
 
-	for tn, fields := range fieldsfortypes {
-		for fn, ftn := range fields {
+	sorted := maps.Keys(fieldsfortypes)
+	slices.SortFunc(sorted, caseInsensitiveCompareTypenames)
+	for _, tn := range sorted {
+		fields := fieldsfortypes[tn]
+		sortedfields := maps.Keys(fields)
+		slices.SortFunc(sortedfields, caseInsensitiveCompareFieldnames)
+		for _, fn := range sortedfields {
+			ftn := fields[fn]
 			b.Accessors = append(b.Accessors,
 				generateGetter(tn, fn, ftn),
 				generateSetter(tn, fn, ftn),
