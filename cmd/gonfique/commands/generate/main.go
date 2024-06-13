@@ -26,6 +26,7 @@ type Args struct {
 	Org        bool
 	Mappings   string
 	Directives string
+	Verbose    bool
 }
 
 func getArgs() Args {
@@ -38,6 +39,7 @@ func getArgs() Args {
 	flag.StringVar(&args.Mappings, "mappings", "", "(optional) use typenames found in the <file>. see examples for mapping file structure")
 	flag.StringVar(&args.Directives, "directives", "", "(optional) use a directives file")
 	flag.BoolVar(&args.Org, "organize", false, "(optional) defines the types of struct fields that are also structs separately instead inline, with auto generated UNSTABLE names.")
+	flag.BoolVar(&args.Verbose, "verbose", false, "(optional) print information regarding to processes.")
 	flag.Parse()
 	return args
 }
@@ -90,7 +92,7 @@ func Run() error {
 		if err != nil {
 			return fmt.Errorf("reading directives file: %w", err)
 		}
-		err = directives.Apply(b)
+		err = directives.Apply(b, args.Verbose)
 		if err != nil {
 			return fmt.Errorf("applying directives: %w", err)
 		}
