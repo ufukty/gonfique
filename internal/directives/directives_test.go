@@ -39,7 +39,7 @@ func TestImplement(t *testing.T) {
 				t.Fatal(fmt.Errorf("act: %w", err))
 			}
 
-			testloc, err := testutils.PrepareTestCase(tc, []string{"go.mod", "go.sum", "config_test.go", "config.yml"})
+			testloc, err := testutils.PrepareTestCase(tc, []string{"go.mod", "go.sum", "config_test.go", "config.yml", "extend.go"})
 			if err != nil {
 				t.Error(fmt.Errorf("preparing testcase to test: :%w", err))
 			}
