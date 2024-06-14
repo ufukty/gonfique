@@ -21,6 +21,9 @@ func Apply(b *bundle.Bundle, verbose bool) error {
 	if err := typenames(b); err != nil {
 		return fmt.Errorf("listing, declaring typenames and swapping definitions: %w", err)
 	}
+	if err := parent.CheckConflicts(b); err != nil {
+		return fmt.Errorf("checking conflicts for adding parent refs: %w", err)
+	}
 	if verbose {
 		debug(b)
 	}
