@@ -16,7 +16,7 @@ import (
 )
 
 func TestImplement(t *testing.T) {
-	tcs := []string{"k8s", "api", "api-parent"}
+	tcs := []string{"k8s", "api", "api-parent", "api-parent2"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {

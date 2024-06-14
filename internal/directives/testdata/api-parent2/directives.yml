@@ -1,0 +1,15 @@
+"*":
+  accessors: [path]
+
+"*.services.*":
+  accessors: [path]
+
+"*.services.*.endpoints.*":
+  named: Endpoint
+  accessors: [path]
+
+"*.services":
+  parent: Parent
+
+"*.services.*.endpoints":
+  parent: Parent

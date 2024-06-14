@@ -1,0 +1,31 @@
+public:
+  path: /api/v1.0.0
+  services:
+    account:
+      path: /account
+      endpoints:
+        create_profile: { method: "POST", path: "/profile" }
+        create: { method: "POST", path: "/account" }
+        login: { method: "POST", path: "/login" }
+        logout: { method: "POST", path: "/logout" }
+        whoami: { method: "GET", path: "/whoami" }
+
+    document:
+      path: /document
+      endpoints:
+        list: { method: "GET", path: "/list/{root}" }
+
+    objectives:
+      path: /tasks
+      endpoints:
+        attach: { method: "POST", path: "/task/attach" }
+        create: { method: "POST", path: "/task" }
+        delete: { method: "POST", path: "/task/delete" }
+        placement: { method: "GET", path: "/task/{root}/placement" }
+        mark: { method: "POST", path: "/task/mark" }
+
+    tags:
+      path: /tags
+      endpoints:
+        creation: { method: "POST", path: "/" }
+        assign: { method: "POST", path: "/assign" }
