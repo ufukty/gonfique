@@ -2,7 +2,6 @@ package directives
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/directives/accessors"
@@ -10,18 +9,7 @@ import (
 	"github.com/ufukty/gonfique/internal/directives/typedecls"
 )
 
-func debug(b *bundle.Bundle) {
-	fmt.Println("elected types:")
-	for tn, kps := range b.Usages {
-		fmt.Printf("  %s:\n", tn)
-		slices.Sort(kps)
-		for _, kp := range kps {
-			fmt.Printf("    %s\n", kp)
-		}
-	}
-}
-
-func Apply(b *bundle.Bundle, dbg bool) error {
+func Apply(b *bundle.Bundle, verbose bool) error {
 	populateKeypathsAndHolders(b)
 
 	if err := populateExprs(b); err != nil {
@@ -33,7 +21,7 @@ func Apply(b *bundle.Bundle, dbg bool) error {
 	if err := typenames(b); err != nil {
 		return fmt.Errorf("listing, declaring typenames and swapping definitions: %w", err)
 	}
-	if dbg {
+	if verbose {
 		debug(b)
 	}
 	if err := typedecls.Implement(b); err != nil {
