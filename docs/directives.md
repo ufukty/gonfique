@@ -103,7 +103,9 @@ a.key.path:
   parent: FieldName
 ```
 
-Add a field `FieldName` to the generated type which will be assigned the pointer of parent, `a.key`. This will also change the body of ReadConfig function. This will be useful when the data defines a hierarchy that a traceback from a child to root is needed. If the keypath contains wildcards; parents of all matches should be in same type.
+Add a field `FieldName` to the generated type which will be assigned the pointer of parent, `a.key`. This will also change the body of ReadConfig function. This will be useful when the data defines a hierarchy that a traceback from a child to root is needed.
+
+Note: If a `parent` containing wildcard keypath gets multiple matches; different type parents will needed to be declared with different typenames. So, combining `parent` with `named` may result with failure.
 
 ### `export`
 
