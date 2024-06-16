@@ -18,3 +18,14 @@ func Revmap[K, V comparable](src map[K]V) map[V][]K {
 	}
 	return dst
 }
+
+func MergeMaps[K comparable, V any](a, b map[K]V) map[K]V {
+	c := make(map[K]V, len(a)+len(b))
+	for k, v := range a {
+		c[k] = v
+	}
+	for k, v := range b {
+		c[k] = v
+	}
+	return c
+}

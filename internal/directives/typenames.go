@@ -6,21 +6,32 @@ import (
 	"slices"
 
 	"github.com/ufukty/gonfique/internal/bundle"
+	"github.com/ufukty/gonfique/internal/compares"
 	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/directives/accessors"
-	"github.com/ufukty/gonfique/internal/directives/parent"
 	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/namings"
 	"golang.org/x/exp/maps"
 )
 
+func compareMergedTypenameUsers(b *bundle.Bundle) error {
+	for tn, kps := range b.TypenameUsers {
+		for i := 1; i < len(kps); i++ {
+			if !compares.Compare(b.TypeExprs[kps[0]], b.TypeExprs[kps[i]]) {
+				return fmt.Errorf("%q and %q doesn't share the same schema, but required to share same type %q", kps[0], kps[i], tn)
+			}
+		}
+	}
+	return nil
+}
+
 func typenames(b *bundle.Bundle) error {
 	// collect
 	if err := accessors.TypenameRequirements(b); err != nil {
-		return fmt.Errorf("checking for accessors: %w", err)
+		return fmt.Errorf("checking requirements for accessors: %w", err)
 	}
-	if err := parent.TypenameRequirements(b); err != nil {
-		return fmt.Errorf("checking for parent refs: %w", err)
+	if err := parent(b); err != nil {
+		return fmt.Errorf("checking requirements for parent refs: %w", err)
 	}
 
 	b.NeededToBeReferred = datas.Uniq(b.NeededToBeReferred)
@@ -55,6 +66,7 @@ func typenames(b *bundle.Bundle) error {
 		}
 		return fmt.Errorf("can't elect a typename for keypath: %s", kp)
 	}
+	b.TypenameUsers = datas.Revmap(b.ElectedTypenames)
 
 	// declare referred types except string, int, etc.
 	for _, kp := range b.NeededToBeReferred {

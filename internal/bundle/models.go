@@ -17,21 +17,16 @@ type Bundle struct {
 	OriginalKeys map[ast.Node]string           // holder -> key
 	Fieldnames   map[ast.Node]models.FieldName // populated by transformer
 
-	Keypaths map[ast.Node]models.FlattenKeypath // holder -> keypath (resolver)
-	Holders  map[models.FlattenKeypath]ast.Node // keypath -> Field, ArrayType (inverse Keypaths)
+	Keypaths       map[ast.Node]models.FlattenKeypath // holder -> keypath (resolver)
+	Holders        map[models.FlattenKeypath]ast.Node // keypath -> Field, ArrayType (inverse Keypaths)
+	TypeExprs      map[models.FlattenKeypath]ast.Expr
+	NamedTypeExprs map[models.TypeName]ast.Expr
+	Expansions     map[models.WildcardKeypath][]models.FlattenKeypath // matches
 
-	// either declared or a built-in basic types
 	NeededToBeReferred []models.FlattenKeypath
-	// those can't stay inline (if they are composite)
 	NeededToBeDeclared []models.FlattenKeypath
-
-	// final typenames to refer (user-provided > auto-generated > basic/built-in)
-	ElectedTypenames map[models.FlattenKeypath]models.TypeName
-
-	Expansions map[models.WildcardKeypath][]models.FlattenKeypath // matches
-	TypeExprs  map[models.FlattenKeypath]ast.Expr
-
-	Imports []string // package paths
+	ElectedTypenames   map[models.FlattenKeypath]models.TypeName
+	TypenameUsers      map[models.TypeName][]models.FlattenKeypath
 
 	// type declarations
 	Cfgcontent any      // produced by yaml.Decoder
@@ -40,6 +35,7 @@ type Bundle struct {
 	// function declarations
 	Isolated *ast.GenDecl   // organization
 	Named    []*ast.GenDecl // mappings, directives
+	Imports  []string       // package paths
 
 	Iterators []*ast.FuncDecl // .Range() methods
 	Accessors []*ast.FuncDecl // directives
@@ -56,9 +52,11 @@ func New(typename string) *Bundle {
 		NeededToBeDeclared: []models.FlattenKeypath{},
 
 		ElectedTypenames: map[models.FlattenKeypath]models.TypeName{},
+		TypenameUsers:    map[models.TypeName][]models.FlattenKeypath{},
 
-		Expansions: map[models.WildcardKeypath][]models.FlattenKeypath{},
-		TypeExprs:  map[models.FlattenKeypath]ast.Expr{},
+		Expansions:     map[models.WildcardKeypath][]models.FlattenKeypath{},
+		TypeExprs:      map[models.FlattenKeypath]ast.Expr{},
+		NamedTypeExprs: map[models.TypeName]ast.Expr{},
 
 		Imports: []string{},
 	}

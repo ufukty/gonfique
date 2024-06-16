@@ -5,8 +5,6 @@ import (
 
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/directives/accessors"
-	"github.com/ufukty/gonfique/internal/directives/parent"
-	"github.com/ufukty/gonfique/internal/directives/typedecls"
 )
 
 func Apply(b *bundle.Bundle, verbose bool) error {
@@ -21,19 +19,23 @@ func Apply(b *bundle.Bundle, verbose bool) error {
 	if err := typenames(b); err != nil {
 		return fmt.Errorf("listing, declaring typenames and swapping definitions: %w", err)
 	}
-	if err := parent.CheckConflicts(b); err != nil {
+	if err := populateNamedTypeExprs(b); err != nil {
+		return fmt.Errorf("checking for named directive: %w", err)
+	}
+	if err := checkConflictsForParentRefs(b); err != nil {
 		return fmt.Errorf("checking conflicts for adding parent refs: %w", err)
 	}
 	if verbose {
 		debug(b)
 	}
-	if err := typedecls.Implement(b); err != nil {
+	implementTypeDeclarations(b)
+	if err := replaceTypeExpressionsWithIdents(b); err != nil {
 		return fmt.Errorf("declaring named types: %w", err)
 	}
 	if err := accessors.Implement(b); err != nil {
 		return fmt.Errorf("implementing accessor methods: %w", err)
 	}
-	if err := parent.Implement(b); err != nil {
+	if err := addParentRefs(b); err != nil {
 		return fmt.Errorf("adding parent refs as fields: %w", err)
 	}
 

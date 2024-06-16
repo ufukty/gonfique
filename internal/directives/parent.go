@@ -1,4 +1,4 @@
-package parent
+package directives
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-func ParentEnabledTypenames(b *bundle.Bundle) []models.TypeName {
+func parentEnabledTypenames(b *bundle.Bundle) []models.TypeName {
 	enabled := map[models.TypeName]bool{}
 	for wckp, dirs := range *b.Df {
 		if dirs.Parent != "" {
@@ -28,23 +28,22 @@ func ParentEnabledTypenames(b *bundle.Bundle) []models.TypeName {
 	return maps.Keys(enabled)
 }
 
-func CheckConflicts(b *bundle.Bundle) error {
-	typenameusers := datas.Revmap(b.ElectedTypenames)
-	enabled := ParentEnabledTypenames(b)
+func checkConflictsForParentRefs(b *bundle.Bundle) error {
+	enabled := parentEnabledTypenames(b)
 	for _, tn := range enabled {
 		ptns := []models.TypeName{}
-		for _, user := range typenameusers[tn] {
+		for _, user := range b.TypenameUsers[tn] {
 			ptns = append(ptns, b.ElectedTypenames[user.Parent()])
 		}
 		simplified := datas.Uniq(ptns)
 		if len(simplified) > 1 {
-			return fmt.Errorf("can't decide the type of parent ref because parents of all users of the type %q use different types: %v", tn, simplified)
+			return fmt.Errorf("users of type %q have parents with different types: %v", tn, simplified)
 		}
 	}
 	return nil
 }
 
-func Implement(b *bundle.Bundle) error {
+func addParentRefs(b *bundle.Bundle) error {
 	type details struct {
 		fieldname      models.FieldName
 		parenttypename models.TypeName
@@ -75,5 +74,25 @@ func Implement(b *bundle.Bundle) error {
 		})
 	}
 
+	return nil
+}
+
+func parent(b *bundle.Bundle) error {
+	for wckp, drs := range *b.Df {
+		if drs.Parent != "" {
+			kps, ok := b.Expansions[wckp]
+			if !ok {
+				return fmt.Errorf("expansions are not found for wildcard containing keypath: %s", wckp)
+			}
+			for _, kp := range kps {
+				if _, ok = b.TypeExprs[kp].(*ast.StructType); !ok {
+					fmt.Printf("warning: keypath %q directs to add a parent ref to a non-struct type (%s) is ignored\n", wckp, kp)
+					continue
+				}
+				b.NeededToBeDeclared = append(b.NeededToBeDeclared, kp)          // itself to declare
+				b.NeededToBeReferred = append(b.NeededToBeReferred, kp.Parent()) // parent to refer
+			}
+		}
+	}
 	return nil
 }
