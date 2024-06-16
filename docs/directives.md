@@ -114,7 +114,7 @@ a.key.path:
   export: True/False
 ```
 
-Directs [automatic type name generation](#automatically-generated-type-names) to generate exported (capitalized) type name. This has no effect when `named` or `type` is also set.
+Directs [automatic type name generation](#automatically-generated-type-names) to generate exported (capitalized) type names for the match of path or each match of wildcard path. This has no effect when `named` or `type` is also set.
 
 ### `import`
 
