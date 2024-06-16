@@ -4,17 +4,15 @@ import (
 	"fmt"
 	"go/ast"
 	"reflect"
-
-	"github.com/ufukty/gonfique/internal/bundle"
 )
 
-func populateExprs(b *bundle.Bundle) error {
-	for kp, n := range b.Holders {
+func (d *Directives) populateExprs() error {
+	for kp, n := range d.Holders {
 		switch n := n.(type) {
 		case *ast.Field:
-			b.TypeExprs[kp] = n.Type
+			d.TypeExprs[kp] = n.Type
 		case *ast.ArrayType:
-			b.TypeExprs[kp] = n.Elt
+			d.TypeExprs[kp] = n.Elt
 		default:
 			return fmt.Errorf("unrecognized holder type: %s", reflect.TypeOf(n).String())
 		}

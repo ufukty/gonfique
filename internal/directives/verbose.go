@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/models"
 )
 
-func debug(b *bundle.Bundle) {
-	usages := datas.Revmap(b.ElectedTypenames)
+func (d *Directives) debug() {
+	usages := datas.Revmap(d.ElectedTypenames)
 
 	fmt.Println("elected types:")
 	for tn, kps := range usages {
@@ -23,8 +22,8 @@ func debug(b *bundle.Bundle) {
 
 	effects := map[models.FlattenKeypath][]models.WildcardKeypath{}
 
-	for wckp := range *b.Df {
-		for _, kp := range b.Expansions[wckp] {
+	for wckp := range *d.b.Df {
+		for _, kp := range d.Expansions[wckp] {
 			if _, ok := effects[kp]; !ok {
 				effects[kp] = []models.WildcardKeypath{}
 			}

@@ -3,17 +3,16 @@ package directives
 import (
 	"fmt"
 
-	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/compares"
 	"github.com/ufukty/gonfique/internal/models"
 )
 
-func populateNamedTypeExprs(b *bundle.Bundle) error {
+func (d *Directives) populateNamedTypeExprs() error {
 	typenames := map[models.TypeName][]models.FlattenKeypath{}
-	for wckp, dirs := range *b.Df {
+	for wckp, dirs := range *d.b.Df {
 		if dirs.Named != "" {
 			tn := dirs.Named
-			for _, kp := range b.Expansions[wckp] {
+			for _, kp := range d.Expansions[wckp] {
 				if _, ok := typenames[tn]; !ok {
 					typenames[tn] = []models.FlattenKeypath{}
 				}
@@ -24,13 +23,13 @@ func populateNamedTypeExprs(b *bundle.Bundle) error {
 
 	for tn, kps := range typenames {
 		for i := 1; i < len(kps); i++ {
-			if !compares.Compare(b.TypeExprs[kps[0]], b.TypeExprs[kps[i]]) {
+			if !compares.Compare(d.TypeExprs[kps[0]], d.TypeExprs[kps[i]]) {
 				return fmt.Errorf("can't use same type %q for %q and %q", tn, kps[0], kps[i])
 			}
 			for _, kp := range kps {
-				b.ElectedTypenames[kp] = tn
+				d.ElectedTypenames[kp] = tn
 			}
-			b.NamedTypeExprs[tn] = b.TypeExprs[kps[0]]
+			d.NamedTypeExprs[tn] = d.TypeExprs[kps[0]]
 		}
 	}
 

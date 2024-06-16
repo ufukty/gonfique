@@ -5,20 +5,19 @@ import (
 	"go/ast"
 	"go/token"
 
-	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/models"
 )
 
-func implementTypeDeclarations(b *bundle.Bundle) {
+func (d *Directives) implementTypeDeclarations() {
 	uniq := map[models.TypeName]ast.Expr{}
-	for _, kp := range b.NeededToBeDeclared {
-		uniq[b.ElectedTypenames[kp]] = b.TypeExprs[kp]
+	for _, kp := range d.NeededToBeDeclared {
+		uniq[d.ElectedTypenames[kp]] = d.TypeExprs[kp]
 	}
-	uniq = datas.MergeMaps(uniq, b.NamedTypeExprs)
-	
+	uniq = datas.MergeMaps(uniq, d.NamedTypeExprs)
+
 	for tn, expr := range uniq {
-		b.Named = append(b.Named, &ast.GenDecl{
+		d.b.Named = append(d.b.Named, &ast.GenDecl{
 			Tok: token.TYPE,
 			Specs: []ast.Spec{&ast.TypeSpec{
 				Name: tn.Ident(),
@@ -28,10 +27,10 @@ func implementTypeDeclarations(b *bundle.Bundle) {
 	}
 }
 
-func replaceTypeExpressionsWithIdents(b *bundle.Bundle) error {
-	for tn, kps := range b.TypenameUsers {
+func (d *Directives) replaceTypeExpressionsWithIdents() error {
+	for tn, kps := range d.TypenameUsers {
 		for _, kp := range kps {
-			holder := b.Holders[kp]
+			holder := d.Holders[kp]
 			switch h := holder.(type) {
 			case *ast.Field:
 				h.Type = tn.Ident()

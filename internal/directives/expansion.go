@@ -3,14 +3,13 @@ package directives
 import (
 	"fmt"
 
-	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/matcher"
 	"github.com/ufukty/gonfique/internal/models"
 )
 
-func expandKeypathsInDirectives(b *bundle.Bundle) error {
-	for kp := range *b.Df {
-		matches, err := matcher.FindTypeDefHoldersForKeypath(b.CfgType, kp, b.OriginalKeys)
+func (d *Directives) expandKeypathsInDirectives() error {
+	for kp := range *d.b.Df {
+		matches, err := matcher.FindTypeDefHoldersForKeypath(d.b.CfgType, kp, d.b.OriginalKeys)
 		if err != nil {
 			return fmt.Errorf("matching the rule: %w", err)
 		}
@@ -19,9 +18,9 @@ func expandKeypathsInDirectives(b *bundle.Bundle) error {
 		}
 		kps := []models.FlattenKeypath{}
 		for _, match := range matches {
-			kps = append(kps, b.Keypaths[match])
+			kps = append(kps, d.Keypaths[match])
 		}
-		b.Expansions[kp] = kps
+		d.Expansions[kp] = kps
 	}
 	return nil
 }

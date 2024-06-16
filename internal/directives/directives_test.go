@@ -34,8 +34,8 @@ func TestImplement(t *testing.T) {
 				t.Fatal(fmt.Errorf("reading directive file: %w", err))
 			}
 
-			err = Apply(b, true)
-			if err != nil {
+			d := New(b)
+			if err = d.Apply(true); err != nil {
 				t.Fatal(fmt.Errorf("act: %w", err))
 			}
 

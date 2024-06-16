@@ -5,35 +5,34 @@ import (
 	"go/ast"
 	"go/token"
 
-	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/models"
 	"golang.org/x/exp/maps"
 )
 
-func parentEnabledTypenames(b *bundle.Bundle) []models.TypeName {
+func (d *Directives) parentEnabledTypenames() []models.TypeName {
 	enabled := map[models.TypeName]bool{}
-	for wckp, dirs := range *b.Df {
+	for wckp, dirs := range *d.b.Df {
 		if dirs.Parent != "" {
-			for _, kp := range b.Expansions[wckp] {
-				ty := b.TypeExprs[kp]
+			for _, kp := range d.Expansions[wckp] {
+				ty := d.TypeExprs[kp]
 				_, ok := ty.(*ast.StructType)
 				if !ok {
 					continue
 				}
-				enabled[b.ElectedTypenames[kp]] = true
+				enabled[d.ElectedTypenames[kp]] = true
 			}
 		}
 	}
 	return maps.Keys(enabled)
 }
 
-func checkConflictsForParentRefs(b *bundle.Bundle) error {
-	enabled := parentEnabledTypenames(b)
+func (d *Directives) checkConflictsForParentRefs() error {
+	enabled := d.parentEnabledTypenames()
 	for _, tn := range enabled {
 		ptns := []models.TypeName{}
-		for _, user := range b.TypenameUsers[tn] {
-			ptns = append(ptns, b.ElectedTypenames[user.Parent()])
+		for _, user := range d.TypenameUsers[tn] {
+			ptns = append(ptns, d.ElectedTypenames[user.Parent()])
 		}
 		simplified := datas.Uniq(ptns)
 		if len(simplified) > 1 {
@@ -43,22 +42,22 @@ func checkConflictsForParentRefs(b *bundle.Bundle) error {
 	return nil
 }
 
-func addParentRefs(b *bundle.Bundle) error {
+func (d *Directives) addParentRefs() error {
 	type details struct {
 		fieldname      models.FieldName
 		parenttypename models.TypeName
 	}
 	toAdd := map[*ast.StructType]details{}
 
-	for wckp, dirs := range *b.Df {
+	for wckp, dirs := range *d.b.Df {
 		if dirs.Parent != "" {
-			for _, kp := range b.Expansions[wckp] {
-				ty := b.TypeExprs[kp]
+			for _, kp := range d.Expansions[wckp] {
+				ty := d.TypeExprs[kp]
 				st, ok := ty.(*ast.StructType)
 				if !ok {
 					continue
 				}
-				toAdd[st] = details{dirs.Parent, models.TypeName(b.ElectedTypenames[kp.Parent()])}
+				toAdd[st] = details{dirs.Parent, models.TypeName(d.ElectedTypenames[kp.Parent()])}
 			}
 		}
 	}
@@ -77,20 +76,20 @@ func addParentRefs(b *bundle.Bundle) error {
 	return nil
 }
 
-func parent(b *bundle.Bundle) error {
-	for wckp, drs := range *b.Df {
+func (d *Directives) parent() error {
+	for wckp, drs := range *d.b.Df {
 		if drs.Parent != "" {
-			kps, ok := b.Expansions[wckp]
+			kps, ok := d.Expansions[wckp]
 			if !ok {
 				return fmt.Errorf("expansions are not found for wildcard containing keypath: %s", wckp)
 			}
 			for _, kp := range kps {
-				if _, ok = b.TypeExprs[kp].(*ast.StructType); !ok {
+				if _, ok = d.TypeExprs[kp].(*ast.StructType); !ok {
 					fmt.Printf("warning: keypath %q directs to add a parent ref to a non-struct type (%s) is ignored\n", wckp, kp)
 					continue
 				}
-				b.NeededToBeDeclared = append(b.NeededToBeDeclared, kp)          // itself to declare
-				b.NeededToBeReferred = append(b.NeededToBeReferred, kp.Parent()) // parent to refer
+				d.NeededToBeDeclared = append(d.NeededToBeDeclared, kp)          // itself to declare
+				d.NeededToBeReferred = append(d.NeededToBeReferred, kp.Parent()) // parent to refer
 			}
 		}
 	}
