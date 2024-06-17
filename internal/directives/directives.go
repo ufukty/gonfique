@@ -62,7 +62,7 @@ func (d *Directives) Apply(verbose bool) error {
 	if err := d.preTypeConflicts(); err != nil {
 		return fmt.Errorf("pre-type conflict checking: %w", err)
 	}
-	d.checkTypenameRequirements()
+	d.checkKeypathsToReferTheirType()
 	if err := d.typenameElection(); err != nil {
 		return fmt.Errorf("typename election: %w", err)
 	}
@@ -73,6 +73,7 @@ func (d *Directives) Apply(verbose bool) error {
 	if verbose {
 		d.debug()
 	}
+	d.checkKeypathsToModifyTheirType()
 	d.implementTypeDeclarations()
 	if err := d.replaceTypeExpressionsWithIdents(); err != nil {
 		return fmt.Errorf("declaring named types: %w", err)
