@@ -99,7 +99,7 @@ func generateSetter(typename models.TypeName, fieldname models.FieldName, fieldt
 func (d *Directives) addAccessorFuncDecls() error {
 	if d.b.Df == nil {
 		return fmt.Errorf("directive file is not populated")
-	} else if d.ElectedTypenames == nil {
+	} else if d.TypenamesElected == nil {
 		return fmt.Errorf("elected type names are missing")
 	}
 	d.b.Accessors = []*ast.FuncDecl{}
@@ -108,13 +108,13 @@ func (d *Directives) addAccessorFuncDecls() error {
 	for wckp, directives := range *d.b.Df {
 		if directives.Accessors != nil {
 			for _, kp := range d.Expansions[wckp] {
-				tn := d.ElectedTypenames[kp]
+				tn := d.TypenamesElected[kp]
 				if _, ok := fieldsfortypes[tn]; !ok {
 					fieldsfortypes[tn] = map[models.FieldName]models.TypeName{}
 				}
 				for _, fp := range directives.Accessors {
 					fkp := kp.WithFieldPath(fp)
-					ftn := d.ElectedTypenames[fkp]
+					ftn := d.TypenamesElected[fkp]
 					fn := d.b.Fieldnames[d.Holders[fkp]]
 					fieldsfortypes[tn][fn] = ftn
 				}

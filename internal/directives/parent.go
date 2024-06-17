@@ -20,7 +20,7 @@ func (d *Directives) parentEnabledTypenames() []models.TypeName {
 				if !ok {
 					continue
 				}
-				enabled[d.ElectedTypenames[kp]] = true
+				enabled[d.TypenamesElected[kp]] = true
 			}
 		}
 	}
@@ -32,7 +32,7 @@ func (d *Directives) checkConflictsForParentRefs() error {
 	for _, tn := range enabled {
 		ptns := []models.TypeName{}
 		for _, user := range d.TypenameUsers[tn] {
-			ptns = append(ptns, d.ElectedTypenames[user.Parent()])
+			ptns = append(ptns, d.TypenamesElected[user.Parent()])
 		}
 		simplified := datas.Uniq(ptns)
 		if len(simplified) > 1 {
@@ -57,7 +57,7 @@ func (d *Directives) addParentRefs() error {
 				if !ok {
 					continue
 				}
-				toAdd[st] = details{dirs.Parent, models.TypeName(d.ElectedTypenames[kp.Parent()])}
+				toAdd[st] = details{dirs.Parent, models.TypeName(d.TypenamesElected[kp.Parent()])}
 			}
 		}
 	}

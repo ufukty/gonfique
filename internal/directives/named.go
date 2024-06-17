@@ -27,7 +27,7 @@ func (d *Directives) populateNamedTypeExprs() error {
 				return fmt.Errorf("can't use same type %q for %q and %q", tn, kps[0], kps[i])
 			}
 			for _, kp := range kps {
-				d.ElectedTypenames[kp] = tn
+				d.TypenamesElected[kp] = tn
 			}
 			d.NamedTypeExprs[tn] = d.TypeExprs[kps[0]]
 		}

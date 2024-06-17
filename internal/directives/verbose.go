@@ -9,7 +9,7 @@ import (
 )
 
 func (d *Directives) debug() {
-	usages := datas.Revmap(d.ElectedTypenames)
+	usages := datas.Revmap(d.TypenamesElected)
 
 	fmt.Println("elected types:")
 	for tn, kps := range usages {

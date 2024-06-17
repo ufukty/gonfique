@@ -13,7 +13,6 @@ type Directives struct {
 	b          *bundle.Bundle
 	Directives map[models.FlattenKeypath]directivefile.Directives
 
-	ElectedTypenames   map[models.FlattenKeypath]models.TypeName
 	Expansions         map[models.WildcardKeypath][]models.FlattenKeypath // matches
 	Holders            map[models.FlattenKeypath]ast.Node                 // keypath -> Field, ArrayType (inverse Keypaths)
 	Keypaths           map[ast.Node]models.FlattenKeypath                 // holder -> keypath (resolver)
@@ -21,6 +20,9 @@ type Directives struct {
 	NeededToBeDeclared []models.FlattenKeypath
 	NeededToBeReferred []models.FlattenKeypath
 	TypeExprs          map[models.FlattenKeypath]ast.Expr
+	TypenamesAutogen   map[models.FlattenKeypath]models.TypeName
+	TypenamesElected   map[models.FlattenKeypath]models.TypeName
+	TypenamesProvided  map[models.FlattenKeypath]models.TypeName
 	TypenameUsers      map[models.TypeName][]models.FlattenKeypath
 }
 
@@ -28,12 +30,12 @@ func New(b *bundle.Bundle) *Directives {
 	return &Directives{
 		b: b,
 
-		ElectedTypenames:   map[models.FlattenKeypath]models.TypeName{},
 		Expansions:         map[models.WildcardKeypath][]models.FlattenKeypath{},
 		NamedTypeExprs:     map[models.TypeName]ast.Expr{},
 		NeededToBeDeclared: []models.FlattenKeypath{},
 		NeededToBeReferred: []models.FlattenKeypath{},
 		TypeExprs:          map[models.FlattenKeypath]ast.Expr{},
+		TypenamesElected:   map[models.FlattenKeypath]models.TypeName{},
 		TypenameUsers:      map[models.TypeName][]models.FlattenKeypath{},
 	}
 }

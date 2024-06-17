@@ -12,7 +12,7 @@ import (
 func (d *Directives) implementTypeDeclarations() {
 	uniq := map[models.TypeName]ast.Expr{}
 	for _, kp := range d.NeededToBeDeclared {
-		uniq[d.ElectedTypenames[kp]] = d.TypeExprs[kp]
+		uniq[d.TypenamesElected[kp]] = d.TypeExprs[kp]
 	}
 	uniq = datas.MergeMaps(uniq, d.NamedTypeExprs)
 
