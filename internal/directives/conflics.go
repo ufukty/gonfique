@@ -3,6 +3,7 @@ package directives
 import (
 	"fmt"
 	"go/ast"
+	"slices"
 	"strings"
 
 	"github.com/ufukty/gonfique/internal/compares"
@@ -36,7 +37,8 @@ func (d *Directives) preTypeConflicts() error {
 	}
 
 	if len(conflicts) > 0 {
-		return fmt.Errorf("found conflicts:\n%s", strings.Join(conflicts, "\n"))
+		slices.Sort(conflicts)
+		return fmt.Errorf("found %d conflicts:\n%s", len(conflicts), strings.Join(conflicts, "\n"))
 	}
 	return nil
 }
@@ -44,12 +46,21 @@ func (d *Directives) preTypeConflicts() error {
 func (d *Directives) postTypeConflicts() error {
 	conflicts := []string{}
 
-	for _, tn := range d.parentEnabledTypenames() {
-		ptns := []models.TypeName{}
-		for _, user := range d.TypenameUsers[tn] {
-			ptns = append(ptns, d.TypenamesElected[user.Parent()])
+	for _, tn := range d.FeaturesForTypenames.Named {
+		kps := d.TypenameUsers[tn]
+		for i := 1; i < len(kps); i++ {
+			if !compares.Compare(d.TypeExprs[kps[0]], d.TypeExprs[kps[i]]) {
+				return fmt.Errorf("can't use same type %q for %q and %q", tn, kps[0], kps[i])
+			}
 		}
-		simplified := datas.Uniq(ptns)
+	}
+
+	for _, tn := range d.FeaturesForTypenames.Parent {
+		parents := []models.TypeName{}
+		for _, user := range d.TypenameUsers[tn] {
+			parents = append(parents, d.TypenamesElected[user.Parent()])
+		}
+		simplified := datas.Uniq(parents)
 		if len(simplified) > 1 {
 			return fmt.Errorf("users of type %q have parents with different types: %v", tn, simplified)
 		}
@@ -62,7 +73,8 @@ func (d *Directives) postTypeConflicts() error {
 	}
 
 	if len(conflicts) > 0 {
-		return fmt.Errorf("found conflicts:\n%s", strings.Join(conflicts, "\n"))
+		slices.Sort(conflicts)
+		return fmt.Errorf("found %d conflicts:\n%s", len(conflicts), strings.Join(conflicts, "\n"))
 	}
 	return nil
 }

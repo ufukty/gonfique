@@ -5,7 +5,6 @@ import (
 	"go/ast"
 	"go/token"
 
-	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/models"
 )
 
@@ -14,7 +13,9 @@ func (d *Directives) implementTypeDeclarations() {
 	for _, kp := range d.NeededToBeDeclared {
 		uniq[d.TypenamesElected[kp]] = d.TypeExprs[kp]
 	}
-	uniq = datas.MergeMaps(uniq, d.NamedTypeExprs)
+	for _, tn := range d.FeaturesForTypenames.Named {
+		uniq[tn] = d.TypeExprs[d.TypenameUsers[tn][0]]
+	}
 
 	for tn, expr := range uniq {
 		d.b.Named = append(d.b.Named, &ast.GenDecl{

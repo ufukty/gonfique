@@ -56,7 +56,7 @@ func TestImplement(t *testing.T) {
 			}
 
 			d := New(b)
-			if err = d.Apply(true); err != nil {
+			if err = d.Apply(false); err != nil {
 				t.Fatal(fmt.Errorf("act: %w", err))
 			}
 

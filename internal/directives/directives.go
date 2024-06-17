@@ -18,7 +18,6 @@ type Directives struct {
 	FeaturesForTypenames  perfeature[[]models.TypeName]
 	Holders               map[models.FlattenKeypath]ast.Node // keypath -> Field, ArrayType (inverse Keypaths)
 	Keypaths              map[ast.Node]models.FlattenKeypath // holder -> keypath (resolver)
-	NamedTypeExprs        map[models.TypeName]ast.Expr
 	NeededToBeDeclared    []models.FlattenKeypath
 	NeededToBeReferred    []models.FlattenKeypath
 	TypeExprs             map[models.FlattenKeypath]ast.Expr
@@ -35,7 +34,6 @@ func New(b *bundle.Bundle) *Directives {
 		Expansions:           map[models.WildcardKeypath][]models.FlattenKeypath{},
 		FeaturesForKeypaths:  perfeature[[]models.FlattenKeypath]{},
 		FeaturesForTypenames: perfeature[[]models.TypeName]{},
-		NamedTypeExprs:       map[models.TypeName]ast.Expr{},
 		NeededToBeDeclared:   []models.FlattenKeypath{},
 		NeededToBeReferred:   []models.FlattenKeypath{},
 		TypeExprs:            map[models.FlattenKeypath]ast.Expr{},
@@ -71,9 +69,6 @@ func (d *Directives) Apply(verbose bool) error {
 	d.populateFeaturesForTypenames()
 	if err := d.postTypeConflicts(); err != nil {
 		return fmt.Errorf("post-type conflict checking: %w", err)
-	}
-	if err := d.populateNamedTypeExprs(); err != nil {
-		return fmt.Errorf("checking for named directive: %w", err)
 	}
 	if verbose {
 		d.debug()
