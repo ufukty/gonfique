@@ -17,7 +17,7 @@ func (d *Directives) preTypeConflicts() error {
 	for tn, kps := range d.TypenameUsers {
 		for i := 1; i < len(kps); i++ {
 			if !compares.Compare(d.TypeExprs[kps[0]], d.TypeExprs[kps[i]]) {
-				return fmt.Errorf("%q and %q doesn't share the same schema, but required to share same type %q", kps[0], kps[i], tn)
+				conflicts = append(conflicts, fmt.Sprintf("%s: typename is used for 2 targets with conflicting schemas: %s, %s", tn, kps[0], kps[i]))
 			}
 		}
 	}
