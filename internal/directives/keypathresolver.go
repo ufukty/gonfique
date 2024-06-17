@@ -4,7 +4,6 @@ import (
 	"go/ast"
 	"strings"
 
-	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/models"
 )
 
@@ -38,11 +37,4 @@ func (r *resolver) dfs(n ast.Node, holder ast.Node, path []string) {
 	case *ast.ArrayType:
 		r.dfs(n.Elt, n, append(path, "[]"))
 	}
-}
-
-func (d *Directives) populateKeypathsAndHolders() {
-	resolver := newresolver(d.b.OriginalKeys)
-	resolver.dfs(d.b.CfgType, nil, []string{})
-	d.Keypaths = resolver.keypaths
-	d.Holders = datas.Invmap(d.Keypaths)
 }

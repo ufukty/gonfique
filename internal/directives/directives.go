@@ -68,7 +68,7 @@ func (d *Directives) Apply(verbose bool) error {
 	if err := d.replaceTypeExpressionsWithIdents(); err != nil {
 		return fmt.Errorf("declaring named types: %w", err)
 	}
-	if err := d.AddAccessorFuncDecls(); err != nil {
+	if err := d.addAccessorFuncDecls(); err != nil {
 		return fmt.Errorf("implementing accessor methods: %w", err)
 	}
 	if err := d.addParentRefs(); err != nil {

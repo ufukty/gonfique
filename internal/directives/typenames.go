@@ -13,7 +13,7 @@ import (
 
 func (d *Directives) typenames() error {
 	// collect
-	if err := d.TypenameRequirementsForAccessors(); err != nil {
+	if err := d.typenameRequirementsForAccessors(); err != nil {
 		return fmt.Errorf("checking requirements for accessors: %w", err)
 	}
 	if err := d.parent(); err != nil {

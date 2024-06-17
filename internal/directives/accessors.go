@@ -11,7 +11,7 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-func (d *Directives) TypenameRequirementsForAccessors() error {
+func (d *Directives) typenameRequirementsForAccessors() error {
 	for wckp, drs := range *d.b.Df {
 		if drs.Accessors != nil {
 			kps, ok := d.Expansions[wckp]
@@ -96,7 +96,7 @@ func generateSetter(typename models.TypeName, fieldname models.FieldName, fieldt
 	}
 }
 
-func (d *Directives) AddAccessorFuncDecls() error {
+func (d *Directives) addAccessorFuncDecls() error {
 	if d.b.Df == nil {
 		return fmt.Errorf("directive file is not populated")
 	} else if d.ElectedTypenames == nil {
