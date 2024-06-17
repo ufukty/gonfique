@@ -76,7 +76,7 @@ func (d *Directives) addParentRefs() error {
 	return nil
 }
 
-func (d *Directives) parent() error {
+func (d *Directives) typenameRequirementsForParent() error {
 	for wckp, drs := range *d.b.Df {
 		if drs.Parent != "" {
 			kps, ok := d.Expansions[wckp]

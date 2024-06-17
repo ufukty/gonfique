@@ -13,15 +13,14 @@ type Directives struct {
 	b          *bundle.Bundle
 	Directives map[models.FlattenKeypath]directivefile.Directives
 
-	Keypaths       map[ast.Node]models.FlattenKeypath // holder -> keypath (resolver)
-	Holders        map[models.FlattenKeypath]ast.Node // keypath -> Field, ArrayType (inverse Keypaths)
-	TypeExprs      map[models.FlattenKeypath]ast.Expr
-	NamedTypeExprs map[models.TypeName]ast.Expr
-	Expansions     map[models.WildcardKeypath][]models.FlattenKeypath // matches
-
-	NeededToBeReferred []models.FlattenKeypath
-	NeededToBeDeclared []models.FlattenKeypath
 	ElectedTypenames   map[models.FlattenKeypath]models.TypeName
+	Expansions         map[models.WildcardKeypath][]models.FlattenKeypath // matches
+	Holders            map[models.FlattenKeypath]ast.Node                 // keypath -> Field, ArrayType (inverse Keypaths)
+	Keypaths           map[ast.Node]models.FlattenKeypath                 // holder -> keypath (resolver)
+	NamedTypeExprs     map[models.TypeName]ast.Expr
+	NeededToBeDeclared []models.FlattenKeypath
+	NeededToBeReferred []models.FlattenKeypath
+	TypeExprs          map[models.FlattenKeypath]ast.Expr
 	TypenameUsers      map[models.TypeName][]models.FlattenKeypath
 }
 
@@ -29,15 +28,13 @@ func New(b *bundle.Bundle) *Directives {
 	return &Directives{
 		b: b,
 
-		NeededToBeReferred: []models.FlattenKeypath{},
+		ElectedTypenames:   map[models.FlattenKeypath]models.TypeName{},
+		Expansions:         map[models.WildcardKeypath][]models.FlattenKeypath{},
+		NamedTypeExprs:     map[models.TypeName]ast.Expr{},
 		NeededToBeDeclared: []models.FlattenKeypath{},
-
-		ElectedTypenames: map[models.FlattenKeypath]models.TypeName{},
-		TypenameUsers:    map[models.TypeName][]models.FlattenKeypath{},
-
-		Expansions:     map[models.WildcardKeypath][]models.FlattenKeypath{},
-		TypeExprs:      map[models.FlattenKeypath]ast.Expr{},
-		NamedTypeExprs: map[models.TypeName]ast.Expr{},
+		NeededToBeReferred: []models.FlattenKeypath{},
+		TypeExprs:          map[models.FlattenKeypath]ast.Expr{},
+		TypenameUsers:      map[models.TypeName][]models.FlattenKeypath{},
 	}
 }
 

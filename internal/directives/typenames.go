@@ -16,7 +16,7 @@ func (d *Directives) typenames() error {
 	if err := d.typenameRequirementsForAccessors(); err != nil {
 		return fmt.Errorf("checking requirements for accessors: %w", err)
 	}
-	if err := d.parent(); err != nil {
+	if err := d.typenameRequirementsForParent(); err != nil {
 		return fmt.Errorf("checking requirements for parent refs: %w", err)
 	}
 
