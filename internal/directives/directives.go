@@ -50,6 +50,8 @@ func (d *Directives) Apply(verbose bool) error {
 		return fmt.Errorf("expanding keypaths: %w", err)
 	}
 	d.linearizeDirectives()
+	d.autogeneration()
+	d.populateProvidedTypenames()
 
 	if err := d.typenames(); err != nil {
 		return fmt.Errorf("listing, declaring typenames and swapping definitions: %w", err)
