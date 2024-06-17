@@ -3,7 +3,6 @@ package directives
 import (
 	"fmt"
 	"go/ast"
-	"reflect"
 
 	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/directives/directivefile"
@@ -28,7 +27,7 @@ func (d *Directives) populateExprs() error {
 		case *ast.ArrayType:
 			d.TypeExprs[kp] = n.Elt
 		default:
-			return fmt.Errorf("unrecognized holder type: %s", reflect.TypeOf(n).String())
+			return fmt.Errorf("unrecognized holder type: %T", n)
 		}
 	}
 	return nil
@@ -52,7 +51,7 @@ func (d *Directives) expandKeypaths() error {
 	return nil
 }
 
-func (d *Directives) linearizeDirectives() {
+func (d *Directives) populateDirectivesForKeypaths() {
 	l := map[models.FlattenKeypath]directivefile.Directives{}
 	for wckp, dirs := range *d.b.Df {
 		for _, kp := range d.Expansions[wckp] {
@@ -78,7 +77,7 @@ func (d *Directives) linearizeDirectives() {
 			l[kp] = d
 		}
 	}
-	d.Directives = l
+	d.DirectivesForKeypaths = l
 }
 
 func (d *Directives) populateTypenamesAutogen() {
@@ -97,34 +96,69 @@ func (d *Directives) populateTypenamesProvided() {
 	}
 }
 
-type featureusers struct {
-	Named     []models.FlattenKeypath
-	Parent    []models.FlattenKeypath
-	Type      []models.FlattenKeypath
-	Import    []models.FlattenKeypath
-	Embed     []models.FlattenKeypath
-	Accessors []models.FlattenKeypath
+type perfeature[T any] struct {
+	Named     T
+	Parent    T
+	Type      T
+	Import    T
+	Embed     T
+	Accessors T
 }
 
-func (d *Directives) populateFeatureUsers() {
-	for kp, dirs := range d.Directives {
+func (d *Directives) populateFeaturesForKeypaths() {
+	for kp, dirs := range d.DirectivesForKeypaths {
 		if dirs.Named != "" {
-			d.FeatureUsers.Named = append(d.FeatureUsers.Named, kp)
+			d.FeaturesForKeypaths.Named = append(d.FeaturesForKeypaths.Named, kp)
 		}
 		if dirs.Parent != "" {
-			d.FeatureUsers.Parent = append(d.FeatureUsers.Parent, kp)
+			d.FeaturesForKeypaths.Parent = append(d.FeaturesForKeypaths.Parent, kp)
 		}
 		if dirs.Type != "" {
-			d.FeatureUsers.Type = append(d.FeatureUsers.Type, kp)
+			d.FeaturesForKeypaths.Type = append(d.FeaturesForKeypaths.Type, kp)
 		}
 		if dirs.Import != "" {
-			d.FeatureUsers.Import = append(d.FeatureUsers.Import, kp)
+			d.FeaturesForKeypaths.Import = append(d.FeaturesForKeypaths.Import, kp)
 		}
 		if dirs.Embed != "" {
-			d.FeatureUsers.Embed = append(d.FeatureUsers.Embed, kp)
+			d.FeaturesForKeypaths.Embed = append(d.FeaturesForKeypaths.Embed, kp)
 		}
 		if len(dirs.Accessors) > 0 {
-			d.FeatureUsers.Accessors = append(d.FeatureUsers.Accessors, kp)
+			d.FeaturesForKeypaths.Accessors = append(d.FeaturesForKeypaths.Accessors, kp)
 		}
 	}
+}
+
+func (d *Directives) populateFeaturesForTypenames() {
+	for kp, dirs := range d.DirectivesForKeypaths {
+		if dirs.Named != "" {
+			d.FeaturesForKeypaths.Named = append(d.FeaturesForKeypaths.Named, kp)
+		}
+		if dirs.Parent != "" {
+			d.FeaturesForKeypaths.Parent = append(d.FeaturesForKeypaths.Parent, kp)
+		}
+		if dirs.Type != "" {
+			d.FeaturesForKeypaths.Type = append(d.FeaturesForKeypaths.Type, kp)
+		}
+		if dirs.Import != "" {
+			d.FeaturesForKeypaths.Import = append(d.FeaturesForKeypaths.Import, kp)
+		}
+		if dirs.Embed != "" {
+			d.FeaturesForKeypaths.Embed = append(d.FeaturesForKeypaths.Embed, kp)
+		}
+		if len(dirs.Accessors) > 0 {
+			d.FeaturesForKeypaths.Accessors = append(d.FeaturesForKeypaths.Accessors, kp)
+		}
+	}
+}
+func (d *Directives) parentEnabledTypenames() []models.TypeName {
+
+	enabled := map[models.TypeName]bool{}
+	for wckp, dirs := range *d.b.Df {
+		if dirs.Parent != "" {
+			for _, kp := range d.Expansions[wckp] {
+				enabled[d.TypenamesElected[kp]] = true
+			}
+		}
+	}
+	return maps.Keys(enabled)
 }

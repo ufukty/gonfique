@@ -9,15 +9,21 @@ import (
 	"github.com/ufukty/gonfique/internal/models"
 )
 
-func (d *Directives) typenames() error {
-	// collect
-	if err := d.typenameRequirementsForAccessors(); err != nil {
-		return fmt.Errorf("checking requirements for accessors: %w", err)
-	}
-	if err := d.typenameRequirementsForParent(); err != nil {
-		return fmt.Errorf("checking requirements for parent refs: %w", err)
+func (d *Directives) checkTypenameRequirements() {
+	for _, kp := range d.FeaturesForKeypaths.Parent {
+		d.NeededToBeDeclared = append(d.NeededToBeDeclared, kp)          // itself to declare
+		d.NeededToBeReferred = append(d.NeededToBeReferred, kp.Parent()) // parent to refer
 	}
 
+	for _, kp := range d.FeaturesForKeypaths.Accessors {
+		d.NeededToBeReferred = append(d.NeededToBeReferred, kp) // struct
+		for _, field := range d.DirectivesForKeypaths[kp].Accessors {
+			d.NeededToBeReferred = append(d.NeededToBeReferred, kp.WithFieldPath(field)) // its field
+		}
+	}
+}
+
+func (d *Directives) typenameElection() error {
 	d.NeededToBeReferred = datas.Uniq(d.NeededToBeReferred)
 	d.NeededToBeDeclared = datas.Uniq(d.NeededToBeDeclared)
 

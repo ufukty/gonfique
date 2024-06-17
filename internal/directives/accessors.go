@@ -11,24 +11,6 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-func (d *Directives) typenameRequirementsForAccessors() error {
-	for wckp, drs := range *d.b.Df {
-		if drs.Accessors != nil {
-			kps, ok := d.Expansions[wckp]
-			if !ok {
-				return fmt.Errorf("expansion is found for: %s", wckp)
-			}
-			for _, kp := range kps {
-				d.NeededToBeReferred = append(d.NeededToBeReferred, kp) // struct
-				for _, field := range drs.Accessors {
-					d.NeededToBeReferred = append(d.NeededToBeReferred, kp.WithFieldPath(field)) // its field
-				}
-			}
-		}
-	}
-	return nil
-}
-
 func generateGetter(typename models.TypeName, fieldname models.FieldName, fieldtype models.TypeName) *ast.FuncDecl {
 	recvname := namings.Initial(string(typename))
 	return &ast.FuncDecl{
