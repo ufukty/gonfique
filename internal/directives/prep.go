@@ -34,7 +34,7 @@ func (d *Directives) populateExprs() error {
 	return nil
 }
 
-func (d *Directives) expandKeypathsInDirectives() error {
+func (d *Directives) expandKeypaths() error {
 	for kp := range *d.b.Df {
 		matches, err := matcher.FindTypeDefHoldersForKeypath(d.b.CfgType, kp, d.b.OriginalKeys)
 		if err != nil {
@@ -81,11 +81,11 @@ func (d *Directives) linearizeDirectives() {
 	d.Directives = l
 }
 
-func (d *Directives) autogeneration() {
+func (d *Directives) populateTypenamesAutogen() {
 	d.TypenamesAutogen = namings.GenerateTypenames(maps.Values(d.Keypaths))
 }
 
-func (d *Directives) populateProvidedTypenames() {
+func (d *Directives) populateTypenamesProvided() {
 	d.TypenamesProvided = map[models.FlattenKeypath]models.TypeName{}
 	for wckp, dirs := range *d.b.Df {
 		if dirs.Named != "" {
@@ -93,6 +93,29 @@ func (d *Directives) populateProvidedTypenames() {
 			for _, kp := range kps {
 				d.TypenamesProvided[kp] = dirs.Named
 			}
+		}
+	}
+}
+
+func (d *Directives) populateFeatureUsers() {
+	for kp, dirs := range d.Directives {
+		if dirs.Named != "" {
+			d.FeatureUsers.Named = append(d.FeatureUsers.Named, kp)
+		}
+		if dirs.Parent != "" {
+			d.FeatureUsers.Parent = append(d.FeatureUsers.Parent, kp)
+		}
+		if dirs.Type != "" {
+			d.FeatureUsers.Type = append(d.FeatureUsers.Type, kp)
+		}
+		if dirs.Import != "" {
+			d.FeatureUsers.Import = append(d.FeatureUsers.Import, kp)
+		}
+		if dirs.Embed != "" {
+			d.FeatureUsers.Embed = append(d.FeatureUsers.Embed, kp)
+		}
+		if len(dirs.Accessors) > 0 {
+			d.FeatureUsers.Accessors = append(d.FeatureUsers.Accessors, kp)
 		}
 	}
 }

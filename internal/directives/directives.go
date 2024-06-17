@@ -14,8 +14,9 @@ type Directives struct {
 	Directives map[models.FlattenKeypath]directivefile.Directives
 
 	Expansions         map[models.WildcardKeypath][]models.FlattenKeypath // matches
-	Holders            map[models.FlattenKeypath]ast.Node                 // keypath -> Field, ArrayType (inverse Keypaths)
-	Keypaths           map[ast.Node]models.FlattenKeypath                 // holder -> keypath (resolver)
+	FeatureUsers       featureusers
+	Holders            map[models.FlattenKeypath]ast.Node // keypath -> Field, ArrayType (inverse Keypaths)
+	Keypaths           map[ast.Node]models.FlattenKeypath // holder -> keypath (resolver)
 	NamedTypeExprs     map[models.TypeName]ast.Expr
 	NeededToBeDeclared []models.FlattenKeypath
 	NeededToBeReferred []models.FlattenKeypath
@@ -31,6 +32,7 @@ func New(b *bundle.Bundle) *Directives {
 		b: b,
 
 		Expansions:         map[models.WildcardKeypath][]models.FlattenKeypath{},
+		FeatureUsers:       featureusers{},
 		NamedTypeExprs:     map[models.TypeName]ast.Expr{},
 		NeededToBeDeclared: []models.FlattenKeypath{},
 		NeededToBeReferred: []models.FlattenKeypath{},
@@ -46,12 +48,13 @@ func (d *Directives) Apply(verbose bool) error {
 	if err := d.populateExprs(); err != nil {
 		return fmt.Errorf("collecting type expressions for each keypaths: %w", err)
 	}
-	if err := d.expandKeypathsInDirectives(); err != nil {
+	if err := d.expandKeypaths(); err != nil {
 		return fmt.Errorf("expanding keypaths: %w", err)
 	}
 	d.linearizeDirectives()
-	d.autogeneration()
-	d.populateProvidedTypenames()
+	d.populateTypenamesAutogen()
+	d.populateTypenamesProvided()
+	d.populateFeatureUsers()
 
 	if err := d.typenames(); err != nil {
 		return fmt.Errorf("listing, declaring typenames and swapping definitions: %w", err)
