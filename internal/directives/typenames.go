@@ -9,15 +9,6 @@ import (
 	"github.com/ufukty/gonfique/internal/models"
 )
 
-type featureusers struct {
-	Named     []models.FlattenKeypath
-	Parent    []models.FlattenKeypath
-	Type      []models.FlattenKeypath
-	Import    []models.FlattenKeypath
-	Embed     []models.FlattenKeypath
-	Accessors []models.FlattenKeypath
-}
-
 func (d *Directives) typenames() error {
 	// collect
 	if err := d.typenameRequirementsForAccessors(); err != nil {
