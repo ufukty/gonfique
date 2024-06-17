@@ -21,31 +21,10 @@ func (d *Directives) checkTypenameRequirements() {
 			d.NeededToBeReferred = append(d.NeededToBeReferred, kp.WithFieldPath(field)) // its field
 		}
 	}
-}
 
-func (d *Directives) typenameElection() error {
-	d.NeededToBeReferred = datas.Uniq(d.NeededToBeReferred)
-	d.NeededToBeDeclared = datas.Uniq(d.NeededToBeDeclared)
-
-	// election
-	for _, kp := range slices.Concat(d.NeededToBeReferred, d.NeededToBeDeclared) {
-		tn, ok := d.TypenamesProvided[kp]
-		if ok {
-			d.TypenamesElected[kp] = tn
-			continue
-		}
-		id, ok := d.TypeExprs[kp].(*ast.Ident)
-		if ok {
-			d.TypenamesElected[kp] = models.TypeName(id.Name)
-			continue
-		}
-		if autogen, ok := d.TypenamesAutogen[kp]; ok {
-			d.TypenamesElected[kp] = autogen
-			continue
-		}
-		return fmt.Errorf("can't elect a typename for keypath: %s", kp)
+	for _, kp := range d.FeaturesForKeypaths.Named {
+		d.NeededToBeReferred = append(d.NeededToBeReferred, kp)
 	}
-	d.TypenameUsers = datas.Revmap(d.TypenamesElected)
 
 	// declare referred types except string, int, etc.
 	for _, kp := range d.NeededToBeReferred {
@@ -56,6 +35,25 @@ func (d *Directives) typenameElection() error {
 
 	d.NeededToBeReferred = datas.Uniq(d.NeededToBeReferred)
 	d.NeededToBeDeclared = datas.Uniq(d.NeededToBeDeclared)
+}
 
+func (d *Directives) typenameElection() error {
+	needed := datas.Uniq(slices.Concat(d.NeededToBeReferred, d.NeededToBeDeclared))
+	for _, kp := range needed {
+		if tn, ok := d.TypenamesProvided[kp]; ok {
+			d.TypenamesElected[kp] = tn
+			continue
+		}
+		if id, ok := d.TypeExprs[kp].(*ast.Ident); ok {
+			d.TypenamesElected[kp] = models.TypeName(id.Name)
+			continue
+		}
+		if autogen, ok := d.TypenamesAutogen[kp]; ok {
+			d.TypenamesElected[kp] = autogen
+			continue
+		}
+		return fmt.Errorf("can't elect a typename for keypath: %s", kp)
+	}
+	d.TypenameUsers = datas.Revmap(d.TypenamesElected)
 	return nil
 }
