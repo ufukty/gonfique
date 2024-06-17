@@ -1,6 +1,6 @@
 # Directive File
 
-> ![WARNING]  
+> ![WARNING]
 > Directive file feature is currently experimental. During the experiment; its usage, behavior or existence can change or get removed without warnings.
 
 A directive file is a YAML file that contains a dictionary of keypaths and directives. Example file contains one keypath and 4 directives for it:
@@ -18,15 +18,17 @@ infra.servers.*:
   parent: Parent
 ```
 
-## Keypath
+## Path
 
-Keypaths is the path of any value in a config file defined by keys to be followed in order to access that value separated by dots. Such as, the keypath of `Hello world` is considered as `a.b.c` in this config file:
+Path is the path of any dict-key/list-item/value in a config file defined by keys to be followed in order to access that value separated by dots. Such as, the keypath of `Hello world` is considered as `a.b.c` in this config file:
 
 ```yaml
 a:
   b:
     c: Hello world
 ```
+
+Paths can be used for various purposes when combined with directives such as: creating a named type declaration for resolved type, assigning a type to matching part, manipulate the resolved type etc.
 
 ### Wildcards
 
@@ -44,7 +46,7 @@ A wildcard-containing-keypath can result with multiple matches. In case of multi
 
 Gonfique will notify if a keypath doesn't get any match.
 
-| Keypath            | Example matches                                         |
+| Path               | Example matches                                         |
 | ------------------ | ------------------------------------------------------- |
 | `**.alice.bob`     | `alice.bob`, `x.alice.bob`, `x.x.alice.bob`             |
 | `*.bob.charlie`    | `x.bob.charlie`, `y.bob.charlie`                        |
@@ -85,7 +87,9 @@ a.key.path:
   accessors: [FieldName, FieldName, ...]
 ```
 
-Accessors are getters and setters for fields. Gonfique can implement getters and setters on any field of a struct. The code will contain input and output parameter types that is nicely matching the field type. Since accessors will be defined on the type; all keypaths directs a target, should be aware will be merged.
+Accessors are getters and setters for fields. Gonfique can implement getters and setters on any field of a struct. The code will contain input and output parameter types that is nicely matching the field type.
+
+Note; accessors will be defined on all types the rule matches. Multiple rules matching same target containing conflicting directives is illegal.
 
 ### `embed`
 
@@ -251,3 +255,11 @@ func ReadConfig() (Config, error) {
   ...
 }
 ```
+
+## Troubleshoot
+
+### Combining `parent` and `named` on a group of matches
+
+It might not be obvious to everyone at first thought; but when parent and named is set together on a group of target, parents of those targets need to be in the same type. Otherwise, you want Gonfique to produce invalid Go code. Because adding parent fields to struct definitions alter their types in a way they end-up being exclusive to one parent type.
+
+When both directives set together on a group of matches, make sure parents of matches are in same type. If they are not; either use separate rules to define different names for conflicting matches. Or, let Gonfique to generate unique typenames by **not using** `named` directive. See `exported` directive if all is needed is to access type name from outside package and the typename itself is arbitrary.
