@@ -21,9 +21,7 @@ type Directives struct {
 	NeededToBeDeclared    []models.FlattenKeypath
 	NeededToBeReferred    []models.FlattenKeypath
 	TypeExprs             map[models.FlattenKeypath]ast.Expr
-	TypenamesAutogen      map[models.FlattenKeypath]models.TypeName
 	TypenamesElected      map[models.FlattenKeypath]models.TypeName
-	TypenamesProvided     map[models.FlattenKeypath]models.TypeName
 	TypenameUsers         map[models.TypeName][]models.FlattenKeypath
 }
 
@@ -56,8 +54,6 @@ func (d *Directives) Apply(verbose bool) error {
 		return fmt.Errorf("expanding keypaths: %w", err)
 	}
 	d.populateDirectivesForKeypaths()
-	d.populateTypenamesAutogen()
-	d.populateTypenamesProvided()
 	d.populateFeaturesForKeypaths()
 	if err := d.preTypeConflicts(); err != nil {
 		return fmt.Errorf("pre-type conflict checking: %w", err)

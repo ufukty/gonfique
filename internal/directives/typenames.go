@@ -7,6 +7,8 @@ import (
 
 	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/models"
+	"github.com/ufukty/gonfique/internal/namings"
+	"golang.org/x/exp/maps"
 )
 
 func (d *Directives) checkKeypathsToReferTheirType() {
@@ -27,9 +29,28 @@ func (d *Directives) checkKeypathsToReferTheirType() {
 	d.NeededToBeReferred = datas.Uniq(d.NeededToBeReferred)
 }
 
+func getAutogen(d *Directives) map[models.FlattenKeypath]models.TypeName {
+	return namings.GenerateTypenames(maps.Values(d.Keypaths))
+}
+
+func getProvided(d *Directives) map[models.FlattenKeypath]models.TypeName {
+	provided := map[models.FlattenKeypath]models.TypeName{}
+	for wckp, dirs := range *d.b.Df {
+		if dirs.Named != "" {
+			kps := d.Expansions[wckp]
+			for _, kp := range kps {
+				provided[kp] = dirs.Named
+			}
+		}
+	}
+	return provided
+}
+
 func (d *Directives) typenameElection() error {
+	autogen := getAutogen(d)
+	provided := getProvided(d)
 	for _, kp := range d.NeededToBeReferred {
-		if tn, ok := d.TypenamesProvided[kp]; ok {
+		if tn, ok := provided[kp]; ok {
 			d.TypenamesElected[kp] = tn
 			continue
 		}
@@ -37,7 +58,7 @@ func (d *Directives) typenameElection() error {
 			d.TypenamesElected[kp] = models.TypeName(id.Name)
 			continue
 		}
-		if autogen, ok := d.TypenamesAutogen[kp]; ok {
+		if autogen, ok := autogen[kp]; ok {
 			d.TypenamesElected[kp] = autogen
 			continue
 		}

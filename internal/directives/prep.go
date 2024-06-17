@@ -8,8 +8,6 @@ import (
 	"github.com/ufukty/gonfique/internal/directives/directivefile"
 	"github.com/ufukty/gonfique/internal/matcher"
 	"github.com/ufukty/gonfique/internal/models"
-	"github.com/ufukty/gonfique/internal/namings"
-	"golang.org/x/exp/maps"
 )
 
 func (d *Directives) populateKeypathsAndHolders() {
@@ -78,22 +76,6 @@ func (d *Directives) populateDirectivesForKeypaths() {
 		}
 	}
 	d.DirectivesForKeypaths = l
-}
-
-func (d *Directives) populateTypenamesAutogen() {
-	d.TypenamesAutogen = namings.GenerateTypenames(maps.Values(d.Keypaths))
-}
-
-func (d *Directives) populateTypenamesProvided() {
-	d.TypenamesProvided = map[models.FlattenKeypath]models.TypeName{}
-	for wckp, dirs := range *d.b.Df {
-		if dirs.Named != "" {
-			kps := d.Expansions[wckp]
-			for _, kp := range kps {
-				d.TypenamesProvided[kp] = dirs.Named
-			}
-		}
-	}
 }
 
 type perfeature[T any] struct {
