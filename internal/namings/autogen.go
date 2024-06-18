@@ -33,7 +33,7 @@ func orderKeypaths(kps []models.FlattenKeypath) []models.FlattenKeypath {
 	return ordered
 }
 
-func typenameForSegments(segments []string) models.TypeName {
+func typenameForSegments(segments []string, exported bool) models.TypeName {
 	l := len(segments)
 	if l == 1 && segments[0] == "[]" {
 		return "" // come back next round with 2 segments
@@ -41,7 +41,7 @@ func typenameForSegments(segments []string) models.TypeName {
 	tn := ""
 	for i, s := range segments {
 		if s != "[]" {
-			tn += SafeTypeName(s, i != 0)
+			tn += SafeTypeName(s, i != 0 || exported)
 		} else if i == 0 {
 			tn += "item"
 		} else {
@@ -53,8 +53,10 @@ func typenameForSegments(segments []string) models.TypeName {
 }
 
 // FIXME: consider [] containing keypaths
-func GenerateTypenames(keypaths []models.FlattenKeypath) map[models.FlattenKeypath]models.TypeName {
-	ordered := orderKeypaths(keypaths)
+// targets is map of keypaths and preference of exported typename
+func GenerateTypenames(targets map[models.FlattenKeypath]bool) map[models.FlattenKeypath]models.TypeName {
+	kps := maps.Keys(targets)
+	ordered := orderKeypaths(kps)
 	tns := map[models.FlattenKeypath]models.TypeName{}
 	reserved := map[models.TypeName]bool{
 		"":            true, // defect
@@ -87,7 +89,7 @@ func GenerateTypenames(keypaths []models.FlattenKeypath) map[models.FlattenKeypa
 	for _, kp := range ordered {
 		segments := kp.Segments()
 		for i := len(segments) - 1; i >= 0; i-- {
-			tn := typenameForSegments(segments[i:])
+			tn := typenameForSegments(segments[i:], targets[kp])
 			if _, found := reserved[tn]; !found {
 				reserved[tn] = true
 				tns[kp] = tn

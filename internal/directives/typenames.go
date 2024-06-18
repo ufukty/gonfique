@@ -8,7 +8,6 @@ import (
 	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/namings"
-	"golang.org/x/exp/maps"
 )
 
 func (d *Directives) checkKeypathsToReferTheirType() {
@@ -30,18 +29,21 @@ func (d *Directives) checkKeypathsToReferTheirType() {
 }
 
 func getAutogen(d *Directives) map[models.FlattenKeypath]models.TypeName {
-	return namings.GenerateTypenames(maps.Values(d.Keypaths))
+	targets := map[models.FlattenKeypath]bool{}
+	for _, kp := range d.Keypaths {
+		targets[kp] = false
+	}
+	for _, kp := range d.FeaturesForKeypaths.Export {
+		targets[kp] = true // overwrite exported
+	}
+	autogen := namings.GenerateTypenames(targets)
+	return autogen
 }
 
 func getProvided(d *Directives) map[models.FlattenKeypath]models.TypeName {
 	provided := map[models.FlattenKeypath]models.TypeName{}
-	for wckp, dirs := range *d.b.Df {
-		if dirs.Named != "" {
-			kps := d.Expansions[wckp]
-			for _, kp := range kps {
-				provided[kp] = dirs.Named
-			}
-		}
+	for _, kp := range d.FeaturesForKeypaths.Named {
+		provided[kp] = d.DirectivesForKeypaths[kp].Named
 	}
 	return provided
 }

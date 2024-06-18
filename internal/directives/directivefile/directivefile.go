@@ -10,8 +10,9 @@ import (
 
 type Directives struct {
 	Named     models.TypeName    `yaml:"named"`
-	Type      models.TypeName    `yaml:"type"`      // type-assigning
-	Import    string             `yaml:"import"`    // type-assigning (optional)
+	Type      models.TypeName    `yaml:"type"`   // type-assigning
+	Import    string             `yaml:"import"` // type-assigning (optional)
+	Export    bool               `yaml:"export"`
 	Embed     models.TypeName    `yaml:"embed"`     // type-defining
 	Parent    models.FieldName   `yaml:"parent"`    // type-defining
 	Accessors []models.FieldPath `yaml:"accessors"` // type-defining

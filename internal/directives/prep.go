@@ -63,6 +63,7 @@ func (d *Directives) populateDirectivesForKeypaths() {
 			if dirs.Embed != "" {
 				d.Embed = dirs.Embed
 			}
+			d.Export = dirs.Export
 			if dirs.Type != "" {
 				d.Type = dirs.Type
 			}
@@ -83,6 +84,7 @@ type perfeature[T any] struct {
 	Parent    T
 	Type      T
 	Import    T
+	Export    T
 	Embed     T
 	Accessors T
 }
@@ -94,6 +96,9 @@ func (d *Directives) populateFeaturesForKeypaths() {
 		}
 		if dirs.Embed != "" {
 			d.FeaturesForKeypaths.Embed = append(d.FeaturesForKeypaths.Embed, kp)
+		}
+		if dirs.Export {
+			d.FeaturesForKeypaths.Export = append(d.FeaturesForKeypaths.Export, kp)
 		}
 		if dirs.Import != "" {
 			d.FeaturesForKeypaths.Import = append(d.FeaturesForKeypaths.Import, kp)
@@ -116,6 +121,9 @@ func (d *Directives) populateFeaturesForTypenames() {
 	}
 	for _, kp := range d.FeaturesForKeypaths.Embed {
 		d.FeaturesForTypenames.Embed = append(d.FeaturesForTypenames.Embed, d.TypenamesElected[kp])
+	}
+	for _, kp := range d.FeaturesForKeypaths.Export {
+		d.FeaturesForTypenames.Export = append(d.FeaturesForTypenames.Export, d.TypenamesElected[kp])
 	}
 	for _, kp := range d.FeaturesForKeypaths.Import {
 		d.FeaturesForTypenames.Import = append(d.FeaturesForTypenames.Import, d.TypenamesElected[kp])
