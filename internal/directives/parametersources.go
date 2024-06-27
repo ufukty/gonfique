@@ -35,6 +35,7 @@ func (m sliceTypeParameterSources[K]) AddSource(parameters []K, source models.Wi
 type parameterSources struct {
 	Accessors sliceTypeParameterSources[models.FieldPath]
 	Declare   comprParameterSources[models.TypeName]
+	Embed     comprParameterSources[directivefile.Embed]
 	Export    comprParameterSources[bool]
 	Parent    comprParameterSources[directivefile.Parent]
 	Replace   comprParameterSources[directivefile.Replace]
@@ -46,26 +47,26 @@ func (d *Directives) parameterSourceClassification() {
 		sources := parameterSources{
 			Accessors: sliceTypeParameterSources[models.FieldPath]{},
 			Declare:   comprParameterSources[models.TypeName]{},
+			Embed:     comprParameterSources[directivefile.Embed]{},
 			Export:    comprParameterSources[bool]{},
 			Parent:    comprParameterSources[directivefile.Parent]{},
 			Replace:   comprParameterSources[directivefile.Replace]{},
 		}
 		for _, wckp := range wckps {
 			wckpdirectives := (*d.b.Df)[wckp]
-			if len(wckpdirectives.Accessors) > 0 {
-				sources.Accessors.AddSource(wckpdirectives.Accessors, wckp)
-			}
-			if wckpdirectives.Declare != "" {
-				sources.Declare.AddSource(wckpdirectives.Declare, wckp)
-			}
+			sources.Accessors.AddSource(wckpdirectives.Accessors, wckp)
+			sources.Declare.AddSource(wckpdirectives.Declare, wckp)
 			sources.Export.AddSource(wckpdirectives.Export, wckp)
-			if wckpdirectives.Parent.Fieldname != "" {
-				sources.Parent.AddSource(wckpdirectives.Parent, wckp)
-			}
-			if wckpdirectives.Replace.Typename != "" {
-				sources.Replace.AddSource(wckpdirectives.Replace, wckp)
-			}
+			sources.Embed.AddSource(wckpdirectives.Embed, wckp)
+			sources.Parent.AddSource(wckpdirectives.Parent, wckp)
+			sources.Replace.AddSource(wckpdirectives.Replace, wckp)
 		}
+		// remove default values
+		delete(sources.Declare, models.TypeName(""))
+		delete(sources.Export, false)
+		delete(sources.Embed, directivefile.Embed{})
+		delete(sources.Parent, directivefile.Parent{})
+		delete(sources.Replace, directivefile.Replace{})
 		d.ParameterSources[kp] = sources
 	}
 }
