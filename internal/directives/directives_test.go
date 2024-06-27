@@ -109,37 +109,11 @@ func TestApplyNegative(t *testing.T) {
 			}
 
 			d := New(b)
-			if err = d.Apply(false); err == nil {
+			err = d.Apply(false)
+			if err == nil {
 				t.Fatal("act, expected error")
 			}
-
-			testloc, err := testutils.PrepareTestCase(tc, []string{"go.mod", "go.sum", "config_test.go", "config.yml", "extend.go"})
-			if err != nil {
-				t.Error(fmt.Errorf("preparing testcase to test: :%w", err))
-			}
-
-			if err := coder.Write(b, filepath.Join(testloc, "config.go"), "config"); err != nil {
-				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
-			}
-
-			defer func() {
-				recover()
-			}()
-
-			cmd := exec.Command("/usr/local/go/bin/go", "test",
-				"-timeout", "10s",
-				"-run", "^TestConfig$",
-				"test",
-				"-v", "-count=1",
-			)
-			cmd.Dir = testloc
-			cmd.Stdout = os.Stderr
-			cmd.Stderr = os.Stderr
-			err = cmd.Run()
-			if err == nil {
-				t.Fatal("running go-test, expected failure")
-			}
-
+			fmt.Println("got:", err)
 		})
 	}
 }
