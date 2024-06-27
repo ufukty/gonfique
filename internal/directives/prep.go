@@ -21,9 +21,9 @@ func (d *Directives) populateExprs() error {
 	for kp, n := range d.Holders {
 		switch n := n.(type) {
 		case *ast.Field:
-			d.TypeExprs[kp] = n.Type
+			d.KeypathTypeExprs[kp] = n.Type
 		case *ast.ArrayType:
-			d.TypeExprs[kp] = n.Elt
+			d.KeypathTypeExprs[kp] = n.Elt
 		default:
 			return fmt.Errorf("unrecognized holder type: %T", n)
 		}
@@ -54,24 +54,21 @@ func (d *Directives) populateDirectivesForKeypaths() {
 	for wckp, dirs := range *d.b.Df {
 		for _, kp := range d.Expansions[wckp] {
 			d := l[kp]
-			if dirs.Named != "" {
-				d.Named = dirs.Named
+			if len(dirs.Accessors) > 0 {
+				d.Accessors = dirs.Accessors
 			}
-			if dirs.Parent != "" {
-				d.Parent = dirs.Parent
+			if dirs.Declare != "" {
+				d.Declare = dirs.Declare
 			}
-			if dirs.Embed != "" {
+			if dirs.Embed.Typename != "" {
 				d.Embed = dirs.Embed
 			}
 			d.Export = dirs.Export
-			if dirs.Type != "" {
-				d.Type = dirs.Type
+			if dirs.Parent.Fieldname != "" {
+				d.Parent = dirs.Parent
 			}
-			if dirs.Import != "" {
-				d.Import = dirs.Import
-			}
-			if len(dirs.Accessors) > 0 {
-				d.Accessors = dirs.Accessors
+			if dirs.Replace.Typename != "" {
+				d.Replace = dirs.Replace
 			}
 			l[kp] = d
 		}
@@ -79,14 +76,14 @@ func (d *Directives) populateDirectivesForKeypaths() {
 	d.DirectivesForKeypaths = l
 }
 
-type perfeature[T any] struct {
-	Named     T
-	Parent    T
-	Type      T
-	Import    T
-	Export    T
-	Embed     T
-	Accessors T
+type featuresForKeypaths struct {
+	Accessors []models.FlattenKeypath
+	Embed     []models.FlattenKeypath
+	Export    []models.FlattenKeypath
+	Import    []models.FlattenKeypath
+	Declare   []models.FlattenKeypath
+	Parent    []models.FlattenKeypath
+	Replace   []models.FlattenKeypath
 }
 
 func (d *Directives) populateFeaturesForKeypaths() {
@@ -94,53 +91,20 @@ func (d *Directives) populateFeaturesForKeypaths() {
 		if len(dirs.Accessors) > 0 {
 			d.FeaturesForKeypaths.Accessors = append(d.FeaturesForKeypaths.Accessors, kp)
 		}
-		if dirs.Embed != "" {
+		if dirs.Declare != "" {
+			d.FeaturesForKeypaths.Declare = append(d.FeaturesForKeypaths.Declare, kp)
+		}
+		if dirs.Embed.Typename != "" {
 			d.FeaturesForKeypaths.Embed = append(d.FeaturesForKeypaths.Embed, kp)
 		}
 		if dirs.Export {
 			d.FeaturesForKeypaths.Export = append(d.FeaturesForKeypaths.Export, kp)
 		}
-		if dirs.Import != "" {
-			d.FeaturesForKeypaths.Import = append(d.FeaturesForKeypaths.Import, kp)
-		}
-		if dirs.Named != "" {
-			d.FeaturesForKeypaths.Named = append(d.FeaturesForKeypaths.Named, kp)
-		}
-		if dirs.Parent != "" {
+		if dirs.Parent.Fieldname != "" {
 			d.FeaturesForKeypaths.Parent = append(d.FeaturesForKeypaths.Parent, kp)
 		}
-		if dirs.Type != "" {
-			d.FeaturesForKeypaths.Type = append(d.FeaturesForKeypaths.Type, kp)
+		if dirs.Replace.Typename != "" {
+			d.FeaturesForKeypaths.Replace = append(d.FeaturesForKeypaths.Replace, kp)
 		}
 	}
-}
-
-func (d *Directives) populateFeaturesForTypenames() {
-	for _, kp := range d.FeaturesForKeypaths.Accessors {
-		d.FeaturesForTypenames.Accessors = append(d.FeaturesForTypenames.Accessors, d.TypenamesElected[kp])
-	}
-	for _, kp := range d.FeaturesForKeypaths.Embed {
-		d.FeaturesForTypenames.Embed = append(d.FeaturesForTypenames.Embed, d.TypenamesElected[kp])
-	}
-	for _, kp := range d.FeaturesForKeypaths.Export {
-		d.FeaturesForTypenames.Export = append(d.FeaturesForTypenames.Export, d.TypenamesElected[kp])
-	}
-	for _, kp := range d.FeaturesForKeypaths.Import {
-		d.FeaturesForTypenames.Import = append(d.FeaturesForTypenames.Import, d.TypenamesElected[kp])
-	}
-	for _, kp := range d.FeaturesForKeypaths.Named {
-		d.FeaturesForTypenames.Named = append(d.FeaturesForTypenames.Named, d.TypenamesElected[kp])
-	}
-	for _, kp := range d.FeaturesForKeypaths.Parent {
-		d.FeaturesForTypenames.Parent = append(d.FeaturesForTypenames.Parent, d.TypenamesElected[kp])
-	}
-	for _, kp := range d.FeaturesForKeypaths.Type {
-		d.FeaturesForTypenames.Type = append(d.FeaturesForTypenames.Type, d.TypenamesElected[kp])
-	}
-	d.FeaturesForTypenames.Accessors = datas.Uniq(d.FeaturesForTypenames.Accessors)
-	d.FeaturesForTypenames.Embed = datas.Uniq(d.FeaturesForTypenames.Embed)
-	d.FeaturesForTypenames.Import = datas.Uniq(d.FeaturesForTypenames.Import)
-	d.FeaturesForTypenames.Named = datas.Uniq(d.FeaturesForTypenames.Named)
-	d.FeaturesForTypenames.Parent = datas.Uniq(d.FeaturesForTypenames.Parent)
-	d.FeaturesForTypenames.Type = datas.Uniq(d.FeaturesForTypenames.Type)
 }

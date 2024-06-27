@@ -5,11 +5,13 @@
   accessors: [path]
 
 "*.services.*.endpoints.*":
-  named: Endpoint
+  declare: Endpoint
   accessors: [path]
 
 "*.services":
-  parent: Parent
+  parent:
+    typename: Parent
 
 "*.services.*.endpoints":
-  parent: Parent
+  parent:
+    typename: Parent

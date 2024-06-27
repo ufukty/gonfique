@@ -1,7 +1,6 @@
 package directives
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
 	"slices"
@@ -79,35 +78,12 @@ func generateSetter(typename models.TypeName, fieldname models.FieldName, fieldt
 }
 
 func (d *Directives) addAccessorFuncDecls() error {
-	if d.b.Df == nil {
-		return fmt.Errorf("directive file is not populated")
-	} else if d.TypenamesElected == nil {
-		return fmt.Errorf("elected type names are missing")
-	}
+	tns := maps.Keys(d.ParametersForTypenames.Accessors)
+	slices.SortFunc(tns, caseInsensitiveCompareTypenames)
+
 	d.b.Accessors = []*ast.FuncDecl{}
-
-	fieldsfortypes := map[models.TypeName]map[models.FieldName]models.TypeName{}
-	for wckp, directives := range *d.b.Df {
-		if directives.Accessors != nil {
-			for _, kp := range d.Expansions[wckp] {
-				tn := d.TypenamesElected[kp]
-				if _, ok := fieldsfortypes[tn]; !ok {
-					fieldsfortypes[tn] = map[models.FieldName]models.TypeName{}
-				}
-				for _, fp := range directives.Accessors {
-					fkp := kp.WithFieldPath(fp)
-					ftn := d.TypenamesElected[fkp]
-					fn := d.b.Fieldnames[d.Holders[fkp]]
-					fieldsfortypes[tn][fn] = ftn
-				}
-			}
-		}
-	}
-
-	sorted := maps.Keys(fieldsfortypes)
-	slices.SortFunc(sorted, caseInsensitiveCompareTypenames)
-	for _, tn := range sorted {
-		fields := fieldsfortypes[tn]
+	for _, tn := range tns {
+		fields := d.ParametersForTypenames.Accessors[tn].FieldsAndTypes
 		sortedfields := maps.Keys(fields)
 		slices.SortFunc(sortedfields, caseInsensitiveCompareFieldnames)
 		for _, fn := range sortedfields {

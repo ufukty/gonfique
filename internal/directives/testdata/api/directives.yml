@@ -5,5 +5,5 @@
   accessors: [path]
 
 "**.endpoints.*":
-  named: Endpoint
+  declare: Endpoint
   accessors: [path]

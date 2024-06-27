@@ -8,28 +8,34 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type Embed struct {
+	Typename   models.TypeName `yaml:"typename"`
+	ImportPath string          `yaml:"import-path"`
+	ImportAs   string          `yaml:"import-as"`
+}
+
+type Parent struct {
+	Fieldname models.FieldName `yaml:"fieldname"`
+	Accessors bool             `yaml:"accessors"`
+	Level     int              `yaml:"level"`
+}
+
+type Replace struct {
+	Typename   models.TypeName `yaml:"typename"`
+	ImportPath string          `yaml:"import-path"`
+	ImportAs   string          `yaml:"import-as"`
+}
+
 type Directives struct {
-	Named     models.TypeName    `yaml:"named"`
-	Type      models.TypeName    `yaml:"type"`   // type-assigning
-	Import    string             `yaml:"import"` // type-assigning (optional)
+	Accessors []models.FieldPath `yaml:"accessors"`
+	Embed     Embed              `yaml:"embed"`
 	Export    bool               `yaml:"export"`
-	Embed     models.TypeName    `yaml:"embed"`     // type-defining
-	Parent    models.FieldName   `yaml:"parent"`    // type-defining
-	Accessors []models.FieldPath `yaml:"accessors"` // type-defining
+	Declare   models.TypeName    `yaml:"declare"`
+	Parent    Parent             `yaml:"parent"`
+	Replace   Replace            `yaml:"replace"`
 }
 
 type DirectiveFile map[models.WildcardKeypath]Directives
-
-func (df DirectiveFile) validate() error {
-	for kp, dir := range df {
-		typeAssigning := dir.Type != ""
-		typeDefining := dir.Embed != "" && dir.Parent != "" && len(dir.Accessors) > 0
-		if typeAssigning && typeDefining {
-			return fmt.Errorf("the directives for %q includes both type defining and type assigning features", kp)
-		}
-	}
-	return nil
-}
 
 func ReadDirectiveFile(path string) (*DirectiveFile, error) {
 	f, err := os.Open(path)
@@ -41,9 +47,6 @@ func ReadDirectiveFile(path string) (*DirectiveFile, error) {
 	err = yaml.NewDecoder(f).Decode(df)
 	if err != nil {
 		return nil, fmt.Errorf("decoding the directive file: %w", err)
-	}
-	if err := df.validate(); err != nil {
-		return nil, fmt.Errorf("validating the directive file: %w", err)
 	}
 	return df, nil
 }

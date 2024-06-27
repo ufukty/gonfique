@@ -11,12 +11,44 @@ import (
 	"github.com/ufukty/gonfique/internal/models"
 )
 
-func (d *Directives) preTypeConflicts() error {
+// TODO: Does it makes sense to add checks for accessors, export etc.
+func (d *Directives) checkConflictingSources() error {
+	conflicts := []string{}
+	for kp, directivesources := range d.ParameterSources {
+		if len(directivesources.Declare) > 1 {
+			msg := fmt.Sprintf("%s: conflicting declare parameters:", kp)
+			for val, wckps := range directivesources.Declare {
+				msg += fmt.Sprintf("\n  %v => %q", wckps, val)
+			}
+			conflicts = append(conflicts, msg)
+		}
+		if len(directivesources.Parent) > 1 {
+			msg := fmt.Sprintf("%s: conflicting parent parameters:", kp)
+			for val, wckps := range directivesources.Parent {
+				msg += fmt.Sprintf("\n  %v => %v", wckps, val)
+			}
+			conflicts = append(conflicts, msg)
+		}
+		if len(directivesources.Replace) > 1 {
+			msg := fmt.Sprintf("%s: conflicting replace parameters:", kp)
+			for val, wckps := range directivesources.Replace {
+				msg += fmt.Sprintf("\n  %v => %v", wckps, val)
+			}
+			conflicts = append(conflicts, msg)
+		}
+	}
+	if len(conflicts) > 0 {
+		return fmt.Errorf(strings.Join(conflicts, "\n"))
+	}
+	return nil
+}
+
+func (d *Directives) checkPreTypeConflicts() error {
 	conflicts := []string{}
 
 	for tn, kps := range d.TypenameUsers {
 		for i := 1; i < len(kps); i++ {
-			if !compares.Compare(d.TypeExprs[kps[0]], d.TypeExprs[kps[i]]) {
+			if !compares.Compare(d.KeypathTypeExprs[kps[0]], d.KeypathTypeExprs[kps[i]]) {
 				conflicts = append(conflicts, fmt.Sprintf("%s: typename is used for 2 targets with conflicting schemas: %s, %s", tn, kps[0], kps[i]))
 			}
 		}
@@ -24,14 +56,14 @@ func (d *Directives) preTypeConflicts() error {
 
 	for kp := range d.DirectivesForKeypaths {
 		for pkp := kp.Parent(); pkp != ""; pkp = pkp.Parent() {
-			if d.DirectivesForKeypaths[pkp].Type != "" {
-				conflicts = append(conflicts, fmt.Sprintf("%q: directive for unmanaged subtree (caused by type of %s is manually assigned to %s)", kp, pkp, d.DirectivesForKeypaths[pkp].Type))
+			if d.DirectivesForKeypaths[pkp].Replace.Typename != "" {
+				conflicts = append(conflicts, fmt.Sprintf("%q: directive for unmanaged subtree (caused by type of %s is manually assigned to %s)", kp, pkp, d.DirectivesForKeypaths[pkp].Replace))
 			}
 		}
 	}
 
 	for _, user := range d.FeaturesForKeypaths.Parent {
-		if _, ok := d.TypeExprs[user].(*ast.StructType); !ok {
+		if _, ok := d.KeypathTypeExprs[user].(*ast.StructType); !ok {
 			conflicts = append(conflicts, fmt.Sprintf("%s: non-dict target for parent directive", user))
 		}
 	}
@@ -43,19 +75,10 @@ func (d *Directives) preTypeConflicts() error {
 	return nil
 }
 
-func (d *Directives) postTypeConflicts() error {
+func (d *Directives) checkPostTypeConflicts() error {
 	conflicts := []string{}
 
-	for _, tn := range d.FeaturesForTypenames.Named {
-		kps := d.TypenameUsers[tn]
-		for i := 1; i < len(kps); i++ {
-			if !compares.Compare(d.TypeExprs[kps[0]], d.TypeExprs[kps[i]]) {
-				return fmt.Errorf("can't use same type %q for %q and %q", tn, kps[0], kps[i])
-			}
-		}
-	}
-
-	for _, tn := range d.FeaturesForTypenames.Parent {
+	for tn := range d.ParametersForTypenames.Parent {
 		parents := []models.TypeName{}
 		for _, user := range d.TypenameUsers[tn] {
 			parents = append(parents, d.TypenamesElected[user.Parent()])

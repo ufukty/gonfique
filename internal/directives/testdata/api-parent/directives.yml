@@ -5,8 +5,9 @@
   accessors: [path]
 
 "**.endpoints.*":
-  named: Endpoint
+  declare: Endpoint
   accessors: [path]
 
 "*.**":
-  parent: Parent
+  parent:
+    typename: Parent

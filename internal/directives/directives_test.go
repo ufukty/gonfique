@@ -88,7 +88,9 @@ func TestApplyPositive(t *testing.T) {
 }
 
 func TestApplyNegative(t *testing.T) {
-	tcs := []string{"api-parent"}
+	tcs := []string{
+		"api-parent", // directs to declare all endpoints of all services (parents) with same type and parent refs
+	}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {

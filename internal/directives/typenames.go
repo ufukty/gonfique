@@ -23,8 +23,7 @@ func (d *Directives) checkKeypathsToReferTheirType() {
 		}
 	}
 
-	d.NeededToBeReferred = append(d.NeededToBeReferred, d.FeaturesForKeypaths.Named...)
-
+	d.NeededToBeReferred = append(d.NeededToBeReferred, d.FeaturesForKeypaths.Declare...)
 	d.NeededToBeReferred = datas.Uniq(d.NeededToBeReferred)
 }
 
@@ -42,8 +41,8 @@ func getAutogen(d *Directives) map[models.FlattenKeypath]models.TypeName {
 
 func getProvided(d *Directives) map[models.FlattenKeypath]models.TypeName {
 	provided := map[models.FlattenKeypath]models.TypeName{}
-	for _, kp := range d.FeaturesForKeypaths.Named {
-		provided[kp] = d.DirectivesForKeypaths[kp].Named
+	for _, kp := range d.FeaturesForKeypaths.Declare {
+		provided[kp] = d.DirectivesForKeypaths[kp].Declare
 	}
 	return provided
 }
@@ -56,7 +55,7 @@ func (d *Directives) typenameElection() error {
 			d.TypenamesElected[kp] = tn
 			continue
 		}
-		if id, ok := d.TypeExprs[kp].(*ast.Ident); ok {
+		if id, ok := d.KeypathTypeExprs[kp].(*ast.Ident); ok {
 			d.TypenamesElected[kp] = models.TypeName(id.Name)
 			continue
 		}
@@ -76,7 +75,7 @@ func (d *Directives) checkKeypathsToModifyTheirType() {
 
 	// declare referred types except string, int, etc.
 	for _, kp := range d.NeededToBeReferred {
-		if _, ok := d.TypeExprs[kp].(*ast.Ident); !ok {
+		if _, ok := d.KeypathTypeExprs[kp].(*ast.Ident); !ok {
 			d.NeededToBeDeclared = append(d.NeededToBeDeclared, kp)
 		}
 	}
@@ -87,11 +86,11 @@ func (d *Directives) checkKeypathsToModifyTheirType() {
 func (d *Directives) implementTypeDeclarations() {
 	uniq := map[models.TypeName]ast.Expr{}
 	for _, kp := range d.NeededToBeDeclared {
-		uniq[d.TypenamesElected[kp]] = d.TypeExprs[kp]
+		uniq[d.TypenamesElected[kp]] = d.KeypathTypeExprs[kp]
 	}
-	for _, tn := range d.FeaturesForTypenames.Named {
-		uniq[tn] = d.TypeExprs[d.TypenameUsers[tn][0]]
-	}
+	// for _, tn := range d.FeaturesForTypenames.Named {
+	// 	uniq[tn] = d.KeypathTypeExprs[d.TypenameUsers[tn][0]]
+	// }
 
 	for tn, expr := range uniq {
 		d.b.Named = append(d.b.Named, &ast.GenDecl{
