@@ -10,8 +10,8 @@
 
 "*.services":
   parent:
-    typename: Parent
+    fieldname: Parent
 
 "*.services.*.endpoints":
   parent:
-    typename: Parent
+    fieldname: Parent

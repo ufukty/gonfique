@@ -10,4 +10,4 @@
 
 "*.**":
   parent:
-    typename: Parent
+    fieldname: Parent
