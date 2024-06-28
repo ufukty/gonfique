@@ -8,6 +8,7 @@ import (
 	"github.com/ufukty/gonfique/internal/directives/directivefile"
 	"github.com/ufukty/gonfique/internal/matcher"
 	"github.com/ufukty/gonfique/internal/models"
+	"golang.org/x/exp/maps"
 )
 
 func (d *Directives) populateKeypathsAndHolders() {
@@ -49,62 +50,35 @@ func (d *Directives) expandKeypaths() error {
 	return nil
 }
 
-func (d *Directives) populateDirectivesForKeypaths() {
-	l := map[models.FlattenKeypath]directivefile.Directives{}
-	for wckp, dirs := range *d.b.Df {
-		for _, kp := range d.Expansions[wckp] {
-			d := l[kp]
-			if len(dirs.Accessors) > 0 {
-				d.Accessors = dirs.Accessors
-			}
-			if dirs.Declare != "" {
-				d.Declare = dirs.Declare
-			}
-			if dirs.Embed.Typename != "" {
-				d.Embed = dirs.Embed
-			}
-			d.Export = dirs.Export
-			if dirs.Parent.Fieldname != "" {
-				d.Parent = dirs.Parent
-			}
-			if dirs.Replace.Typename != "" {
-				d.Replace = dirs.Replace
-			}
-			l[kp] = d
-		}
-	}
-	d.DirectivesForKeypaths = l
-}
-
-type featuresForKeypaths struct {
-	Accessors []models.FlattenKeypath
-	Embed     []models.FlattenKeypath
-	Export    []models.FlattenKeypath
-	Import    []models.FlattenKeypath
-	Declare   []models.FlattenKeypath
-	Parent    []models.FlattenKeypath
-	Replace   []models.FlattenKeypath
-}
-
-func (d *Directives) populateFeaturesForKeypaths() {
-	for kp, dirs := range d.DirectivesForKeypaths {
-		if len(dirs.Accessors) > 0 {
+func (d *Directives) populateDirectivesAndFeaturesForKeypaths() {
+	dfk := map[models.FlattenKeypath]directivefile.Directives{}
+	for kp, sources := range d.ParameterSources {
+		ds := directivefile.Directives{}
+		if len(sources.Accessors) > 0 {
+			ds.Accessors = *maps.Keys(sources.Accessors)[0]
 			d.FeaturesForKeypaths.Accessors = append(d.FeaturesForKeypaths.Accessors, kp)
 		}
-		if dirs.Declare != "" {
+		if len(sources.Declare) > 0 {
+			ds.Declare = maps.Keys(sources.Declare)[0]
 			d.FeaturesForKeypaths.Declare = append(d.FeaturesForKeypaths.Declare, kp)
 		}
-		if dirs.Embed.Typename != "" {
+		if len(sources.Embed) > 0 {
+			ds.Embed = maps.Keys(sources.Embed)[0]
 			d.FeaturesForKeypaths.Embed = append(d.FeaturesForKeypaths.Embed, kp)
 		}
-		if dirs.Export {
+		if len(sources.Export) > 0 {
+			ds.Export = maps.Keys(sources.Export)[0]
 			d.FeaturesForKeypaths.Export = append(d.FeaturesForKeypaths.Export, kp)
 		}
-		if dirs.Parent.Fieldname != "" {
+		if len(sources.Parent) > 0 {
+			ds.Parent = maps.Keys(sources.Parent)[0]
 			d.FeaturesForKeypaths.Parent = append(d.FeaturesForKeypaths.Parent, kp)
 		}
-		if dirs.Replace.Typename != "" {
+		if len(sources.Replace) > 0 {
+			ds.Replace = maps.Keys(sources.Replace)[0]
 			d.FeaturesForKeypaths.Replace = append(d.FeaturesForKeypaths.Replace, kp)
 		}
+		dfk[kp] = ds
 	}
+	d.DirectivesForKeypaths = dfk
 }

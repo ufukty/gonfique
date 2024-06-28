@@ -9,6 +9,16 @@ import (
 	"github.com/ufukty/gonfique/internal/models"
 )
 
+type featuresForKeypaths struct {
+	Accessors []models.FlattenKeypath
+	Embed     []models.FlattenKeypath
+	Export    []models.FlattenKeypath
+	Import    []models.FlattenKeypath
+	Declare   []models.FlattenKeypath
+	Parent    []models.FlattenKeypath
+	Replace   []models.FlattenKeypath
+}
+
 type Directives struct {
 	b *bundle.Bundle
 
@@ -16,9 +26,9 @@ type Directives struct {
 	Holders                map[models.FlattenKeypath]ast.Node // inverse Keypaths
 	KeypathTypeExprs       map[models.FlattenKeypath]ast.Expr
 	Expansions             map[models.WildcardKeypath][]models.FlattenKeypath
-	ParameterSources       map[models.FlattenKeypath]parameterSources
+	ParameterSources       map[models.FlattenKeypath]parameterSources         //
 	DirectivesForKeypaths  map[models.FlattenKeypath]directivefile.Directives // flatten ParameterSources
-	FeaturesForKeypaths    featuresForKeypaths                                // slices
+	FeaturesForKeypaths    featuresForKeypaths                                // convenience
 	NeededToBeReferred     []models.FlattenKeypath
 	TypenamesElected       map[models.FlattenKeypath]models.TypeName
 	TypenameUsers          map[models.TypeName][]models.FlattenKeypath // inverse TypenamesElected
@@ -60,8 +70,7 @@ func (d *Directives) Apply(verbose bool) error {
 	if err := d.checkConflictingSources(); err != nil {
 		return fmt.Errorf("comparing directives applied to same targets: %w", err)
 	}
-	d.populateDirectivesForKeypaths()
-	d.populateFeaturesForKeypaths()
+	d.populateDirectivesAndFeaturesForKeypaths()
 	if err := d.checkPreTypeConflicts(); err != nil {
 		return fmt.Errorf("pre-type conflict checking: %w", err)
 	}
