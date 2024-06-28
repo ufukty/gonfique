@@ -40,11 +40,7 @@ func (d *Directives) implementParentRefs() {
 		ty.Fields.List = append(ty.Fields.List, pf)
 	}
 
-	sorted := []models.FlattenKeypath{}
-	// for tn := range d.ParametersForTypenames.Parent {
-	// 	sorted = append(sorted, d.TypenameUsers[tn]...)
-	// }
-	sorted = slices.Clone(d.FeaturesForKeypaths.Parent)
+	sorted := slices.Clone(d.FeaturesForKeypaths.Parent)
 	slices.Sort(sorted)
 	d.b.ParentRefAssignStmts = []ast.Stmt{}
 	for _, kp := range sorted {
