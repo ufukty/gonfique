@@ -37,7 +37,7 @@ func TestAllKeypathsForHolders(t *testing.T) {
 }
 
 func TestApplyPositive(t *testing.T) {
-	tcs := []string{"k8s", "api", "api-parent2"}
+	tcs := []string{"k8s", "api", "api-parent", "api-parent-and-declare"}
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
@@ -89,7 +89,8 @@ func TestApplyPositive(t *testing.T) {
 
 func TestApplyNegative(t *testing.T) {
 	tcs := []string{
-		"api-parent", // directs to declare all endpoints of all services (parents) with same type and parent refs
+		"api-parent-on-root",
+		"api-conflicting-parent-types-and-declare",
 	}
 
 	for _, tc := range tcs {
