@@ -3,10 +3,27 @@ package coder
 import (
 	"go/ast"
 	"go/token"
+	"slices"
 
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/models"
 )
+
+func addParentRefAssignmentsFunction(b *bundle.Bundle, dst *ast.File) {
+	fd := &ast.FuncDecl{
+		Name: ast.NewIdent("parentRefAssignments"),
+		Type: &ast.FuncType{Params: &ast.FieldList{
+			List: []*ast.Field{{
+				Names: []*ast.Ident{ast.NewIdent("c")},
+				Type:  &ast.Ident{Name: b.TypeName},
+			}},
+		}},
+		Body: &ast.BlockStmt{
+			List: b.ParentRefAssignStmts,
+		},
+	}
+	dst.Decls = append(dst.Decls, fd)
+}
 
 func addReaderFunction(b *bundle.Bundle, dst *ast.File) {
 	var decoder *ast.SelectorExpr
@@ -253,6 +270,16 @@ func addReaderFunction(b *bundle.Bundle, dst *ast.File) {
 				},
 			},
 		},
+	}
+
+	if b.ParentRefAssignStmts != nil && len(b.ParentRefAssignStmts) > 0 {
+		// insert before ReturnStmt
+		var callstmt ast.Stmt = &ast.ExprStmt{
+			X: &ast.CallExpr{
+				Fun:  ast.NewIdent("parentRefAssignments"),
+				Args: []ast.Expr{ast.NewIdent("c")},
+			}}
+		readerFunc.Body.List = slices.Insert(readerFunc.Body.List, len(readerFunc.Body.List)-1, callstmt)
 	}
 
 	dst.Decls = append(dst.Decls, readerFunc)

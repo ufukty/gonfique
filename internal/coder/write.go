@@ -85,6 +85,9 @@ func Write(b *bundle.Bundle, dst, pkgname string) error {
 	addIteratorMethods(af, b.Iterators)
 	addNamedTypeSpecifications(af, b.Named)
 	addConfig(af, b.CfgType, b.TypeName)
+	if b.ParentRefAssignStmts != nil && len(b.ParentRefAssignStmts) > 0 {
+		addParentRefAssignmentsFunction(b, af)
+	}
 	addReaderFunction(b, af)
 	if b.Accessors != nil {
 		addAccessors(af, b.Accessors)

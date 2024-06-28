@@ -96,8 +96,6 @@ func (d *Directives) Apply(verbose bool) error {
 	if err := d.addAccessorFuncDecls(); err != nil {
 		return fmt.Errorf("implementing accessor methods: %w", err)
 	}
-	if err := d.addParentRefs(); err != nil {
-		return fmt.Errorf("adding parent refs as fields: %w", err)
-	}
+	d.implementParentRefs()
 	return nil
 }

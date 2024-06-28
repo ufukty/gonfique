@@ -29,7 +29,8 @@ type Bundle struct {
 	Iterators []*ast.FuncDecl // .Range() methods
 	Accessors []*ast.FuncDecl // directives
 
-	Df *directivefile.DirectiveFile
+	Df                   *directivefile.DirectiveFile
+	ParentRefAssignStmts []ast.Stmt
 }
 
 func New(typename string) *Bundle {
