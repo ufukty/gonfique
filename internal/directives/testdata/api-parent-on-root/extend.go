@@ -1,12 +1,14 @@
 package config
 
-import "path/filepath"
+import (
+	"path/filepath"
+)
 
-type addressable interface {
+type Addressable interface {
 	GetPath() string
 }
 
-func Join(adds ...addressable) string {
+func Join(adds ...Addressable) string {
 	addr := []string{}
 	for _, adr := range adds {
 		addr = append(addr, adr.GetPath())

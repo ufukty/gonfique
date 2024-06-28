@@ -13,9 +13,9 @@ func TestConfig(t *testing.T) {
 
 	want := "/api/v1.0.0/tags/assign"
 	got := Join(
-		cfg.Public,
-		cfg.Public.Services.Tags,
-		cfg.Public.Services.Tags.Endpoints.Assign,
+		cfg.Gateways.Public,
+		cfg.Gateways.Public.Services.Tags,
+		cfg.Gateways.Public.Services.Tags.Endpoints.Assign,
 	)
 	if want != got {
 		t.Fatal(fmt.Errorf("assert:\nwant: %s\ngot : %s", want, got))

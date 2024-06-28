@@ -1,13 +1,17 @@
-"gateways.public":
+"*":
   accessors: [path]
 
-"**.services.*":
+"*.services.*":
   accessors: [path]
 
-"**.endpoints.*":
+"*.services.*.endpoints.*":
   declare: Endpoint
   accessors: [path]
 
-"*.**":
+"*.services":
+  parent:
+    fieldname: Parent
+
+"*.services.*.endpoints":
   parent:
     fieldname: Parent
