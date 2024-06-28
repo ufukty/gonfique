@@ -12,19 +12,19 @@ import (
 type Directives struct {
 	b *bundle.Bundle
 
-	DirectivesForKeypaths  map[models.FlattenKeypath]directivefile.Directives
-	Expansions             map[models.WildcardKeypath][]models.FlattenKeypath // matches
-	FeaturesForKeypaths    featuresForKeypaths
-	ParametersForTypenames parametersForTypenames // in-effect directive parameters
-	ParameterSources       map[models.FlattenKeypath]parameterSources
-	Holders                map[models.FlattenKeypath]ast.Node // keypath -> Field, ArrayType (inverse Keypaths)
-	Keypaths               map[ast.Node]models.FlattenKeypath // holder -> keypath (resolver)
-	NeededToBeDeclared     []models.FlattenKeypath
-	NeededToBeReferred     []models.FlattenKeypath
+	Keypaths               map[ast.Node]models.FlattenKeypath // holder (Field, ArrayType etc.) -> keypath (resolver)
+	Holders                map[models.FlattenKeypath]ast.Node // inverse Keypaths
 	KeypathTypeExprs       map[models.FlattenKeypath]ast.Expr
-	TypeExprs              map[models.TypeName]ast.Expr
+	Expansions             map[models.WildcardKeypath][]models.FlattenKeypath
+	ParameterSources       map[models.FlattenKeypath]parameterSources
+	DirectivesForKeypaths  map[models.FlattenKeypath]directivefile.Directives // flatten ParameterSources
+	FeaturesForKeypaths    featuresForKeypaths                                // slices
+	NeededToBeReferred     []models.FlattenKeypath
 	TypenamesElected       map[models.FlattenKeypath]models.TypeName
 	TypenameUsers          map[models.TypeName][]models.FlattenKeypath // inverse TypenamesElected
+	TypeExprs              map[models.TypeName]ast.Expr
+	ParametersForTypenames parametersForTypenames // in-effect directive parameters, more than what DirectivesForKeypaths contains
+	NeededToBeDeclared     []models.FlattenKeypath
 }
 
 func New(b *bundle.Bundle) *Directives {
