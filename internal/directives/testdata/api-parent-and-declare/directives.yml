@@ -1,7 +1,5 @@
 "*":
   accessors: [path]
-  parent:
-    fieldname: Parent
 
 "*.services":
   parent:
