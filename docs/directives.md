@@ -2,6 +2,8 @@
 
 > ![WARNING]
 > Directive file feature is currently experimental. During the experiment; its usage, behavior or existence can change or get removed without warnings.
+
+> ![WARNING]
 > Documentation might not be up to date with implementation at the moment.
 
 A directive file is a YAML file that contains a dictionary of paths and directives. Example file contains 3 path and 4 directives for it:
@@ -12,12 +14,7 @@ infra.servers:
 
 infra.servers.*:
   declare: Vps
-  embed:
-    typename: Basic
   accessors: [Cores, Ram, Disk]
-
-"*.**":
-  parent: Parent
 ```
 
 ## Path
@@ -67,10 +64,10 @@ There are 5 different directive that can be set on a path. See explanations for 
 a.key.path:
   accessors: ...
   declare: ...
-  embed: ...
+  embed: ... # planned
   export: ...
   parent: ...
-  replace: ...
+  replace: ... # planned
 ```
 
 ### `declare`
@@ -117,6 +114,9 @@ Accessors are getters and setters for fields. Gonfique can implement getters and
 
 ### `embed`
 
+> [!NOTE]
+> This directive is currently here for preview and unavailable for use.
+
 ```yaml
 a.key.path:
   embed:
@@ -149,6 +149,9 @@ Using `parent` adds a field to generated type. The field name will be `fieldname
 - Adding parent refs alters the body of ReadConfig function, as the refs need to be assigned after initialization.
 
 ### `replace`
+
+> [!NOTE]
+> This directive is currently here for preview and unavailable for use.
 
 ```yaml
 a.key.path:
@@ -201,95 +204,6 @@ lorem:
 | `lorem.ipsum.sit`   | `ipsumSit`         |
 | `lorem.ipsum`       | `ipsum`            |
 | `lorem.sit`         | `sit`              |
-
-## Full example
-
-Config file:
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-deployment
-  namespace: my-namespace
-type: Opaque
-data:
-  my-key: my-value
-  password: cGFzc3dvcmQ=
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: my-app
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
-  rules:
-    - host: myapp.example.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: my-service
-                port:
-                  number: 80
-  template:
-    metadata:
-      labels:
-        app: my-app
-    spec:
-      containers:
-        - name: my-container
-          image: my-image
-          ports:
-            - containerPort: 80
-          envFrom:
-            - configMapRef:
-                name: my-config
-            - secretRef:
-                name: my-secret
-```
-
-Directive file:
-
-```yaml
-# export each auto generated type name by default
-"**":
-  exported: true
-
-# add a '.Parent' field to each struct type that is under 'spec' key
-spec.**:
-  parent: Parent
-
-# make the item type of ports list named 'Port'
-spec.ports.[]:
-  named: Port
-
-# assign the type 'Protocol' to 'protocol' field of item type
-spec.ports.[].protocol:
-  type: Protocol
-```
-
-Output:
-
-```go
-type Eve struct {
-  Frank Frank
-}
-
-type Frank struct {
-  MyParent *Eve // notice
-}
-
-func ReadConfig() (Config, error) {
-  ...
-  cfg.A.Eve.Frank.MyParent = &cfg.A.Eve // notice
-  ...
-}
-```
 
 ## Troubleshoot
 
