@@ -1,0 +1,12 @@
+gonfique is a tool to generate type definitions for YAML and JSON files in Go.
+
+Usage:
+
+        gonfique <command> [arguments]
+
+The commands are:
+
+        generate    generate a Go file that contains the type definition(s)
+        version     print gonfique version
+
+Use "gonfique help <command>" for more information about a command.

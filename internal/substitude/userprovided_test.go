@@ -7,8 +7,11 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ufukty/gonfique/internal/bundle"
+	"github.com/ufukty/gonfique/internal/coder"
 	"github.com/ufukty/gonfique/internal/files"
 	"github.com/ufukty/gonfique/internal/testutils"
+	"github.com/ufukty/gonfique/internal/transform"
 )
 
 func TestSubstitute(t *testing.T) {
@@ -16,7 +19,9 @@ func TestSubstitute(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			f, err := files.ReadConfigFile(filepath.Join("testdata", tc, "config.yml"), "Config")
+			b := bundle.New("Config")
+
+			err := files.ReadConfigFile(b, filepath.Join("testdata", tc, "config.yml"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}
@@ -31,9 +36,10 @@ func TestSubstitute(t *testing.T) {
 				t.Fatal(fmt.Errorf("reading types to use in substitution: %w", err))
 			}
 
-			UserProvided(f, etss)
+			transform.Transform(b)
+			UserProvided(b, etss)
 
-			if err := f.Write(filepath.Join(testloc, "config.go"), "config"); err != nil {
+			if err := coder.Write(b, filepath.Join(testloc, "config.go"), "config"); err != nil {
 				t.Fatal(fmt.Errorf("creating config.go file: %w", err))
 			}
 

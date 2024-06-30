@@ -1,0 +1,16 @@
+gateway:
+  named: Gateway
+  accessors: [path]
+
+gateway.services:
+  parent: Parent
+
+gateway.services.*:
+  parent: Parent
+  accessors: [path]
+
+gateway.services.*.endpoints:
+  parent: Parent
+
+gateway.services.*.endpoints.*:
+  named: Endpoint

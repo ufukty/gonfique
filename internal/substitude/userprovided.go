@@ -6,8 +6,8 @@ import (
 	"go/parser"
 	"go/token"
 
+	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/compares"
-	"github.com/ufukty/gonfique/internal/files"
 	"golang.org/x/tools/go/ast/astutil"
 )
 
@@ -31,9 +31,9 @@ func ReadTypes(path string) ([]*ast.TypeSpec, error) {
 	return tss, nil
 }
 
-func UserProvided(f *files.File, existing []*ast.TypeSpec) {
+func UserProvided(b *bundle.Bundle, existing []*ast.TypeSpec) {
 	// substitute on dfs traceback
-	astutil.Apply(f.Cfg, nil, func(c *astutil.Cursor) bool {
+	astutil.Apply(b.CfgType, nil, func(c *astutil.Cursor) bool {
 		for _, e := range existing {
 			if c.Node() != nil && compares.Compare(c.Node(), e.Type) {
 				c.Replace(e.Name)

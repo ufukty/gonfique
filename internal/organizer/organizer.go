@@ -5,16 +5,17 @@ import (
 	"go/token"
 	"slices"
 
+	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/compares"
-	"github.com/ufukty/gonfique/internal/files"
+	"github.com/ufukty/gonfique/internal/namings"
 	"golang.org/x/tools/go/ast/astutil"
 )
 
-func Organize(f *files.File) {
+func Organize(b *bundle.Bundle) {
 	store := map[*ast.StructType]*ast.Ident{}
 	prevs := []*ast.StructType{}
-	astutil.Apply(f.Cfg, nil, func(c *astutil.Cursor) bool {
-		if c.Node() != nil && c.Node() != f.Cfg {
+	astutil.Apply(b.CfgType, nil, func(c *astutil.Cursor) bool {
+		if c.Node() != nil && c.Node() != b.CfgType {
 			if st, ok := c.Node().(*ast.StructType); ok {
 				i := slices.IndexFunc(prevs, func(prev *ast.StructType) bool {
 					return compares.Compare(prev, st)
@@ -22,7 +23,7 @@ func Organize(f *files.File) {
 				if i != -1 {
 					c.Replace(store[prevs[i]])
 				} else {
-					name := ast.NewIdent("autoGen" + bijective26(len(store)))
+					name := ast.NewIdent("autoGen" + namings.Bijective26(len(store)))
 					prevs = append(prevs, st)
 					store[st] = name
 					c.Replace(name)
@@ -50,5 +51,5 @@ func Organize(f *files.File) {
 			Type: st,
 		})
 	}
-	f.Isolated = gd
+	b.Isolated = gd
 }

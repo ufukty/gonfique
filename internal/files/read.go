@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"slices"
 
-	"github.com/ufukty/gonfique/internal/transform"
+	"github.com/ufukty/gonfique/internal/bundle"
+	"github.com/ufukty/gonfique/internal/models"
 	"gopkg.in/yaml.v3"
 )
 
-func readYamlConfig(src string, typename string) (*File, error) {
+func readYamlConfig(src string) (any, error) {
 	f, err := os.Open(src)
 	if err != nil {
 		return nil, fmt.Errorf("opening input file: %w", err)
@@ -21,27 +21,10 @@ func readYamlConfig(src string, typename string) (*File, error) {
 	if err := yaml.NewDecoder(f).Decode(&y); err != nil {
 		return nil, fmt.Errorf("decoding input file: %w", err)
 	}
-
-	cfg, imports, keys := transform.Transform(y, transform.Yaml)
-	imports = slices.Concat([]string{"fmt", "os", "gopkg.in/yaml.v3"}, imports)
-	slices.Sort(imports)
-
-	file := &File{
-		Encoding:      transform.Yaml,
-		Keys:          keys,
-		TypeName:      typename,
-		ConfigContent: y,
-		Cfg:           cfg,
-		Named:         nil,
-		Isolated:      nil,
-		Iterators:     nil,
-		Imports:       imports,
-	}
-
-	return file, nil
+	return y, nil
 }
 
-func readJsonConfig(src string, typename string) (*File, error) {
+func readJsonConfig(src string) (any, error) {
 	f, err := os.Open(src)
 	if err != nil {
 		return nil, fmt.Errorf("opening input file: %w", err)
@@ -51,33 +34,29 @@ func readJsonConfig(src string, typename string) (*File, error) {
 	if err := json.NewDecoder(f).Decode(&y); err != nil {
 		return nil, fmt.Errorf("decoding input file: %w", err)
 	}
-
-	cfg, imports, keys := transform.Transform(y, transform.Json)
-	imports = slices.Concat([]string{"fmt", "os", "encoding/json"}, imports)
-	slices.Sort(imports)
-
-	file := &File{
-		Encoding:      transform.Json,
-		Keys:          keys,
-		TypeName:      typename,
-		ConfigContent: y,
-		Cfg:           cfg,
-		Named:         nil,
-		Isolated:      nil,
-		Iterators:     nil,
-		Imports:       imports,
-	}
-
-	return file, nil
+	return y, nil
 }
 
-func ReadConfigFile(src string, typename string) (*File, error) {
+func ReadConfigFile(b *bundle.Bundle, src string) error {
+	var err error
 	switch ext := filepath.Ext(src); ext {
 	case ".json":
-		return readJsonConfig(src, typename)
+		b.Encoding = models.Json
+		b.Imports = append(b.Imports, "encoding/json")
+		b.Cfgcontent, err = readJsonConfig(src)
+		if err != nil {
+			return fmt.Errorf("reading json config: %w", err)
+		}
+		return nil
 	case ".yaml", ".yml":
-		return readYamlConfig(src, typename)
+		b.Encoding = models.Yaml
+		b.Imports = append(b.Imports, "gopkg.in/yaml.v3")
+		b.Cfgcontent, err = readYamlConfig(src)
+		if err != nil {
+			return fmt.Errorf("reading yaml config: %w", err)
+		}
+		return nil
 	default:
-		return nil, fmt.Errorf("unsupported file extension %q", ext)
+		return fmt.Errorf("unsupported file extension %q", ext)
 	}
 }

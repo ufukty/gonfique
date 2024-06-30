@@ -1,0 +1,13 @@
+"gateways.public":
+  accessors: [path]
+
+"**.services.*":
+  accessors: [path]
+
+"**.endpoints.*":
+  declare: Endpoint
+  accessors: [path]
+
+"*.**":
+  parent:
+    fieldname: Parent
