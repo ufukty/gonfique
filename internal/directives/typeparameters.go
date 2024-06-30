@@ -14,7 +14,6 @@ func (d *Directives) populateTypeExprs() {
 		d.TypeExprs[tn] = modelty
 	}
 }
-
 type typenameParentDetails struct {
 	Fieldname  models.FieldName
 	ParentType models.TypeName
@@ -102,7 +101,7 @@ func (d *Directives) mergeDirectiveParametersForTypes() error {
 	for tn, kps := range d.TypenameUsers {
 		for _, kp := range kps {
 			dirs := d.DirectivesForKeypaths[kp]
-			if dirs.Parent.Fieldname != "" {
+			if dirs.Parent != "" {
 				current, ok := f.Parent[tn]
 				if !ok {
 					f.Parent[tn] = typenameParentDetails{
@@ -119,7 +118,7 @@ func (d *Directives) mergeDirectiveParametersForTypes() error {
 				// if dirs.Parent.Level != current.Level {
 				//   return fmt.Errorf("typename %q is ...", tn)
 				// }
-				current.Fieldname = dirs.Parent.Fieldname
+				current.Fieldname = dirs.Parent
 				current.ParentType = d.TypenamesElected[kp.Parent()] // TODO: compare with current value
 				f.Parent[tn] = current
 			}

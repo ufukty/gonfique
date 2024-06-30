@@ -14,12 +14,6 @@ type Embed struct {
 	ImportAs   string          `yaml:"import-as"`
 }
 
-type Parent struct {
-	Fieldname models.FieldName `yaml:"fieldname"`
-	Accessors bool             `yaml:"accessors"`
-	Level     int              `yaml:"level"`
-}
-
 type Replace struct {
 	Typename   models.TypeName `yaml:"typename"`
 	ImportPath string          `yaml:"import-path"`
@@ -31,7 +25,7 @@ type Directives struct {
 	Embed     Embed              `yaml:"embed"`
 	Export    bool               `yaml:"export"`
 	Declare   models.TypeName    `yaml:"declare"`
-	Parent    Parent             `yaml:"parent"`
+	Parent    models.FieldName   `yaml:"parent"`
 	Replace   Replace            `yaml:"replace"`
 }
 

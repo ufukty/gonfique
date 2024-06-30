@@ -137,18 +137,10 @@ Use `import-path` if the embedded type is outside of package specified with CLI 
 
 ```yaml
 a.key.path:
-  parent:
-    fieldname: Fieldname
-    accessors: True/False
-    level: 1
+  parent: Fieldname
 ```
 
 Using `parent` adds a field to generated type. The field name will be `fieldname` and its value will be the reference of its `level`th level of parent. Adding refs may be useful when the data defines an hierarchy a traceback from a child to root is needed.
-
-**Options**
-
-- Accessors can be defined on the generated field, if generalization will be needed.
-- Level of parent/ancestor can be customized. Default value, `1` adds the ref of direct parent such as `a.b.c.Parent` will point to `a.b` while 2 would make it point to `a`.
 
 **Notes**
 

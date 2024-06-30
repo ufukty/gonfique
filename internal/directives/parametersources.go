@@ -37,7 +37,7 @@ type parameterSources struct {
 	Declare   comprParameterSources[models.TypeName]
 	Embed     comprParameterSources[directivefile.Embed]
 	Export    comprParameterSources[bool]
-	Parent    comprParameterSources[directivefile.Parent]
+	Parent    comprParameterSources[models.FieldName]
 	Replace   comprParameterSources[directivefile.Replace]
 }
 
@@ -49,7 +49,7 @@ func (d *Directives) parameterSourceClassification() {
 			Declare:   comprParameterSources[models.TypeName]{},
 			Embed:     comprParameterSources[directivefile.Embed]{},
 			Export:    comprParameterSources[bool]{},
-			Parent:    comprParameterSources[directivefile.Parent]{},
+			Parent:    comprParameterSources[models.FieldName]{},
 			Replace:   comprParameterSources[directivefile.Replace]{},
 		}
 		for _, wckp := range wckps {
@@ -65,7 +65,7 @@ func (d *Directives) parameterSourceClassification() {
 		delete(sources.Declare, models.TypeName(""))
 		delete(sources.Export, false)
 		delete(sources.Embed, directivefile.Embed{})
-		delete(sources.Parent, directivefile.Parent{})
+		delete(sources.Parent, models.FieldName(""))
 		delete(sources.Replace, directivefile.Replace{})
 		d.ParameterSources[kp] = sources
 	}
