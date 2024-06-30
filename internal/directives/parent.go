@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"github.com/ufukty/gonfique/internal/models"
+	"github.com/ufukty/gonfique/internal/namings"
 )
 
 func selectExprForKeypath(d *Directives, kp models.FlattenKeypath) ast.Expr {
@@ -54,5 +55,27 @@ func (d *Directives) implementParentRefs() {
 				X:  selectExprForKeypath(d, kp.Parent()),
 			}},
 		})
+	}
+
+	for tn, details := range d.ParametersForTypenames.Parent {
+		recvname := namings.Initial(string(tn))
+		fd := &ast.FuncDecl{
+			Recv: &ast.FieldList{List: []*ast.Field{{
+				Names: []*ast.Ident{{Name: recvname}},
+				Type:  tn.Ident(),
+			}}},
+			Name: ast.NewIdent("Get" + string(details.Fieldname)),
+			Type: &ast.FuncType{
+				Params:  &ast.FieldList{},
+				Results: &ast.FieldList{List: []*ast.Field{{Type: ast.NewIdent("any")}}},
+			},
+			Body: &ast.BlockStmt{List: []ast.Stmt{&ast.ReturnStmt{
+				Results: []ast.Expr{&ast.SelectorExpr{
+					X:   ast.NewIdent(recvname),
+					Sel: details.Fieldname.Ident(),
+				}},
+			}}},
+		}
+		d.b.Accessors = append(d.b.Accessors, fd)
 	}
 }
