@@ -69,6 +69,31 @@ func addConfig(dst *ast.File, cfg ast.Expr, typeName string) {
 }
 
 func addAccessors(dst *ast.File, accessors []*ast.FuncDecl) {
+	// sorts accessors by receiver name first then method name
+	slices.SortFunc(accessors, func(i, j *ast.FuncDecl) int {
+		it, jt := i.Recv.List[0].Type, j.Recv.List[0].Type
+		if se, ok := it.(*ast.StarExpr); ok {
+			it = se.X
+		}
+		if se, ok := jt.(*ast.StarExpr); ok {
+			jt = se.X
+		}
+		in := it.(*ast.Ident).Name
+		jn := jt.(*ast.Ident).Name
+		if in < jn {
+			return -1
+		} else if in > jn {
+			return 1
+		}
+		ifn := i.Name.Name
+		jfn := j.Name.Name
+		if i.Name.Name < j.Name.Name {
+			return -1
+		} else if ifn > jfn {
+			return 1
+		}
+		return 0
+	})
 	for _, fd := range accessors {
 		dst.Decls = append(dst.Decls, fd)
 	}
