@@ -6,7 +6,7 @@ Leave a :star: for Gonfique's future development
 
 Gonfique is a CLI tool for Go developers to automatically build exact **struct definitions** in Go that will match the provided YAML or JSON config. Makes instant to notice **when and where a breaking change** occurs. Since compiler warns whenever it happens by type-checking, and source control shows where the change exactly is.
 
-## Example
+## Examples
 
 Input:
 
@@ -57,7 +57,7 @@ spec:
                 name: my-secret
 ```
 
-Output:
+### Output for basic usage
 
 ```go
 package config
@@ -152,9 +152,103 @@ func ReadConfig(path string) (Config, error) {
 }
 ```
 
+### Output when mapping is used
+
+```yml
+apiVersion: ApiVersion
+metadata.name: Name
+spec.rules.[]: Rule
+spec.rules.[].http.paths.[]: Path
+spec.ports.[]: Port
+spec.**.containers: SpecContainers
+spec.**.containers.[]: SpecContainer
+spec.**.containers.[].name: ContainerName
+```
+
+```go
+// ...
+
+type ApiVersion string
+type ContainerName string
+type Name string
+type Path struct {
+  Backend struct {
+    Service struct {
+      Name string `yaml:"name"`
+      Port struct {
+        Number int `yaml:"number"`
+      } `yaml:"port"`
+    } `yaml:"service"`
+  } `yaml:"backend"`
+  Path     string `yaml:"path"`
+  PathType string `yaml:"pathType"`
+}
+type Port struct {
+  Port       int    `yaml:"port"`
+  Protocol   string `yaml:"protocol"`
+  TargetPort int    `yaml:"targetPort"`
+}
+type Rule struct {
+  Host string `yaml:"host"`
+  Http struct {
+    Paths []Path `yaml:"paths"`
+  } `yaml:"http"`
+}
+type SpecContainer struct {
+  EnvFrom []struct {
+    ConfigMapRef struct {
+      Name string `yaml:"name"`
+    } `yaml:"configMapRef"`
+    SecretRef struct {
+      Name string `yaml:"name"`
+    } `yaml:"secretRef"`
+  } `yaml:"envFrom"`
+  Image string        `yaml:"image"`
+  Name  ContainerName `yaml:"name"`
+  Ports []struct {
+    ContainerPort int `yaml:"containerPort"`
+  } `yaml:"ports"`
+}
+type SpecContainers []SpecContainer
+type Config struct {
+  ApiVersion ApiVersion `yaml:"apiVersion"`
+  Data       struct {
+    MyKey    string `yaml:"my-key"`
+    Password string `yaml:"password"`
+  } `yaml:"data"`
+  Kind     string `yaml:"kind"`
+  Metadata struct {
+    Name      Name   `yaml:"name"`
+    Namespace string `yaml:"namespace"`
+  } `yaml:"metadata"`
+  Spec struct {
+    Ports    []Port `yaml:"ports"`
+    Replicas int    `yaml:"replicas"`
+    Rules    []Rule `yaml:"rules"`
+    Selector struct {
+      MatchLabels struct {
+        App string `yaml:"app"`
+      } `yaml:"matchLabels"`
+    } `yaml:"selector"`
+    Template struct {
+      Metadata struct {
+        Labels struct {
+          App string `yaml:"app"`
+        } `yaml:"labels"`
+      } `yaml:"metadata"`
+      Spec struct {
+        Containers SpecContainers `yaml:"containers"`
+      } `yaml:"spec"`
+    } `yaml:"template"`
+  } `yaml:"spec"`
+  Type string `yaml:"type"`
+}
+
+// ...
+```
+
 See outputs for different flag combinations:
 
-- [`-mapping`](/examples/k8s/map/output.go)
 - [`-organize`](/examples/k8s/organized/output.go)
 - [`-organize`, `-use`](/examples/k8s/organized-used/output.go)
 
@@ -176,6 +270,7 @@ Run `gonfique --help` for [parameter details](docs/parameter-details.txt).
 
 ## Features
 
+- Works offline
 - Specify names for detected types via `-mapping` flag to export safely. [More](docs/mapping.md)
 - Defines named or inline types depending on user choice (`-organize` flag).
 - Reuses user-defined types defined provided in a file when schemas match via `-use` flag
