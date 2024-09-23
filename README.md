@@ -1,5 +1,3 @@
-Leave a :star: for Gonfique's future development
-
 # Gonfique
 
 <img src="assets/Gonfique.png" alt="Gonfique logo" height="300px">
