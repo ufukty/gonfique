@@ -23,7 +23,7 @@ func TestAllKeypathsForHolders(t *testing.T) {
 	}
 	d := New(b)
 	d.populateKeypathsAndHolders()
-	got := d.Keypaths
+	got := d.keypaths
 	if len(got) != len(appendix.Keypaths) {
 		t.Errorf("assert 1, length. want %d got %d", len(appendix.Keys), len(got))
 	}

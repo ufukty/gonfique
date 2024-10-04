@@ -9,7 +9,7 @@ import (
 )
 
 func (d *Directives) debug() {
-	usages := datas.Revmap(d.Elected)
+	usages := datas.Revmap(d.elected)
 
 	fmt.Println("elected types:")
 	for tn, kps := range usages {
@@ -23,7 +23,7 @@ func (d *Directives) debug() {
 	effects := map[models.FlattenKeypath][]models.WildcardKeypath{}
 
 	for wckp := range *d.b.Df {
-		for _, kp := range d.Expansions[wckp] {
+		for _, kp := range d.expansions[wckp] {
 			if _, ok := effects[kp]; !ok {
 				effects[kp] = []models.WildcardKeypath{}
 			}

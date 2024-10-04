@@ -18,10 +18,10 @@ type parentRefDetails struct {
 func detailsForParentRefs(d *Directives) (map[models.TypeName]parentRefDetails, error) {
 	details := map[models.TypeName]parentRefDetails{}
 
-	for tn, kps := range d.Instances {
+	for tn, kps := range d.instances {
 		values := collects.WithSources[models.FieldName, models.FlattenKeypath]{}
 		for _, kp := range kps {
-			dirs := d.Directives[kp]
+			dirs := d.directives[kp]
 			if dirs.Parent != "" {
 				values.Collect(dirs.Parent, kp)
 			}
@@ -48,7 +48,7 @@ func selectExprForKeypath(d *Directives, kp models.FlattenKeypath) ast.Expr {
 	for _, ancestor := range ancestry {
 		x = &ast.SelectorExpr{
 			X:   x,
-			Sel: d.b.Fieldnames[d.Holders[ancestor]].Ident(),
+			Sel: d.b.Fieldnames[d.holders[ancestor]].Ident(),
 		}
 	}
 	return x
@@ -59,9 +59,9 @@ func selectExprForKeypath(d *Directives, kp models.FlattenKeypath) ast.Expr {
 func (d *Directives) implementParentRefs() error {
 	types := map[models.TypeName]ast.Expr{}
 
-	for tn, kps := range d.Instances {
+	for tn, kps := range d.instances {
 		modelkp := kps[0]
-		modelty := d.Exprs[modelkp]
+		modelty := d.exprs[modelkp]
 		types[tn] = modelty
 	}
 
@@ -80,7 +80,7 @@ func (d *Directives) implementParentRefs() error {
 		ty.Fields.List = append(ty.Fields.List, pf)
 	}
 
-	sorted := slices.Clone(d.Features.Parent)
+	sorted := slices.Clone(d.features.Parent)
 	slices.Sort(sorted)
 	d.b.ParentRefAssignStmts = []ast.Stmt{}
 	for _, kp := range sorted {

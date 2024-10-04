@@ -14,17 +14,17 @@ import (
 func (d *Directives) populateKeypathsAndHolders() {
 	resolver := newresolver(d.b.OriginalKeys)
 	resolver.dfs(d.b.CfgType, nil, []string{})
-	d.Keypaths = resolver.keypaths
-	d.Holders = datas.Invmap(d.Keypaths)
+	d.keypaths = resolver.keypaths
+	d.holders = datas.Invmap(d.keypaths)
 }
 
 func (d *Directives) populateExprs() error {
-	for kp, n := range d.Holders {
+	for kp, n := range d.holders {
 		switch n := n.(type) {
 		case *ast.Field:
-			d.Exprs[kp] = n.Type
+			d.exprs[kp] = n.Type
 		case *ast.ArrayType:
-			d.Exprs[kp] = n.Elt
+			d.exprs[kp] = n.Elt
 		default:
 			return fmt.Errorf("unrecognized holder type: %T", n)
 		}
@@ -43,42 +43,42 @@ func (d *Directives) expandKeypaths() error {
 		}
 		kps := []models.FlattenKeypath{}
 		for _, match := range matches {
-			kps = append(kps, d.Keypaths[match])
+			kps = append(kps, d.keypaths[match])
 		}
-		d.Expansions[kp] = kps
+		d.expansions[kp] = kps
 	}
 	return nil
 }
 
 func (d *Directives) populateDirectivesAndFeaturesForKeypaths() {
 	dfk := map[models.FlattenKeypath]directivefile.Directives{}
-	for kp, sources := range d.Sources {
+	for kp, sources := range d.sources {
 		ds := directivefile.Directives{}
 		if len(sources.Accessors) > 0 {
 			ds.Accessors = *maps.Keys(sources.Accessors)[0]
-			d.Features.Accessors = append(d.Features.Accessors, kp)
+			d.features.Accessors = append(d.features.Accessors, kp)
 		}
 		if len(sources.Declare) > 0 {
 			ds.Declare = maps.Keys(sources.Declare)[0]
-			d.Features.Declare = append(d.Features.Declare, kp)
+			d.features.Declare = append(d.features.Declare, kp)
 		}
 		if len(sources.Embed) > 0 {
 			ds.Embed = maps.Keys(sources.Embed)[0]
-			d.Features.Embed = append(d.Features.Embed, kp)
+			d.features.Embed = append(d.features.Embed, kp)
 		}
 		if len(sources.Export) > 0 {
 			ds.Export = maps.Keys(sources.Export)[0]
-			d.Features.Export = append(d.Features.Export, kp)
+			d.features.Export = append(d.features.Export, kp)
 		}
 		if len(sources.Parent) > 0 {
 			ds.Parent = maps.Keys(sources.Parent)[0]
-			d.Features.Parent = append(d.Features.Parent, kp)
+			d.features.Parent = append(d.features.Parent, kp)
 		}
 		if len(sources.Replace) > 0 {
 			ds.Replace = maps.Keys(sources.Replace)[0]
-			d.Features.Replace = append(d.Features.Replace, kp)
+			d.features.Replace = append(d.features.Replace, kp)
 		}
 		dfk[kp] = ds
 	}
-	d.Directives = dfk
+	d.directives = dfk
 }

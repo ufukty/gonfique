@@ -22,27 +22,27 @@ type featuresForKeypaths struct {
 type Directives struct {
 	b *bundle.Bundle
 
-	Keypaths   map[ast.Node]models.FlattenKeypath // holder (Field, ArrayType etc.) -> keypath (resolver)
-	Holders    map[models.FlattenKeypath]ast.Node // inverse Keypaths
-	Exprs      map[models.FlattenKeypath]ast.Expr
-	Expansions map[models.WildcardKeypath][]models.FlattenKeypath
-	Sources    map[models.FlattenKeypath]parameterSources
-	Directives map[models.FlattenKeypath]directivefile.Directives // flatten Sources
-	Features   featuresForKeypaths                                // convenience
-	ToRefer    []models.FlattenKeypath
-	Elected    map[models.FlattenKeypath]models.TypeName
-	Instances  map[models.TypeName][]models.FlattenKeypath // inverse Elected
+	keypaths   map[ast.Node]models.FlattenKeypath // holder (Field, ArrayType etc.) -> keypath (resolver)
+	holders    map[models.FlattenKeypath]ast.Node // inverse Keypaths
+	exprs      map[models.FlattenKeypath]ast.Expr
+	expansions map[models.WildcardKeypath][]models.FlattenKeypath
+	sources    map[models.FlattenKeypath]parameterSources
+	directives map[models.FlattenKeypath]directivefile.Directives // flatten Sources
+	features   featuresForKeypaths                                // convenience
+	toRefer    []models.FlattenKeypath
+	elected    map[models.FlattenKeypath]models.TypeName
+	instances  map[models.TypeName][]models.FlattenKeypath // inverse Elected
 }
 
 func New(b *bundle.Bundle) *Directives {
 	return &Directives{
 		b:          b,
-		Expansions: map[models.WildcardKeypath][]models.FlattenKeypath{},
-		Features:   featuresForKeypaths{},
-		ToRefer:    []models.FlattenKeypath{},
-		Exprs:      map[models.FlattenKeypath]ast.Expr{},
-		Elected:    map[models.FlattenKeypath]models.TypeName{},
-		Instances:  map[models.TypeName][]models.FlattenKeypath{},
+		expansions: map[models.WildcardKeypath][]models.FlattenKeypath{},
+		features:   featuresForKeypaths{},
+		toRefer:    []models.FlattenKeypath{},
+		exprs:      map[models.FlattenKeypath]ast.Expr{},
+		elected:    map[models.FlattenKeypath]models.TypeName{},
+		instances:  map[models.TypeName][]models.FlattenKeypath{},
 	}
 }
 

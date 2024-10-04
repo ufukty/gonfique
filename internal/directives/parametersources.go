@@ -42,8 +42,8 @@ type parameterSources struct {
 }
 
 func (d *Directives) parameterSourceClassification() {
-	d.Sources = map[models.FlattenKeypath]parameterSources{}
-	for kp, wckps := range datas.RevSliceMap(d.Expansions) {
+	d.sources = map[models.FlattenKeypath]parameterSources{}
+	for kp, wckps := range datas.RevSliceMap(d.expansions) {
 		sources := parameterSources{
 			Accessors: sliceTypeParameterSources[models.FieldPath]{},
 			Declare:   comprParameterSources[models.TypeName]{},
@@ -67,6 +67,6 @@ func (d *Directives) parameterSourceClassification() {
 		delete(sources.Embed, directivefile.Embed{})
 		delete(sources.Parent, models.FieldName(""))
 		delete(sources.Replace, directivefile.Replace{})
-		d.Sources[kp] = sources
+		d.sources[kp] = sources
 	}
 }
