@@ -46,6 +46,9 @@ func generateGetter(typename models.TypeName, fieldname models.FieldName, fieldt
 func generateSetter(typename models.TypeName, fieldname models.FieldName, fieldtype models.TypeName) *ast.FuncDecl {
 	recvname := namings.Initial(string(typename))
 	paramname := "v"
+	if recvname == "v" {
+		paramname = "value"
+	}
 	return &ast.FuncDecl{
 		Recv: &ast.FieldList{
 			List: []*ast.Field{{
