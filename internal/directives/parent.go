@@ -57,14 +57,6 @@ func selectExprForKeypath(d *Directives, kp models.FlattenKeypath) ast.Expr {
 // Add parent fields to type expressions and generate value assignments
 // for later embedding in ReadConfig function
 func (d *Directives) implementParentRefs() error {
-	types := map[models.TypeName]ast.Expr{}
-
-	for tn, kps := range d.instances {
-		modelkp := kps[0]
-		modelty := d.exprs[modelkp]
-		types[tn] = modelty
-	}
-
 	details, err := detailsForParentRefs(d)
 	if err != nil {
 		return fmt.Errorf("detailsForParentRefs: %w", err)
@@ -76,7 +68,7 @@ func (d *Directives) implementParentRefs() error {
 			Type:  ast.NewIdent("any"),
 			Tag:   &ast.BasicLit{Kind: token.STRING, Value: "`yaml:\"-\"`"},
 		}
-		ty := types[tn].(*ast.StructType)
+		ty := d.molds[tn].(*ast.StructType)
 		ty.Fields.List = append(ty.Fields.List, pf)
 	}
 

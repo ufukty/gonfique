@@ -4,8 +4,10 @@ import "iter"
 
 type Set[E comparable] map[E]any
 
-func (s *Set[E]) Add(e E) {
-	(*s)[e] = new(any)
+func (s *Set[E]) Add(e ...E) {
+	for _, e := range e {
+		(*s)[e] = new(any)
+	}
 }
 
 func (s *Set[E]) Remove(e E) {

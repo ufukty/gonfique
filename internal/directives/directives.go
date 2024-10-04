@@ -32,6 +32,7 @@ type Directives struct {
 	toRefer    []models.FlattenKeypath
 	elected    map[models.FlattenKeypath]models.TypeName
 	instances  map[models.TypeName][]models.FlattenKeypath // inverse Elected
+	molds      map[models.TypeName]ast.Expr
 }
 
 func New(b *bundle.Bundle) *Directives {

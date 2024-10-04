@@ -6,6 +6,7 @@ import (
 	"go/token"
 
 	"github.com/ufukty/gonfique/internal/datas"
+	"github.com/ufukty/gonfique/internal/datas/collects"
 	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/namings"
 )
@@ -70,26 +71,22 @@ func (d *Directives) typenameElection() error {
 }
 
 func (d *Directives) implementTypeDeclarations() {
-	neededToBeDeclared := []models.FlattenKeypath{}
-	neededToBeDeclared = append(neededToBeDeclared, d.features.Parent...)
-	neededToBeDeclared = append(neededToBeDeclared, d.features.Embed...)
+	declare := collects.Set[models.FlattenKeypath]{}
+	declare.Add(d.features.Parent...)
+	declare.Add(d.features.Embed...)
 	// declare referred types except string, int, etc.
 	for _, kp := range d.toRefer {
 		if _, ok := d.exprs[kp].(*ast.Ident); !ok {
-			neededToBeDeclared = append(neededToBeDeclared, kp)
+			declare.Add(kp)
 		}
 	}
-	neededToBeDeclared = datas.Uniq(neededToBeDeclared)
 
-	uniq := map[models.TypeName]ast.Expr{}
-	for _, kp := range neededToBeDeclared {
-		uniq[d.elected[kp]] = d.exprs[kp]
+	d.molds = map[models.TypeName]ast.Expr{}
+	for kp := range declare.Iter() {
+		d.molds[d.elected[kp]] = d.exprs[kp]
 	}
-	// for _, tn := range d.FeaturesForTypenames.Named {
-	// 	uniq[tn] = d.KeypathTypeExprs[d.TypenameUsers[tn][0]]
-	// }
 
-	for tn, expr := range uniq {
+	for tn, expr := range d.molds {
 		d.b.Named = append(d.b.Named, &ast.GenDecl{
 			Tok: token.TYPE,
 			Specs: []ast.Spec{&ast.TypeSpec{
