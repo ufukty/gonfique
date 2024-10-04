@@ -22,9 +22,9 @@ func (d *Directives) populateExprs() error {
 	for kp, n := range d.Holders {
 		switch n := n.(type) {
 		case *ast.Field:
-			d.KeypathTypeExprs[kp] = n.Type
+			d.Exprs[kp] = n.Type
 		case *ast.ArrayType:
-			d.KeypathTypeExprs[kp] = n.Elt
+			d.Exprs[kp] = n.Elt
 		default:
 			return fmt.Errorf("unrecognized holder type: %T", n)
 		}
@@ -52,33 +52,33 @@ func (d *Directives) expandKeypaths() error {
 
 func (d *Directives) populateDirectivesAndFeaturesForKeypaths() {
 	dfk := map[models.FlattenKeypath]directivefile.Directives{}
-	for kp, sources := range d.ParameterSources {
+	for kp, sources := range d.Sources {
 		ds := directivefile.Directives{}
 		if len(sources.Accessors) > 0 {
 			ds.Accessors = *maps.Keys(sources.Accessors)[0]
-			d.FeaturesForKeypaths.Accessors = append(d.FeaturesForKeypaths.Accessors, kp)
+			d.Features.Accessors = append(d.Features.Accessors, kp)
 		}
 		if len(sources.Declare) > 0 {
 			ds.Declare = maps.Keys(sources.Declare)[0]
-			d.FeaturesForKeypaths.Declare = append(d.FeaturesForKeypaths.Declare, kp)
+			d.Features.Declare = append(d.Features.Declare, kp)
 		}
 		if len(sources.Embed) > 0 {
 			ds.Embed = maps.Keys(sources.Embed)[0]
-			d.FeaturesForKeypaths.Embed = append(d.FeaturesForKeypaths.Embed, kp)
+			d.Features.Embed = append(d.Features.Embed, kp)
 		}
 		if len(sources.Export) > 0 {
 			ds.Export = maps.Keys(sources.Export)[0]
-			d.FeaturesForKeypaths.Export = append(d.FeaturesForKeypaths.Export, kp)
+			d.Features.Export = append(d.Features.Export, kp)
 		}
 		if len(sources.Parent) > 0 {
 			ds.Parent = maps.Keys(sources.Parent)[0]
-			d.FeaturesForKeypaths.Parent = append(d.FeaturesForKeypaths.Parent, kp)
+			d.Features.Parent = append(d.Features.Parent, kp)
 		}
 		if len(sources.Replace) > 0 {
 			ds.Replace = maps.Keys(sources.Replace)[0]
-			d.FeaturesForKeypaths.Replace = append(d.FeaturesForKeypaths.Replace, kp)
+			d.Features.Replace = append(d.Features.Replace, kp)
 		}
 		dfk[kp] = ds
 	}
-	d.DirectivesForKeypaths = dfk
+	d.Directives = dfk
 }

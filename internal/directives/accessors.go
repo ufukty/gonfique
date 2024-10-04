@@ -16,13 +16,13 @@ type accessordetails map[models.FieldName]models.TypeName
 func accessorDetailsForTypes(d *Directives) (map[models.TypeName]accessordetails, error) {
 	details := map[models.TypeName]accessordetails{}
 
-	for tn, kps := range d.TypenameUsers {
+	for tn, kps := range d.Instances {
 		init := true
 		details[tn] = map[models.FieldName]models.TypeName{}
 		for _, kp := range kps {
-			for _, fn := range d.DirectivesForKeypaths[kp].Accessors {
+			for _, fn := range d.Directives[kp].Accessors {
 				fkp := kp.WithFieldPath(fn)
-				ftn := d.TypenamesElected[fkp]
+				ftn := d.Elected[fkp]
 				fn := d.b.Fieldnames[d.Holders[fkp]]
 				current := details[tn]
 				if !init {

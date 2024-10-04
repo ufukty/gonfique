@@ -12,7 +12,7 @@ import (
 // TODO: Does it makes sense to add checks for accessors, export etc.
 func (d *Directives) checkConflictingSources() error {
 	conflicts := []string{}
-	for kp, directivesources := range d.ParameterSources {
+	for kp, directivesources := range d.Sources {
 		if len(directivesources.Declare) > 1 {
 			msg := fmt.Sprintf("%s: conflicting declare parameters:", kp)
 			for val, wckps := range directivesources.Declare {
@@ -44,27 +44,27 @@ func (d *Directives) checkConflictingSources() error {
 func (d *Directives) checkPreTypeConflicts() error {
 	conflicts := []string{}
 
-	for tn, kps := range d.TypenameUsers {
+	for tn, kps := range d.Instances {
 		for i := 1; i < len(kps); i++ {
-			if !compares.Compare(d.KeypathTypeExprs[kps[0]], d.KeypathTypeExprs[kps[i]]) {
+			if !compares.Compare(d.Exprs[kps[0]], d.Exprs[kps[i]]) {
 				conflicts = append(conflicts, fmt.Sprintf("  declare type for incompatible targets: (%s, %s) => %s", kps[0], kps[i], tn))
 			}
 		}
 	}
 
-	for kp := range d.DirectivesForKeypaths {
+	for kp := range d.Directives {
 		for pkp := kp.Parent(); pkp != ""; pkp = pkp.Parent() {
-			if d.DirectivesForKeypaths[pkp].Replace.Typename != "" {
-				conflicts = append(conflicts, fmt.Sprintf("  directive for unmanaged subtree: %s (type of %s is replaced with %s)", kp, pkp, d.DirectivesForKeypaths[pkp].Replace))
+			if d.Directives[pkp].Replace.Typename != "" {
+				conflicts = append(conflicts, fmt.Sprintf("  directive for unmanaged subtree: %s (type of %s is replaced with %s)", kp, pkp, d.Directives[pkp].Replace))
 			}
 		}
 	}
 
-	for _, user := range d.FeaturesForKeypaths.Parent {
+	for _, user := range d.Features.Parent {
 		if len(user.Segments()) <= 1 {
 			conflicts = append(conflicts, fmt.Sprintf("  parent ref on top node: %s", user))
 		}
-		if _, ok := d.KeypathTypeExprs[user].(*ast.StructType); !ok {
+		if _, ok := d.Exprs[user].(*ast.StructType); !ok {
 			conflicts = append(conflicts, fmt.Sprintf("  non-dict target for parent directive: %s", user))
 		}
 	}

@@ -22,27 +22,27 @@ type featuresForKeypaths struct {
 type Directives struct {
 	b *bundle.Bundle
 
-	Keypaths              map[ast.Node]models.FlattenKeypath // holder (Field, ArrayType etc.) -> keypath (resolver)
-	Holders               map[models.FlattenKeypath]ast.Node // inverse Keypaths
-	KeypathTypeExprs      map[models.FlattenKeypath]ast.Expr
-	Expansions            map[models.WildcardKeypath][]models.FlattenKeypath
-	ParameterSources      map[models.FlattenKeypath]parameterSources         //
-	DirectivesForKeypaths map[models.FlattenKeypath]directivefile.Directives // flatten ParameterSources
-	FeaturesForKeypaths   featuresForKeypaths                                // convenience
-	NeededToBeReferred    []models.FlattenKeypath
-	TypenamesElected      map[models.FlattenKeypath]models.TypeName
-	TypenameUsers         map[models.TypeName][]models.FlattenKeypath // inverse TypenamesElected
+	Keypaths   map[ast.Node]models.FlattenKeypath // holder (Field, ArrayType etc.) -> keypath (resolver)
+	Holders    map[models.FlattenKeypath]ast.Node // inverse Keypaths
+	Exprs      map[models.FlattenKeypath]ast.Expr
+	Expansions map[models.WildcardKeypath][]models.FlattenKeypath
+	Sources    map[models.FlattenKeypath]parameterSources
+	Directives map[models.FlattenKeypath]directivefile.Directives // flatten Sources
+	Features   featuresForKeypaths                                // convenience
+	ToRefer    []models.FlattenKeypath
+	Elected    map[models.FlattenKeypath]models.TypeName
+	Instances  map[models.TypeName][]models.FlattenKeypath // inverse Elected
 }
 
 func New(b *bundle.Bundle) *Directives {
 	return &Directives{
-		b:                   b,
-		Expansions:          map[models.WildcardKeypath][]models.FlattenKeypath{},
-		FeaturesForKeypaths: featuresForKeypaths{},
-		NeededToBeReferred:  []models.FlattenKeypath{},
-		KeypathTypeExprs:    map[models.FlattenKeypath]ast.Expr{},
-		TypenamesElected:    map[models.FlattenKeypath]models.TypeName{},
-		TypenameUsers:       map[models.TypeName][]models.FlattenKeypath{},
+		b:          b,
+		Expansions: map[models.WildcardKeypath][]models.FlattenKeypath{},
+		Features:   featuresForKeypaths{},
+		ToRefer:    []models.FlattenKeypath{},
+		Exprs:      map[models.FlattenKeypath]ast.Expr{},
+		Elected:    map[models.FlattenKeypath]models.TypeName{},
+		Instances:  map[models.TypeName][]models.FlattenKeypath{},
 	}
 }
 

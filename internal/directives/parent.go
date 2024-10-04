@@ -17,9 +17,9 @@ type parentRefDetails struct {
 func detailsForParentRefs(d *Directives) (map[models.TypeName]parentRefDetails, error) {
 	details := map[models.TypeName]parentRefDetails{}
 
-	for tn, kps := range d.TypenameUsers {
+	for tn, kps := range d.Instances {
 		for _, kp := range kps {
-			dirs := d.DirectivesForKeypaths[kp]
+			dirs := d.Directives[kp]
 			if dirs.Parent != "" {
 				current, ok := details[tn]
 				if !ok {
@@ -57,9 +57,9 @@ func selectExprForKeypath(d *Directives, kp models.FlattenKeypath) ast.Expr {
 func (d *Directives) implementParentRefs() error {
 	types := map[models.TypeName]ast.Expr{}
 
-	for tn, kps := range d.TypenameUsers {
+	for tn, kps := range d.Instances {
 		modelkp := kps[0]
-		modelty := d.KeypathTypeExprs[modelkp]
+		modelty := d.Exprs[modelkp]
 		types[tn] = modelty
 	}
 
@@ -78,7 +78,7 @@ func (d *Directives) implementParentRefs() error {
 		ty.Fields.List = append(ty.Fields.List, pf)
 	}
 
-	sorted := slices.Clone(d.FeaturesForKeypaths.Parent)
+	sorted := slices.Clone(d.Features.Parent)
 	slices.Sort(sorted)
 	d.b.ParentRefAssignStmts = []ast.Stmt{}
 	for _, kp := range sorted {
