@@ -1,6 +1,7 @@
 package directives
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"slices"
@@ -9,6 +10,34 @@ import (
 	"github.com/ufukty/gonfique/internal/namings"
 	"golang.org/x/exp/maps"
 )
+
+type accessordetails map[models.FieldName]models.TypeName
+
+func accessorDetailsForTypes(d *Directives) (map[models.TypeName]accessordetails, error) {
+	details := map[models.TypeName]accessordetails{}
+
+	for tn, kps := range d.TypenameUsers {
+		init := true
+		details[tn] = map[models.FieldName]models.TypeName{}
+		for _, kp := range kps {
+			for _, fn := range d.DirectivesForKeypaths[kp].Accessors {
+				fkp := kp.WithFieldPath(fn)
+				ftn := d.TypenamesElected[fkp]
+				fn := d.b.Fieldnames[d.Holders[fkp]]
+				current := details[tn]
+				if !init {
+					if current[fn] != ftn {
+						return nil, fmt.Errorf("typename %q is directed to have accessors on the field %q  which its type resolving to different types", tn, fn)
+					}
+				}
+				details[tn][fn] = ftn
+				init = true
+			}
+		}
+	}
+
+	return details, nil
+}
 
 func generateGetter(typename models.TypeName, fieldname models.FieldName, fieldtype models.TypeName) *ast.FuncDecl {
 	recvname := namings.Initial(string(typename))
@@ -81,12 +110,16 @@ func generateSetter(typename models.TypeName, fieldname models.FieldName, fieldt
 }
 
 func (d *Directives) addAccessorFuncDecls() error {
-	tns := maps.Keys(d.ParametersForTypenames.Accessors)
+	details, err := accessorDetailsForTypes(d)
+	if err != nil {
+		return fmt.Errorf("accessorDetailsForTypes: %w", err)
+	}
+	tns := maps.Keys(details)
 	slices.SortFunc(tns, caseInsensitiveCompareTypenames)
 
 	d.b.Accessors = []*ast.FuncDecl{}
 	for _, tn := range tns {
-		fields := d.ParametersForTypenames.Accessors[tn].FieldsAndTypes
+		fields := details[tn]
 		sortedfields := maps.Keys(fields)
 		slices.SortFunc(sortedfields, caseInsensitiveCompareFieldnames)
 		for _, fn := range sortedfields {

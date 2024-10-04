@@ -1,6 +1,7 @@
 package directives
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"slices"
@@ -8,6 +9,32 @@ import (
 	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/namings"
 )
+
+type parentRefDetails struct {
+	Fieldname models.FieldName
+}
+
+func detailsForParentRefs(d *Directives) (map[models.TypeName]parentRefDetails, error) {
+	details := map[models.TypeName]parentRefDetails{}
+
+	for tn, kps := range d.TypenameUsers {
+		for _, kp := range kps {
+			dirs := d.DirectivesForKeypaths[kp]
+			if dirs.Parent != "" {
+				current, ok := details[tn]
+				if !ok {
+					details[tn] = parentRefDetails{
+						Fieldname: "",
+					}
+				}
+				current.Fieldname = dirs.Parent
+				details[tn] = current
+			}
+		}
+	}
+
+	return details, nil
+}
 
 func selectExprForKeypath(d *Directives, kp models.FlattenKeypath) ast.Expr {
 	var x ast.Expr = ast.NewIdent("c") // c is also hardcoded in coder.addReaderFunction
@@ -27,17 +54,27 @@ func selectExprForKeypath(d *Directives, kp models.FlattenKeypath) ast.Expr {
 
 // Add parent fields to type expressions and generate value assignments
 // for later embedding in ReadConfig function
-func (d *Directives) implementParentRefs() {
-	for tn, details := range d.ParametersForTypenames.Parent {
+func (d *Directives) implementParentRefs() error {
+	types := map[models.TypeName]ast.Expr{}
+
+	for tn, kps := range d.TypenameUsers {
+		modelkp := kps[0]
+		modelty := d.KeypathTypeExprs[modelkp]
+		types[tn] = modelty
+	}
+
+	details, err := detailsForParentRefs(d)
+	if err != nil {
+		return fmt.Errorf("detailsForParentRefs: %w", err)
+	}
+
+	for tn, details := range details {
 		pf := &ast.Field{
 			Names: []*ast.Ident{details.Fieldname.Ident()},
-			Type: &ast.StarExpr{
-				Star: token.NoPos,
-				X:    details.ParentType.Ident(),
-			},
-			Tag: &ast.BasicLit{Kind: token.STRING, Value: "`yaml:\"-\"`"},
+			Type:  ast.NewIdent("any"),
+			Tag:   &ast.BasicLit{Kind: token.STRING, Value: "`yaml:\"-\"`"},
 		}
-		ty := d.TypeExprs[tn].(*ast.StructType)
+		ty := types[tn].(*ast.StructType)
 		ty.Fields.List = append(ty.Fields.List, pf)
 	}
 
@@ -57,7 +94,7 @@ func (d *Directives) implementParentRefs() {
 		})
 	}
 
-	for tn, details := range d.ParametersForTypenames.Parent {
+	for tn, details := range details {
 		recvname := namings.Initial(string(tn))
 		fd := &ast.FuncDecl{
 			Recv: &ast.FieldList{List: []*ast.Field{{
@@ -78,4 +115,6 @@ func (d *Directives) implementParentRefs() {
 		}
 		d.b.Accessors = append(d.b.Accessors, fd)
 	}
+
+	return nil
 }

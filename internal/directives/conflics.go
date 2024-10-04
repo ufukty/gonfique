@@ -7,8 +7,6 @@ import (
 	"strings"
 
 	"github.com/ufukty/gonfique/internal/compares"
-	"github.com/ufukty/gonfique/internal/datas"
-	"github.com/ufukty/gonfique/internal/models"
 )
 
 // TODO: Does it makes sense to add checks for accessors, export etc.
@@ -68,33 +66,6 @@ func (d *Directives) checkPreTypeConflicts() error {
 		}
 		if _, ok := d.KeypathTypeExprs[user].(*ast.StructType); !ok {
 			conflicts = append(conflicts, fmt.Sprintf("  non-dict target for parent directive: %s", user))
-		}
-	}
-
-	if len(conflicts) > 0 {
-		slices.Sort(conflicts)
-		return fmt.Errorf("found %d conflicts:\n%s", len(conflicts), strings.Join(conflicts, "\n"))
-	}
-	return nil
-}
-
-func (d *Directives) checkPostTypeConflicts() error {
-	conflicts := []string{}
-
-	for tn := range d.ParametersForTypenames.Parent {
-		parents := []models.TypeName{}
-		for _, user := range d.TypenameUsers[tn] {
-			parents = append(parents, d.TypenamesElected[user.Parent()])
-		}
-		simplified := datas.Uniq(parents)
-		if len(simplified) > 1 {
-			return fmt.Errorf("users of type %q have parents with different types: %v", tn, simplified)
-		}
-	}
-
-	for _, user := range d.FeaturesForKeypaths.Parent {
-		if user == "" {
-			return fmt.Errorf("")
 		}
 	}
 

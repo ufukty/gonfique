@@ -69,23 +69,20 @@ func (d *Directives) typenameElection() error {
 	return nil
 }
 
-func (d *Directives) checkKeypathsToModifyTheirType() {
-	d.NeededToBeDeclared = append(d.NeededToBeDeclared, d.FeaturesForKeypaths.Parent...)
-	d.NeededToBeDeclared = append(d.NeededToBeDeclared, d.FeaturesForKeypaths.Embed...)
-
+func (d *Directives) implementTypeDeclarations() {
+	neededToBeDeclared := []models.FlattenKeypath{}
+	neededToBeDeclared = append(neededToBeDeclared, d.FeaturesForKeypaths.Parent...)
+	neededToBeDeclared = append(neededToBeDeclared, d.FeaturesForKeypaths.Embed...)
 	// declare referred types except string, int, etc.
 	for _, kp := range d.NeededToBeReferred {
 		if _, ok := d.KeypathTypeExprs[kp].(*ast.Ident); !ok {
-			d.NeededToBeDeclared = append(d.NeededToBeDeclared, kp)
+			neededToBeDeclared = append(neededToBeDeclared, kp)
 		}
 	}
+	neededToBeDeclared = datas.Uniq(neededToBeDeclared)
 
-	d.NeededToBeDeclared = datas.Uniq(d.NeededToBeDeclared)
-}
-
-func (d *Directives) implementTypeDeclarations() {
 	uniq := map[models.TypeName]ast.Expr{}
-	for _, kp := range d.NeededToBeDeclared {
+	for _, kp := range neededToBeDeclared {
 		uniq[d.TypenamesElected[kp]] = d.KeypathTypeExprs[kp]
 	}
 	// for _, tn := range d.FeaturesForTypenames.Named {
