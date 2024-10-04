@@ -6,6 +6,7 @@ import (
 	"go/token"
 	"slices"
 
+	"github.com/ufukty/gonfique/internal/datas/collects"
 	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/namings"
 )
@@ -18,19 +19,20 @@ func detailsForParentRefs(d *Directives) (map[models.TypeName]parentRefDetails, 
 	details := map[models.TypeName]parentRefDetails{}
 
 	for tn, kps := range d.Instances {
+		values := collects.WithSources[models.FieldName, models.FlattenKeypath]{}
 		for _, kp := range kps {
 			dirs := d.Directives[kp]
 			if dirs.Parent != "" {
-				current, ok := details[tn]
-				if !ok {
-					details[tn] = parentRefDetails{
-						Fieldname: "",
-					}
-				}
-				current.Fieldname = dirs.Parent
-				details[tn] = current
+				values.Collect(dirs.Parent, kp)
 			}
 		}
+		fieldname, err := values.One()
+		if err == collects.ErrNoValues {
+			continue
+		} else if err != nil {
+			return nil, fmt.Errorf("checking every keypath resolves to the typename %q and specifies a parent ref field name: %w", tn, err)
+		}
+		details[tn] = parentRefDetails{Fieldname: fieldname}
 	}
 
 	return details, nil
