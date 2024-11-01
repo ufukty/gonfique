@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"slices"
 
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/namings"
@@ -86,6 +87,17 @@ func ImplementIterators(b *bundle.Bundle) error {
 			}
 		}
 	}
+	slices.SortFunc(fds, func(a, b *ast.FuncDecl) int {
+		na := a.Recv.List[0].Type.(*ast.Ident).Name
+		nb := b.Recv.List[0].Type.(*ast.Ident).Name
+		if na < nb {
+			return -1
+		} else if nb < na {
+			return 1
+		} else {
+			return 0
+		}
+	})
 	b.Iterators = fds
 	return nil
 }
