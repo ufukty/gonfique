@@ -27,6 +27,17 @@ func addImports(dst *ast.File, imports []string) {
 			},
 		})
 	}
+	slices.SortFunc(specs, func(a, b ast.Spec) int {
+		sa := a.(*ast.ImportSpec).Path.Value
+		sb := b.(*ast.ImportSpec).Path.Value
+		if sa < sb {
+			return -1
+		} else if sa == sb {
+			return 0
+		} else {
+			return 1
+		}
+	})
 	dst.Decls = append(dst.Decls, &ast.GenDecl{
 		Tok:   token.IMPORT,
 		Specs: specs,
