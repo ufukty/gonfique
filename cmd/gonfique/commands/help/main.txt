@@ -9,4 +9,4 @@ The commands are:
         generate    generate a Go file that contains the type definition(s)
         version     print gonfique version
 
-Use "gonfique help <command>" for more information about a command.
+Use "gonfique <command> --help" for more information about a command.
