@@ -4,9 +4,23 @@
 
 Gonfique is a CLI tool for Go developers to automatically build exact **struct definitions** in Go that will match the provided YAML or JSON config. Makes instant to notice **when and where a breaking change** occurs. Since compiler warns whenever it happens by type-checking, and source control shows where the change exactly is.
 
-## Examples
+## TOC
 
-Input:
+- [Full example](#full-example)
+  - [Output with nested declarations](#output-with-nested-declarations)
+  - [Creating separate (named) type declarations](#creating-separate-named-type-declarations)
+- [Install](#install)
+- [Usage](#usage)
+- [Features](#features)
+- [Docs](#docs)
+- [Limitations](#limitations)
+- [Contribution](#contribution)
+- [Stargazers-over-time](#stargazers-over-time)
+- [License](#license)
+
+## Full example
+
+Say this file is your input:
 
 ```yaml
 apiVersion: apps/v1
@@ -55,7 +69,9 @@ spec:
                 name: my-secret
 ```
 
-### Output for basic usage
+### Output with nested declarations
+
+Gonfique creates the most compact type declaration for the provided file when it's not supplied a mapping file or the flag `--organize`. The file would only one declaration with all sub-structs defined inlined. Such as:
 
 ```go
 package config
@@ -150,7 +166,9 @@ func ReadConfig(path string) (Config, error) {
 }
 ```
 
-### Output when mapping is used
+### Creating separate (named) type declarations
+
+You can create named declarations for types you want. Just provide a mapping file that contains the "paths" of targets and the typename you pick. Pass the path of this file as an argument (via `--mappings <path>`) to gonfique. See docs: [Mapping file](docs/mapping.md)
 
 ```yml
 apiVersion: ApiVersion
@@ -162,6 +180,8 @@ spec.**.containers: SpecContainers
 spec.**.containers.[]: SpecContainer
 spec.**.containers.[].name: ContainerName
 ```
+
+This time the generated file would contain additional types as the mappings file directs. The main type declaration refers to those type in related substructures.
 
 ```go
 // ...
@@ -298,6 +318,10 @@ Run `gonfique --help` for [parameter details](docs/parameter-details.txt).
 Issues are open for discussions and rest.
 
 - [How it works?](docs/how-it-works.md)
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/ufukty/gonfique.svg?variant=adaptive)](https://starchart.cc/ufukty/gonfique)
 
 ## License
 
