@@ -9,6 +9,8 @@ Having Gonfique integrated into the build pipeline, developers can use extremely
 > ```go
 > cfg.the.["road"].to.["panics"].is.["paved"].with.["hardcoded"]["strings"]
 > ```
+>
+> — a Gopher
 
 > ```go
 > if r, ok := cfg.the.["road"]; ok {
@@ -96,8 +98,6 @@ This one was an easy one. No one have enough time to deal with this in repeat. Y
 
 ## TOC
 
-<!-- TOC -->
-
 - [Gonfique](#gonfique)
   - [TOC](#toc)
   - [Install](#install)
@@ -106,7 +106,7 @@ This one was an easy one. No one have enough time to deal with this in repeat. Y
     - [Version](#version)
     - [Help](#help)
   - [Features](#features)
-  - [Gonfique config puns&funs](#gonfique-config-punsfuns)
+  - [Gonfique config](#gonfique-config-punsfuns)
     - [Paths section](#paths-section)
       - [Writing paths](#writing-paths)
         - [Wildcards](#wildcards)
@@ -118,12 +118,12 @@ This one was an easy one. No one have enough time to deal with this in repeat. Y
           - [Notes](#notes)
         - [replace](#replace)
     - [Types](#types)
-        - [accessors](#accessors)
-          - [Notes](#notes)
-        - [embed](#embed)
-          - [Notes](#notes)
-        - [parent](#parent)
-          - [Notes](#notes)
+      - [accessors](#accessors)
+        - [Notes](#notes)
+      - [embed](#embed)
+        - [Notes](#notes)
+      - [parent](#parent)
+        - [Notes](#notes)
   - [Full examples](#full-examples)
     - [With customization](#with-customization)
     - [Without customization](#without-customization)
@@ -139,8 +139,6 @@ This one was an easy one. No one have enough time to deal with this in repeat. Y
   - [Considerations](#considerations)
   - [Contribution](#contribution)
   - [License](#license)
-
-<!-- /TOC -->
 
 ## Install
 
