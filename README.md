@@ -405,9 +405,17 @@ a.key.path:
 
 Assign specified type name instead resolving from source file. For example: `type: int`
 
-### Types
+### Types section
 
-##### `accessors`
+Developer can customize types declared by Gonfique. Customization list includes implementing methods on types and mutating the field list of generated struct.
+
+Types section is a dictionary where keys are individual typenames and values are a dict of directives and their parameters.
+
+#### Type directives
+
+There are 4 types of type directives: `accessors`, `embed`, `iterator`, `parent`.
+
+##### Implementing getters and setters with `accessors`
 
 ```yaml
 a.key.path:
@@ -421,7 +429,7 @@ Accessors are getters and setters for fields. Gonfique can implement getters and
 - Accessors will be defined on all types the rule matches. Define paths that will only match same type targets.
 - Multiple rules matching same target containing conflicting directives is illegal, as well as, one rule match with different type targets.
 
-##### `embed`
+##### Making the hierarchy of types explicit with `embed`
 
 > [!NOTE]
 > This directive is currently here for preview and unavailable for use.
@@ -441,7 +449,21 @@ Use `import-path` if the embedded type is outside of package specified with CLI 
 
 - Embedded type should be a struct, not an interface.
 
-##### `parent`
+##### Making structs iterable with `iterator`
+
+Since the corresponding type for a struct-represented section of the input file is actually a dict of string keys and values; Gonfique can include additional data in the generated file to allow you access the "keys" as strings.
+
+Combined with `iterator` directive, Gonfique let's you use your 'structs' in a previously unimagined way:
+
+```go
+for name, details := range cfg.employees { /* */ }
+```
+
+where the employees were originally a dict and represented with a struct in Go.
+
+This way you can keep your way to access values through fields like it is a `struct` and also have another way to iterate over them like it is a `map`.
+
+##### Adding a field for parent access with `parent`
 
 ```yaml
 a.key.path:
@@ -540,8 +562,11 @@ import (
 )
 
 type ApiVersion string
+
 type ContainerName string
+
 type Name string
+
 type Path struct {
   Backend struct {
     Service struct {
@@ -554,17 +579,20 @@ type Path struct {
   Path     string `yaml:"path"`
   PathType string `yaml:"pathType"`
 }
+
 type Port struct {
   Port       int    `yaml:"port"`
   Protocol   string `yaml:"protocol"`
   TargetPort int    `yaml:"targetPort"`
 }
+
 type Rule struct {
   Host string `yaml:"host"`
   Http struct {
     Paths []Path `yaml:"paths"`
   } `yaml:"http"`
 }
+
 type SpecContainer struct {
   EnvFrom []struct {
     ConfigMapRef struct {
@@ -580,7 +608,9 @@ type SpecContainer struct {
     ContainerPort int `yaml:"containerPort"`
   } `yaml:"ports"`
 }
+
 type SpecContainers []SpecContainer
+
 type Kubernetes struct {
   ApiVersion ApiVersion `yaml:"apiVersion"`
   Data       struct {
@@ -808,8 +838,8 @@ lorem:
 For existing Makefile users:
 
 ```Makefile
-config.go: config.yml
-    gonfique -in config.yml -out config.go -pkg main
+config.go: config.yml gonfique.yml
+    gonfique -in config.yml -out config.go -config gonfique.yml
 
 all: config.go
     ...
