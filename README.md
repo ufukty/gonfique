@@ -71,7 +71,7 @@ spec:
 
 ### Output with nested declarations
 
-Gonfique creates the most compact type declaration for the provided file when it's not supplied a mapping file or the flag `--organize`. The file would only one declaration with all sub-structs defined inlined. Such as:
+Gonfique creates the most compact type declaration for the provided file when it's not supplied a mapping file or the flag `--organize`. The file will contain only one declaration with all sub-structs defined inlined. Such as:
 
 ```go
 package config
@@ -291,7 +291,7 @@ Run `gonfique --help` for [parameter details](docs/parameter-details.txt).
 - Works offline
 - Specify names for detected types via `-mapping` flag to export safely. [More](docs/mapping.md)
 - Defines named or inline types depending on user choice (`-organize` flag).
-- Reuses user-defined types defined provided in a file when schemas match via `-use` flag
+- Reuses user-defined types provided in a file when schemas match via `-use` flag
 - Supports arrays:
   - When all array items share same schema; array types are generated as `[]<item type>`.
   - When all array items don't share same schema, but all items are compatible; array types are generated as `[]<combined item types>`.
