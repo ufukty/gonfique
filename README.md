@@ -307,13 +307,14 @@ Exporting a path, will result every matching target's type to be declared as sep
 
 ```yaml
 paths:
-  <path>: declare Typename
+  <path>: declare <typename>
 ```
 
 Use `declare` directive to generate named type declaration(s) for matching targets. This directive merges the types of all matches, and requires them to share same schema. There can be multiple rules mentioning same typename in `declare` directive.
 
 > ![TIP]
-> Declaration examples with wildcards
+>
+> Examples:
 >
 > ```yaml
 > paths:
@@ -322,44 +323,28 @@ Use `declare` directive to generate named type declaration(s) for matching targe
 >   spec.template.metadata.labels.app: declare AppLabel
 > ```
 >
-> Wildcards lets users to write more flexible mappings.
->
-> Single-level wildcards match with any key in a dictionary, and they can be used many times in a pathway. The specified type name will be
+> Wildcards lets users to write more flexible mappings. Single-level wildcards match with any key in a dictionary, and they can be used many times in a pathway:
 >
 > ```yaml
 > paths:
->   spec.template.*.labels.app: declare AppLabel
 >   spec.*.*.labels.app: declare AppLabel
+>   spec.template.*.labels.app: declare AppLabel
 > ```
 >
-> Multi-level wildcards match zero-to-many depth of dictionaries:
+> Multi-level wildcards passes many times from a dict to its keys and from an array to its item type. Below would match all of the `spec.app`, `spec.foo.app` and `spec.bar.[].app` same time:
 >
 > ```yaml
 > paths:
 >   spec.**.app: declare AppLabel
 > ```
 >
-> That would match all of the `spec.app`, `spec.foo.app` and `spec.bar.[].app` same time.
->
-> Array item type:
->
-> ```yaml
-> paths:
->   spec.template.spec.containers.[]: declare Container
-> ```
->
-> A key's type in any item:
->
-> ```yaml
-> paths:
->   spec.template.spec.containers.[].Name: declare ContainerName
-> ```
->
-> If the array type also needs to be given a name:
+> Square brackets can be used to pass from an array to its item type only once:
 >
 > ```yaml
 > paths:
 >   spec.template.spec.containers: declare Containers
+>   spec.template.spec.containers.[]: declare Container
+>   spec.template.spec.containers.[].Name: declare ContainerName
 > ```
 
 ##### Assigning types manually with `replace`
