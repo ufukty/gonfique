@@ -310,11 +310,11 @@ paths:
   <path>: declare <typename>
 ```
 
-Use `declare` directive to generate named type declaration(s) for matching targets. This directive merges the types of all matches, and requires them to share same schema. There can be multiple rules mentioning same typename in `declare` directive.
+Use `declare` directive to generate named type declaration(s) for matching targets. This directive merges the types of all matches, and requires them to share same schema.
 
 > ![TIP]
 >
-> Examples:
+> Examples with paths and `declare` directive:
 >
 > ```yaml
 > paths:
@@ -345,6 +345,22 @@ Use `declare` directive to generate named type declaration(s) for matching targe
 >   spec.template.spec.containers: declare Containers
 >   spec.template.spec.containers.[]: declare Container
 >   spec.template.spec.containers.[].Name: declare ContainerName
+> ```
+
+> [!TIP]
+>
+> Multiple paths can declare same name on different targets. This is useful when the willing is reducing the number of types or making the relation between different part of input file explicit in mapping.
+>
+> ```yaml
+> paths:
+>   a.b: declare B
+>   c.b: declare B
+> ```
+>
+> Which might make possible to write functions that takes those part of file an argument:
+>
+> ```go
+> func UtilityFunction(b config.B) { /* */ }
 > ```
 
 ##### Assigning types manually with `replace`
