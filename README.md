@@ -2,9 +2,9 @@
 
 <img src="assets/Gonfique.png" alt="Gonfique logo" height="300px">
 
-Gonfique is a special kind of YAML-to-Go and JSON-to-Go that has the **customization** options when developers need to create mappings for config files. Gonfique also works **offline** unlike online services which makes Gonfique easier to integrate into build process and always keep mapping types up-to-date.
+Gonfique is a special kind of YAML-to-Go and JSON-to-Go that has the **customization** options developers need when they create mappings for config files. Gonfique also works **offline** unlike online services which makes Gonfique easier to integrate into build process and always keep mapping types up-to-date.
 
-Having Gonfique integrated into the build pipeline, developers can use extremely dynamic schemas like storing part of the config information in the keys. Dynamic keys are breeze to work with, as they make accessing to particular entry a.dot.access.close. Before Gonfique an update in the source file would need developer to open the online service and regenerate the mapping file. With Gonfique, _as the mapping file gets updated_, the LSP checks whole codebase at instant and IDE points to the files where a previously working config access went broken. So, the developer gets a chance to fix before prod.
+Having Gonfique integrated into the build pipeline, developers can use extremely dynamic schemas like storing part of the config information in the keys. Dynamic keys are breeze to work with, as they make accessing to particular entry a.dot.access.close. Before Gonfique, an update in the source file would need developer to open the online service and regenerate the mapping file. With Gonfique, _as the mapping file gets updated_, the LSP checks whole codebase at instant and IDE points to the files where a previously working config access went broken. So, the developer gets a chance to fix before prod.
 
 > ```go
 > cfg.the.["road"].to.["panics"].is.["paved"].with.["hardcoded"]["strings"]
@@ -92,53 +92,49 @@ type Config struct {
 </tr>
 </table>
 
-This one was an easy one. No one have enough time to deal with this in repeat. You should find at least 5 mistakes depending on how you count.
+This one was an easy one. No one have enough time to deal with this in repeat. You should find at least 6 mistakes depending on how you count.
 
 </details>
 
 ## TOC
 
-- [Gonfique](#gonfique)
-  - [TOC](#toc)
-  - [Install](#install)
-  - [CLI usage](#cli-usage)
-    - [Generation](#generation)
-    - [Version](#version)
-    - [Help](#help)
-  - [Features](#features)
-  - [Gonfique config](#gonfique-config-punsfuns)
-    - [Paths section](#paths-section)
-      - [Writing paths](#writing-paths)
-        - [Wildcards](#wildcards)
-      - [Path directives](#path-directives)
-        - [declare](#declare)
-          - [Notes](#notes)
-          - [Declaration examples with wildcards](#declaration-examples-with-wildcards)
-        - [The export directive](#the-export-directive)
-          - [Notes](#notes)
-        - [replace](#replace)
-    - [Types](#types)
-      - [accessors](#accessors)
+- [Install](#install)
+- [CLI usage](#cli-usage)
+  - [Generation](#generation)
+  - [Version](#version)
+  - [Help](#help)
+- [Features](#features)
+- [Gonfique config](#gonfique-config-punsfuns)
+  - [Paths section](#paths-section)
+    - [Writing paths](#writing-paths)
+      - [Wildcards](#wildcards)
+      - [Arrays](#arrays)
+    - [Path directives](#path-directives)
+      - [Creating named separate type declarations with auto generated names with export](#creating-named-separate-type-declarations-with-auto-generated-names-with-export)
+      - [Creating named separate type declarations with declare](#creating-named-separate-type-declarations-with-declare)
+      - [Assigning types manually with replace](#assigning-types-manually-with-replace)
+  - [Types section](#types-section)
+    - [Type directives](#type-directives)
+      - [Implementing getters and setters with accessors](#implementing-getters-and-setters-with-accessors)
+      - [Making the hierarchy of types explicit with embed](#making-the-hierarchy-of-types-explicit-with-embed)
+      - [Making structs iterable with iterator](#making-structs-iterable-with-iterator)
+      - [Adding a field for parent access with parent](#adding-a-field-for-parent-access-with-parent)
         - [Notes](#notes)
-      - [embed](#embed)
-        - [Notes](#notes)
-      - [parent](#parent)
-        - [Notes](#notes)
-  - [Full examples](#full-examples)
-    - [With customization](#with-customization)
-    - [Without customization](#without-customization)
-  - [Internal Concepts](#internal-concepts)
-    - [Pipeline](#pipeline)
-    - [Automatic type resolution vs. manual type assignment](#automatic-type-resolution-vs-manual-type-assignment)
-    - [Decision process to generate type declarations](#decision-process-to-generate-type-declarations)
-    - [Automatic typename generation](#automatic-typename-generation)
-    - [Decision process on array type](#decision-process-on-array-type)
-  - [Serving suggestions](#serving-suggestions)
-  - [Troubleshoot](#troubleshoot)
-    - [Combining parent and declare on a group of matches](#combining-parent-and-declare-on-a-group-of-matches)
-  - [Considerations](#considerations)
-  - [Contribution](#contribution)
-  - [License](#license)
+- [Full examples](#full-examples)
+  - [With customization](#with-customization)
+  - [Without customization](#without-customization)
+- [Internal Concepts](#internal-concepts)
+  - [Pipeline](#pipeline)
+  - [Automatic type resolution vs. manual type assignment](#automatic-type-resolution-vs-manual-type-assignment)
+  - [Decision process to generate type declarations](#decision-process-to-generate-type-declarations)
+  - [Automatic typename generation](#automatic-typename-generation)
+  - [Decision process on array type](#decision-process-on-array-type)
+- [Serving suggestions](#serving-suggestions)
+- [Troubleshoot](#troubleshoot)
+  - [Combining parent and declare on a group of matches](#combining-parent-and-declare-on-a-group-of-matches)
+- [Considerations](#considerations)
+- [Contribution](#contribution)
+- [License](#license)
 
 ## Install
 
@@ -237,17 +233,13 @@ alpha:
     charlie: Hello world
 ```
 
+After completing this section, look at the [examples](#creating-named-separate-type-declarations-with-declare) in `declare` section.
+
 ##### Wildcards
 
 Use wildcards to increase flexibility of directives against partial content shifts, changes in the config files which are expected to happen over time.
 
-There are 3 wildcards: `*`, `[]`, `**` which respectively means:
-
-- to match **any key of the dictionary** in the current depth,
-- to match **item type of the array** in the current depth,
-- to match any key of the dictionary or the item type of array type in the every depth.
-
-A wildcard-containing-path can result with multiple matches. In case of multiple matches, the directives will be applied to each match.
+There are 2 wildcards: `*`, `**`. The first matches every key of the current dict. Second one matches multiple (0+) levels of keys. Second one also passes from arrays to item types. A wildcard containing path may result with multiple matches. The directives on path will be applied to each match of path.
 
 Gonfique will notify if a path doesn't get any match.
 
@@ -260,21 +252,34 @@ Gonfique will notify if a path doesn't get any match.
 | `*`      | `x`, `y`, `z`, ...             |
 | `**`     | `x`, `x.x`, `x.x.x`, ...       |
 
+##### Arrays
+
 Arrays can be given directives too. But there is a separation between an array's type and its element type.
 
 ```go
 type ArrayType []ItemType
 ```
 
-If there is a pair of square brackets, than Gonfique expects to see an array in the target in input file.
+If there is a pair of square brackets like `[]`, then Gonfique expects to see an array in the target in input file.
 
-| Path     | Description                         |
-| -------- | ----------------------------------- |
-| `a.[]`   | item's type of `a` array            |
-| `a.[].b` | `b` key of item type (dict)         |
-| `a.[].*` | Every key in the item's type (dict) |
+| Path     | Matches                   | Consequences                                                                              |
+| -------- | ------------------------- | ----------------------------------------------------------------------------------------- |
+| `a.[]`   | the `a` array's item type | `a` must be an array                                                                      |
+| `a.[].*` | the item type's every key | `a` must be an array, item type of `a` must be a dict                                     |
+| `a.[].b` | the item type's `b` key   | `a` must be an array, item type of `a` must be a dict, the dict must have a key named `b` |
 
 #### Path directives
+
+There are 4 alternative directives that :
+
+- **export**  
+  Generates a separate type declaration for the resolved type with the shortest name based on the path
+- **declare**  
+  Like `export` but the user specify the name for the declaration
+- **replace**  
+  Overwrites the resolved type definition with the provided typename
+- **map-values**  
+   Converts the struct type to a map. applies the directive on map's value type
 
 ```yml
 paths:
@@ -299,111 +304,82 @@ paths:
   <path>: map-values replace <existing-typename> <import-path>
 ```
 
-There are 4 alternative directives that :
-
-- **export**  
-  Generates a separate type declaration for the resolved type with the shortest name based on the path
-- **declare**  
-  Like `export` but the user specify the name for the declaration
-- **replace**  
-  Overwrites the resolved type definition with the provided typename
-- **map-values**  
-  Converts the struct type to a map. applies the directive on map's value type
-
-User needs to include additional details when the mode is either of `declare`, `replace`, `map`. Such as:
-
-User can control the handling of map-values when the mode selected as `map`.
-
-##### `declare`
+##### Creating named (separate) type declarations with auto generated names with `export`
 
 ```yaml
-a.key.path:
-  declare: Typename
+paths:
+  <path>: export
+```
+
+Exporting a path, will result every matching target's type to be declared as separate with an auto generated typename. The path match multiple target is completely fine and intended. If desired, the path could be `*` or `**` too. See also: [Automatic typename generation](#automatic-typename-generation). Note that auto generated typenames are dependent to each other because of collisions and readability. So, typenames' stability subject to schema stability. Thus, consecutive runs might produce different typename set. For the typenames stability matters prefer usage of `declare` directive.
+
+##### Creating named (separate) type declarations with `declare`
+
+```yaml
+paths:
+  <path>: declare Typename
 ```
 
 Use `declare` directive to generate named type declaration(s) for matching targets. This directive merges the types of all matches, and requires them to share same schema. There can be multiple rules mentioning same typename in `declare` directive.
 
-###### Notes
+> ![TIP]
+> Declaration examples with wildcards
+>
+> ```yaml
+> paths:
+>   apiVersion: declare ApiVersion
+>   metadata.name: declare Name
+>   spec.template.metadata.labels.app: declare AppLabel
+> ```
+>
+> Wildcards lets users to write more flexible mappings.
+>
+> Single-level wildcards match with any key in a dictionary, and they can be used many times in a pathway. The specified type name will be
+>
+> ```yaml
+> paths:
+>   spec.template.*.labels.app: declare AppLabel
+>   spec.*.*.labels.app: declare AppLabel
+> ```
+>
+> Multi-level wildcards match zero-to-many depth of dictionaries:
+>
+> ```yaml
+> paths:
+>   spec.**.app: declare AppLabel
+> ```
+>
+> That would match all of the `spec.app`, `spec.foo.app` and `spec.bar.[].app` same time.
+>
+> Array item type:
+>
+> ```yaml
+> paths:
+>   spec.template.spec.containers.[]: declare Container
+> ```
+>
+> A key's type in any item:
+>
+> ```yaml
+> paths:
+>   spec.template.spec.containers.[].Name: declare ContainerName
+> ```
+>
+> If the array type also needs to be given a name:
+>
+> ```yaml
+> paths:
+>   spec.template.spec.containers: declare Containers
+> ```
 
-- `declare` can be combined with `replace`
-- `declare` overrides `export`
-
-###### Declaration examples with wildcards
+##### Assigning types manually with `replace`
 
 ```yaml
 paths:
-  apiVersion: declare ApiVersion
-  metadata.name: declare Name
-  spec.template.metadata.labels.app: declare AppLabel
+  <path>: replace <typename> <import-path>
 ```
 
-Wildcards lets users to write more flexible mappings.
-
-Single-level wildcards match with any key in a dictionary, and they can be used many times in a pathway. The specified type name will be
-
-```yaml
-paths:
-  spec.template.*.labels.app: declare AppLabel
-  spec.*.*.labels.app: declare AppLabel
-```
-
-Multi-level wildcards match zero-to-many depth of dictionaries:
-
-```yaml
-paths:
-  spec.**.app: declare AppLabel
-```
-
-That would match all of the `spec.app`, `spec.foo.app` and `spec.bar.[].app` same time.
-
-Array item type:
-
-```yaml
-paths:
-  spec.template.spec.containers.[]: declare Container
-```
-
-A key's type in any item:
-
-```yaml
-paths:
-  spec.template.spec.containers.[].Name: declare ContainerName
-```
-
-If the array type also needs to be given a name:
-
-```yaml
-paths:
-  spec.template.spec.containers: declare Containers
-```
-
-##### The `export` directive
-
-```yaml
-a.key.path:
-  export: true # default is false
-```
-
-Setting `export` to true will result with automatically generated typenames to be exported, meanining is that they'll start with a capitalized letter. This will only have effect when [automatic type declaration](#automatically-deciding-to-generate-type-declarations) gets triggered.
-
-###### Notes
-
-- Typenames are dependent to each other because of collisions and readability. So, typenames' stability subject to schema stability.
-- Exporting doesn't need to merge the types of all matches. So, a rule can match targets in different schemas and set exporting to true, such as `**`.
-
-##### `replace`
-
-> [!NOTE]
-> This directive is currently here for preview and unavailable for use.
-
-```yaml
-a.key.path:
-  typename: Typename
-  import-path: path/to/package/to/import
-  import-as: packageAlias
-```
-
-Assign specified type name instead resolving from source file. For example: `type: int`
+Assign specified type name instead resolving from source file. For example: `replace int` or `replace Employee acme/models`.
 
 ### Types section
 
@@ -418,38 +394,30 @@ There are 4 types of type directives: `accessors`, `embed`, `iterator`, `parent`
 ##### Implementing getters and setters with `accessors`
 
 ```yaml
-a.key.path:
-  accessors: [key-name-1, key-name-2, ...]
+types:
+  <typename>:
+    accessors: [<key-1>, <key-2>, ...]
 ```
 
 Accessors are getters and setters for fields. Gonfique can implement getters and setters on any field of a struct, any key of a dict. The code will contain input and output parameter types that is nicely matching the field type.
 
-###### Notes
-
-- Accessors will be defined on all types the rule matches. Define paths that will only match same type targets.
-- Multiple rules matching same target containing conflicting directives is illegal, as well as, one rule match with different type targets.
-
 ##### Making the hierarchy of types explicit with `embed`
 
-> [!NOTE]
-> This directive is currently here for preview and unavailable for use.
-
 ```yaml
-a.key.path:
-  embed:
-    typename: Typename
-    import-path: path/to/package/to/import
+types:
+  <typename>:
+    embed: <typename>
 ```
 
-Using `embed` directive will modify the generated type definition to make it look like it is derived from an embedded type. The resulting field list won't contain common fields that is also found in the embedded type.
-
-Use `import-path` if the embedded type is outside of package specified with CLI flag. Also use `import-as` when an alias is desired for imported package.
-
-###### Notes
-
-- Embedded type should be a struct, not an interface.
+Using `embed` directive will modify the generated type definition to make it look like it is derived from an embedded type. The resulting field list won't contain common fields that is also found in the embedded type. The embedded type should be amongst types generated with `declare` directive.
 
 ##### Making structs iterable with `iterator`
+
+```yaml
+types:
+  <typename>:
+    iterator: <bool>
+```
 
 Since the corresponding type for a struct-represented section of the input file is actually a dict of string keys and values; Gonfique can include additional data in the generated file to allow you access the "keys" as strings.
 
@@ -459,14 +427,12 @@ Combined with `iterator` directive, Gonfique let's you use your 'structs' in a p
 for name, details := range cfg.employees { /* */ }
 ```
 
-where the employees were originally a dict and represented with a struct in Go.
-
-This way you can keep your way to access values through fields like it is a `struct` and also have another way to iterate over them like it is a `map`.
+where the employees were originally a dict and represented with a struct in Go. With iterator support on structs, you can keep your way to access values through fields like it is a `struct` and also have another way to iterate over them like it is a `map`.
 
 ##### Adding a field for parent access with `parent`
 
 ```yaml
-a.key.path:
+<typename>:
   parent: Fieldname
 ```
 
@@ -806,31 +772,44 @@ lorem:
 
 `gonfique` assignes the necessary slice type to arrays. It works best when all items of an array possess the same schema or at least compatible schemas. Type assignment occurs as below when items have not same but compatible schemas:
 
+<table>
+<thead>
+<td>Input</td>
+<td>Output</td>
+<thead>
+<tr>
+<td>
+
 ```yaml
-# input
-- action: foo
-  foo-details: ""
-- action: bar
-  bar-details: ""
+- a: ""
+  b: ""
+- a: ""
+  c: 0
 ```
 
+</td>
+<td>
+
 ```go
-// output
 []struct {
-  Action     string
-  FooDetails string
-  BarDetails string
+  A string
+  B string
+  C int
 }
 ```
+
+</td>
+<tr>
+<table>
 
 > [!IMPORTANT]
 > Slice type gets defined as `[]any` if shared keys have different type values. Like `detail` has given `int` and `string` values below:
 >
 > ```yaml
-> - action: ""
->   detail: 0
-> - action: ""
->   detail: ""
+> - a: ""
+>   b: 0
+> - a: ""
+>   b: ""
 > ```
 
 ## Serving suggestions
