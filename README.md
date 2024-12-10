@@ -2,9 +2,9 @@
 
 <img src="assets/Gonfique.png" alt="Gonfique logo" height="300px">
 
-Gonfique is a special kind of YAML-to-Go and JSON-to-Go that has the **customization** options developers need when they create mappings for config files. Gonfique also works **offline** unlike online services which makes Gonfique easier to integrate into build process and always keep mapping types up-to-date.
+Gonfique is a special kind of YAML-to-Go and JSON-to-Go that has the **customization options** developers need when they create mappings for config files. Gonfique also **works offline**. Unlike online services Gonfique is easier to integrate into build pipeline which makes effortless to keep mapping types always up-to-date.
 
-Having Gonfique integrated into the build pipeline, developers can use extremely dynamic schemas like storing part of the config information in the keys. Dynamic keys are breeze to work with, as they make accessing to particular entry a.dot.access.close. Before Gonfique, an update in the source file would need developer to open the online service and regenerate the mapping file. With Gonfique, _as the mapping file gets updated_, the LSP checks whole codebase at instant and IDE points to the files where a previously working config access went broken. So, the developer gets a chance to fix before prod.
+Having Gonfique integrated into the build pipeline, developers can use extremely dynamic schemas like storing part of the config information in the keys. Dynamic keys are breeze to work with, as they make accessing particular entry a.dot.access.close. Before Gonfique, an update in the source file would need developer to open the online service and regenerate the mapping file. With Gonfique, _as the mapping file gets updated_, the LSP checks whole codebase at instant and IDE points to the files where a previously working config access went broken. So, the developer gets a chance to fix before prod.
 
 > ```go
 > cfg.the.["road"].to.["panics"].is.["paved"].with.["hardcoded"]["strings"]
@@ -205,7 +205,11 @@ meta:
   config-type: <typename>
 
 paths:
-  <path>: [ export | declare | replace | map-values ] <args...>
+  <path>:
+    declare: <typename>
+    dict: [ static | dynamic-keys | dynamic ]
+    export: <bool>
+    replace: <typename> <import-path>
 
 types:
   <typename>:
@@ -213,6 +217,8 @@ types:
     embed: <typename>
     iterator: <bool>
     parent: <field-name>
+
+.
 ```
 
 The section `paths` is processed earlier than the `types` in the generation process. The types which are declared by the `declare` directives in the `paths` section can be further customized by directives in the `types` section. Keep reading for the explanation of `declare`. If none of the entries in the `path` section contain `declare` directive on any path, than there is no need for `types` section.
@@ -268,37 +274,74 @@ If there is a pair of square brackets like `[]`, then Gonfique expects to see an
 | `a.[].*` | the item type's every key | `a` must be an array, item type of `a` must be a dict                                     |
 | `a.[].b` | the item type's `b` key   | `a` must be an array, item type of `a` must be a dict, the dict must have a key named `b` |
 
-#### Path directives
+##### Maps
 
-There are 4 alternative directives. the first 3 directives also can be used as an argument to the 4th
+Use `[key]` operator to target a key type and use `[value]` operator to target a value type.
 
-- **export**  
-  Generates a separate type declaration for the resolved type with the shortest name based on the path
-- **declare**  
-  Like `export` but the user specify the name for the declaration
-- **replace**  
-  Overwrites the resolved type definition with the provided typename
-- **map**  
-  Implements the dict with a map instead of a struct. Accepts the argument as a directive on value type
+<table>
+<thead>
+<td>Input</td>
+<td>Output</td>
+</thead>
+<tbody>
+<tr>
+<td>
 
 ```yml
 paths:
-  <path>: export
+  events:
+    dict: dynamic #
 
-  <path>: declare <typename>
+  events.[key]: #
+    declare: Event
+    replace: string
 
-  <path>: replace <existing-typename> <import-path>
-
-  <path>: map export
-  <path>: map declare <typename>
-  <path>: map replace <existing-typename> <import-path>
+  events.[value]: #
+    replace: Date time
 ```
+
+</td>
+<td>
+
+```go
+import (
+  "time"
+)
+
+type Event string
+
+type Config struct {
+  Events map[Event]time.Date `json:"events"`
+}
+
+```
+
+</td>
+</tr>
+</tbody>
+</table>
+
+Key targeting paths are only read when the containing map set either `dict: dynamic-keys` or `dict: dynamic`. Value targeting paths are only processed when containing dict set `dict: dynamic`.
+
+#### Path directives
+
+There are 4 alternative directives:
+
+- **export**  
+  Generate a separate type declaration
+- **declare**  
+  Like `export` but you provide the typename
+- **dict**  
+  Choose between `map` and `struct` to represent a dict
+- **replace**  
+  Overwrites the resolved type definition with the provided typename
 
 ##### Creating named (separate) type declarations with auto generated names with `export`
 
 ```yaml
 paths:
-  <path>: export
+  <path>:
+    export: true
 ```
 
 Exporting a path, will result every matching target's type to be declared as separate with an auto generated typename. The path match multiple target is completely fine and intended. If desired, the path could be `*` or `**` too. See also: [Automatic typename generation](#automatic-typename-generation). Note that auto generated typenames are dependent to each other because of collisions and readability. So, typenames' stability subject to schema stability. Thus, consecutive runs might produce different typename set. For the typenames stability matters prefer usage of `declare` directive.
@@ -307,7 +350,8 @@ Exporting a path, will result every matching target's type to be declared as sep
 
 ```yaml
 paths:
-  <path>: declare <typename>
+  <path>:
+    declare: <typename>
 ```
 
 Use `declare` directive to generate named type declaration(s) for matching targets. This directive merges the types of all matches, and requires them to share same schema.
@@ -318,33 +362,41 @@ Use `declare` directive to generate named type declaration(s) for matching targe
 >
 > ```yaml
 > paths:
->   apiVersion: declare ApiVersion
->   metadata.name: declare Name
->   spec.template.metadata.labels.app: declare AppLabel
+>   apiVersion: { declare: ApiVersion }
+>   metadata.name: { declare: Name }
+>   spec.template.metadata.labels.app: { declare: AppLabel }
+> ```
+>
+> Don't confuse your mind with braces.
+> You can still write them multi-line if you prefer:
+>
+> ```yaml
+> spec.template.metadata.labels.app:
+>   declare: AppLabel
 > ```
 >
 > Wildcards lets users to write more flexible mappings. Single-level wildcards match with any key in a dictionary, and they can be used many times in a pathway:
 >
 > ```yaml
 > paths:
->   spec.*.*.labels.app: declare AppLabel
->   spec.template.*.labels.app: declare AppLabel
+>   spec.*.*.labels.app: { declare: AppLabel }
+>   spec.template.*.labels.app: { declare: AppLabel }
 > ```
 >
 > Multi-level wildcards passes many times from a dict to its keys and from an array to its item type. Below would match all of the `spec.app`, `spec.foo.app` and `spec.bar.[].app` same time:
 >
 > ```yaml
 > paths:
->   spec.**.app: declare AppLabel
+>   spec.**.app: { declare: AppLabel }
 > ```
 >
 > Square brackets can be used to pass from an array to its item type only once:
 >
 > ```yaml
 > paths:
->   spec.template.spec.containers: declare Containers
->   spec.template.spec.containers.[]: declare Container
->   spec.template.spec.containers.[].Name: declare ContainerName
+>   spec.template.spec.containers: { declare: Containers }
+>   spec.template.spec.containers.[]: { declare: Container }
+>   spec.template.spec.containers.[].Name: { declare: ContainerName }
 > ```
 
 > [!TIP]
@@ -353,8 +405,8 @@ Use `declare` directive to generate named type declaration(s) for matching targe
 >
 > ```yaml
 > paths:
->   a.b: declare B
->   c.b: declare B
+>   a.b: { declare: B }
+>   c.b: { declare: B }
 > ```
 >
 > Which might make possible to write functions that takes those part of file an argument:
@@ -367,10 +419,29 @@ Use `declare` directive to generate named type declaration(s) for matching targe
 
 ```yaml
 paths:
-  <path>: replace <typename> <import-path>
+  <path>:
+    replace: <typename> <import-path>
 ```
 
-Assign specified type name instead resolving from source file. For example: `replace int` or `replace Employee acme/models`.
+Assign specified type name instead resolving from source file. For example: `replace: int` or `replace: Employee acme/models`.
+
+##### Using maps for dicts with `dict`
+
+```yaml
+paths:
+  <path>:
+    dict: [static | dynamic-keys | dynamic]
+```
+
+Use a Go `map` instead of a `struct` to represent a dict. This might be useful when the set of keys for a dict is not fixed until the build time, but extends to runtime. Using `map` requires all values of the dict in path to have same or compatible schemas. Otherwise Gonfique will print an error on stderr and return with status other than 0.
+
+The default value is `static`. It would result the dict as to be represented in Go with a `struct` just like how it is normally.
+
+When the value is set to `dynamic` Gonfique will seek for both `<path>.[key]` and `<path>.[value]` for `replace` directives. Gonfique won't try to resolve types from input file for key and value types in this mode.
+
+When the value is set to `dynamic-keys` Gonfique will only seek for `<path>.[key]` for `replace` directive. The value type will be resolved by input file. So, in `dynamic-keys`, Gonfique still resolves value type.
+
+If you want to get a standard map type such as a `map[string]any`, you might as well use `replace: map[string]any` at the dict's path instead. `dict` directive suits better when only the keys are dynamic and values are fixed in build time. The advantage of using `dict: dynamic` over `replace: map[K]V` is when you also want to use `declare` on replaced type and apply type directives on the declared type.
 
 ### Types section
 
