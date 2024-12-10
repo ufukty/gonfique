@@ -270,7 +270,7 @@ If there is a pair of square brackets like `[]`, then Gonfique expects to see an
 
 #### Path directives
 
-There are 4 alternative directives that :
+There are 4 alternative directives. the first 3 directives also can be used as an argument to the 4th
 
 - **export**  
   Generates a separate type declaration for the resolved type with the shortest name based on the path
@@ -278,30 +278,20 @@ There are 4 alternative directives that :
   Like `export` but the user specify the name for the declaration
 - **replace**  
   Overwrites the resolved type definition with the provided typename
-- **map-values**  
-   Converts the struct type to a map. applies the directive on map's value type
+- **map**  
+  Implements the dict with a map instead of a struct. Accepts the argument as a directive on value type
 
 ```yml
 paths:
-  # there are 4 main directives: export, declare, replace, map-values
-  # the first 3 directives are also can be used as an argument to the 4th.
-
-  # creates named type declaration with a generated name:
   <path>: export
 
-  # creates type declaration with the provided name:
   <path>: declare <typename>
 
-  # overwrites the resolved type with the provided type.
-  # imports the package if provided (optional).
   <path>: replace <existing-typename> <import-path>
 
-  # converts struct definition to a map.
-  # export, declare and replace have the same effect like when used directly,
-  # but this time they target the map's value type.
-  <path>: map-values export
-  <path>: map-values declare <typename>
-  <path>: map-values replace <existing-typename> <import-path>
+  <path>: map export
+  <path>: map declare <typename>
+  <path>: map replace <existing-typename> <import-path>
 ```
 
 ##### Creating named (separate) type declarations with auto generated names with `export`
