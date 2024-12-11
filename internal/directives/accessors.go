@@ -6,19 +6,20 @@ import (
 	"go/token"
 	"slices"
 
+	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/namings"
-	"github.com/ufukty/gonfique/internal/paths/models"
+	"github.com/ufukty/gonfique/internal/transform"
 	"golang.org/x/exp/maps"
 )
 
-type accessordetails map[models.FieldName]models.TypeName
+type accessordetails map[transform.FieldName]config.Typename
 
-func accessorDetailsForTypes(d *Directives) (map[models.TypeName]accessordetails, error) {
-	details := map[models.TypeName]accessordetails{}
+func accessorDetailsForTypes(d *Directives) (map[config.Typename]accessordetails, error) {
+	details := map[config.Typename]accessordetails{}
 
 	for tn, kps := range d.instances {
 		init := true
-		details[tn] = map[models.FieldName]models.TypeName{}
+		details[tn] = map[transform.FieldName]config.Typename{}
 		for _, kp := range kps {
 			for _, fn := range d.directives[kp].Accessors {
 				fkp := kp.WithFieldPath(fn)
@@ -39,7 +40,7 @@ func accessorDetailsForTypes(d *Directives) (map[models.TypeName]accessordetails
 	return details, nil
 }
 
-func generateGetter(typename models.TypeName, fieldname models.FieldName, fieldtype models.TypeName) *ast.FuncDecl {
+func generateGetter(typename config.Typename, fieldname transform.FieldName, fieldtype config.Typename) *ast.FuncDecl {
 	recvname := namings.Initial(string(typename))
 	return &ast.FuncDecl{
 		Recv: &ast.FieldList{
@@ -72,7 +73,7 @@ func generateGetter(typename models.TypeName, fieldname models.FieldName, fieldt
 	}
 }
 
-func generateSetter(typename models.TypeName, fieldname models.FieldName, fieldtype models.TypeName) *ast.FuncDecl {
+func generateSetter(typename config.Typename, fieldname transform.FieldName, fieldtype config.Typename) *ast.FuncDecl {
 	recvname := namings.Initial(string(typename))
 	paramname := "v"
 	if recvname == "v" {

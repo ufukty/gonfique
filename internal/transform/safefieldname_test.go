@@ -1,4 +1,4 @@
-package namings
+package transform
 
 import "testing"
 
@@ -24,7 +24,7 @@ func TestFieldnameFromUppercase(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			if got := SafeFieldName(tc.input); tc.want != got {
+			if got := safeFieldName(tc.input); tc.want != got {
 				t.Errorf("titleCase(%q) got %q, want %q", tc.input, got, tc.want)
 			}
 		})
@@ -158,7 +158,7 @@ func TestFieldnameFromLowercase(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			if got := SafeFieldName(tc.input); tc.want != got {
+			if got := safeFieldName(tc.input); tc.want != got {
 				t.Errorf("titleCase(%q) got %q, want %q", tc.input, got, tc.want)
 			}
 		})
@@ -184,7 +184,7 @@ func TestFieldnameFromCamelCase(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			if got := SafeFieldName(tc.input); tc.want != got {
+			if got := safeFieldName(tc.input); tc.want != got {
 				t.Errorf("titleCase(%q) got %q, want %q", tc.input, got, tc.want)
 			}
 		})
@@ -213,7 +213,7 @@ func TestFieldnameFromSnakeCase(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			if got := SafeFieldName(tc.input); tc.want != got {
+			if got := safeFieldName(tc.input); tc.want != got {
 				t.Errorf("titleCase(%q) got %q, want %q", tc.input, got, tc.want)
 			}
 		})
@@ -237,7 +237,7 @@ func TestFieldnameFromKebabCase(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			if got := SafeFieldName(tc.input); tc.want != got {
+			if got := safeFieldName(tc.input); tc.want != got {
 				t.Errorf("titleCase(%q) got %q, want %q", tc.input, got, tc.want)
 			}
 		})
@@ -287,7 +287,7 @@ func TestFieldnameFromKubernetesConfig(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			if got := SafeFieldName(tc.input); tc.want != got {
+			if got := safeFieldName(tc.input); tc.want != got {
 				t.Errorf("titleCase(%q) got %q, want %q", tc.input, got, tc.want)
 			}
 		})

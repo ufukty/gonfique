@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"go/ast"
 
-	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/directives/directivefile"
+	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/paths/models"
 )
 
@@ -25,25 +25,25 @@ type Directives struct {
 	keypaths   map[ast.Node]models.FlattenKeypath // holder (Field, ArrayType etc.) -> keypath (resolver)
 	holders    map[models.FlattenKeypath]ast.Node // inverse Keypaths
 	exprs      map[models.FlattenKeypath]ast.Expr
-	expansions map[models.WildcardKeypath][]models.FlattenKeypath
+	expansions map[config.Path][]models.FlattenKeypath
 	sources    map[models.FlattenKeypath]parameterSources
 	directives map[models.FlattenKeypath]directivefile.Directives // flatten Sources
 	features   featuresForKeypaths                                // convenience
 	toRefer    []models.FlattenKeypath
-	elected    map[models.FlattenKeypath]models.TypeName
-	instances  map[models.TypeName][]models.FlattenKeypath // inverse Elected
-	molds      map[models.TypeName]ast.Expr
+	elected    map[models.FlattenKeypath]config.Typename
+	instances  map[config.Typename][]models.FlattenKeypath // inverse Elected
+	molds      map[config.Typename]ast.Expr
 }
 
 func New(b *bundle.Bundle) *Directives {
 	return &Directives{
 		b:          b,
-		expansions: map[models.WildcardKeypath][]models.FlattenKeypath{},
+		expansions: map[config.Path][]models.FlattenKeypath{},
 		features:   featuresForKeypaths{},
 		toRefer:    []models.FlattenKeypath{},
 		exprs:      map[models.FlattenKeypath]ast.Expr{},
-		elected:    map[models.FlattenKeypath]models.TypeName{},
-		instances:  map[models.TypeName][]models.FlattenKeypath{},
+		elected:    map[models.FlattenKeypath]config.Typename{},
+		instances:  map[config.Typename][]models.FlattenKeypath{},
 	}
 }
 

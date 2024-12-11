@@ -3,26 +3,27 @@ package namings
 import (
 	"slices"
 
-	"github.com/ufukty/gonfique/internal/paths/models"
+	"github.com/ufukty/gonfique/internal/files/config"
+	"github.com/ufukty/gonfique/internal/paths"
 	"golang.org/x/exp/maps"
 )
 
-func groupKeypathsByDepth(kps []models.FlattenKeypath) map[int][]models.FlattenKeypath {
-	groups := map[int][]models.FlattenKeypath{}
+func groupKeypathsByDepth(kps []paths.FlattenKeypath) map[int][]paths.FlattenKeypath {
+	groups := map[int][]paths.FlattenKeypath{}
 	for _, kp := range kps {
 		depth := len(kp.Segments())
 		if _, ok := groups[depth]; !ok {
-			groups[depth] = []models.FlattenKeypath{}
+			groups[depth] = []paths.FlattenKeypath{}
 		}
 		groups[depth] = append(groups[depth], kp)
 	}
 	return groups
 }
 
-func orderKeypaths(kps []models.FlattenKeypath) []models.FlattenKeypath {
+func orderKeypaths(kps []paths.FlattenKeypath) []paths.FlattenKeypath {
 	// 1. group by depth
 	// 2. order each group alphabetically
-	ordered := []models.FlattenKeypath{}
+	ordered := []paths.FlattenKeypath{}
 	grouped := groupKeypathsByDepth(kps)
 	depths := maps.Keys(grouped)
 	slices.Sort(depths)
@@ -33,7 +34,7 @@ func orderKeypaths(kps []models.FlattenKeypath) []models.FlattenKeypath {
 	return ordered
 }
 
-func typenameForSegments(segments []string, exported bool) models.TypeName {
+func typenameForSegments(segments []string, exported bool) config.Typename {
 	l := len(segments)
 	if l == 1 && segments[0] == "[]" {
 		return "" // come back next round with 2 segments
@@ -48,17 +49,17 @@ func typenameForSegments(segments []string, exported bool) models.TypeName {
 			tn += "Item"
 		}
 	}
-	return models.TypeName(tn)
+	return config.Typename(tn)
 
 }
 
 // FIXME: consider [] containing keypaths
 // targets is map of keypaths and preference of exported typename
-func GenerateTypenames(targets map[models.FlattenKeypath]bool) map[models.FlattenKeypath]models.TypeName {
+func GenerateTypenames(targets map[paths.FlattenKeypath]bool) map[paths.FlattenKeypath]config.Typename {
 	kps := maps.Keys(targets)
 	ordered := orderKeypaths(kps)
-	tns := map[models.FlattenKeypath]models.TypeName{}
-	reserved := map[models.TypeName]bool{
+	tns := map[paths.FlattenKeypath]config.Typename{}
+	reserved := map[config.Typename]bool{
 		"":            true, // defect
 		"break":       true,
 		"case":        true,

@@ -7,18 +7,30 @@ import (
 	"log"
 	"os"
 	"reflect"
-	"time"
 
-	"github.com/ufukty/gonfique/internal/bundle"
-	"github.com/ufukty/gonfique/internal/namings"
-	"github.com/ufukty/gonfique/internal/paths/models"
+	"github.com/ufukty/gonfique/internal/files/input"
 )
 
+// func (tn FieldName) Capitilized() FieldName {
+// 	return FieldName(cases.Title(language.English, cases.NoLower).String(string(tn)))
+// }
+
+type FieldName string
+
+func (fn FieldName) Ident() *ast.Ident {
+	return ast.NewIdent(string(fn))
+}
+
+type Info struct {
+	Type       ast.Expr
+	Keys       map[ast.Node]string
+	Fieldnames map[ast.Node]FieldName
+}
+
 type transformer struct {
-	isTimeUsed bool
 	keys       map[ast.Node]string // corresponding keys for ASTs
+	fieldnames map[ast.Node]FieldName
 	tagname    string
-	fieldnames map[ast.Node]models.FieldName
 }
 
 func (tr *transformer) arrayType(v reflect.Value) ast.Expr {
@@ -58,7 +70,7 @@ func (tr *transformer) structType(v reflect.Value) *ast.StructType {
 	for iter.Next() {
 		ik := iter.Key()
 		iv := iter.Value()
-		fieldname := models.FieldName(namings.SafeFieldName(ik.String()))
+		fieldname := FieldName(safeFieldName(ik.String()))
 		f := &ast.Field{
 			Names: []*ast.Ident{fieldname.Ident()},
 			Type:  tr.transform(iv),
@@ -73,21 +85,6 @@ func (tr *transformer) structType(v reflect.Value) *ast.StructType {
 	}
 	sort(st.Fields)
 	return st
-}
-
-func (tr *transformer) stringType(v reflect.Value) ast.Expr {
-	s := v.Interface().(string)
-	if s == "0" { // BECAUSE: time.ParseDuration("0") doesn't return error
-		return ast.NewIdent("string")
-	}
-	if _, err := time.ParseDuration(s); err == nil {
-		tr.isTimeUsed = true
-		return &ast.SelectorExpr{
-			X:   ast.NewIdent("time"),
-			Sel: ast.NewIdent("Duration"),
-		}
-	}
-	return ast.NewIdent("string") // generic string
 }
 
 func (tr *transformer) transform(v reflect.Value) ast.Expr {
@@ -106,7 +103,7 @@ func (tr *transformer) transform(v reflect.Value) ast.Expr {
 	case reflect.Bool:
 		return ast.NewIdent("bool")
 	case reflect.String:
-		return tr.stringType(v)
+		return ast.NewIdent("string")
 	case reflect.Int:
 		return ast.NewIdent("int")
 	case reflect.Int32:
@@ -131,17 +128,12 @@ func (tr *transformer) transform(v reflect.Value) ast.Expr {
 
 // reconstructs a reflect-value's type in ast.TypeSpec.
 // limited with types used by YAML decoder.
-func Transform(b *bundle.Bundle) {
-	t := &transformer{
-		isTimeUsed: false,
-		keys:       map[ast.Node]string{},
-		tagname:    string(b.Encoding),
-		fieldnames: map[ast.Node]models.FieldName{},
+func Transform(d any, encoding input.Encoding) Info {
+	tr := transformer{tagname: string(encoding)}
+	ty := tr.transform(reflect.ValueOf(d))
+	return Info{
+		Type:       ty,
+		Keys:       tr.keys,
+		Fieldnames: tr.fieldnames,
 	}
-	b.CfgType = t.transform(reflect.ValueOf(b.Cfgcontent))
-	if t.isTimeUsed {
-		b.AddImports("time")
-	}
-	b.OriginalKeys = t.keys
-	b.Fieldnames = t.fieldnames
 }

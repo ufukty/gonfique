@@ -6,7 +6,7 @@ import (
 	"slices"
 
 	"github.com/ufukty/gonfique/internal/bundle"
-	"github.com/ufukty/gonfique/internal/paths/models"
+	"github.com/ufukty/gonfique/internal/files/input"
 )
 
 func addParentRefAssignmentsFunction(b *bundle.Bundle, dst *ast.File) {
@@ -26,12 +26,12 @@ func addParentRefAssignmentsFunction(b *bundle.Bundle, dst *ast.File) {
 func addReaderFunction(b *bundle.Bundle, dst *ast.File) {
 	var decoder *ast.SelectorExpr
 	switch b.Encoding {
-	case models.Json:
+	case input.Json:
 		decoder = &ast.SelectorExpr{
 			X:   &ast.Ident{Name: "json"},
 			Sel: &ast.Ident{Name: "NewDecoder"},
 		}
-	case models.Yaml:
+	case input.Yaml:
 		decoder = &ast.SelectorExpr{
 			X:   &ast.Ident{Name: "yaml"},
 			Sel: &ast.Ident{Name: "NewDecoder"},

@@ -1,4 +1,4 @@
-package files
+package config
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestConfig(t *testing.T) {
-	f, err := ReadConfigFile("testdata/config.yml")
+	f, err := Read("testdata/config.yml")
 	if err != nil {
 		t.Fatal(fmt.Errorf("read: %w", err))
 	}

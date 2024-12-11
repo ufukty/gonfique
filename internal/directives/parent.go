@@ -7,19 +7,21 @@ import (
 	"slices"
 
 	"github.com/ufukty/gonfique/internal/datas/collects"
+	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/namings"
 	"github.com/ufukty/gonfique/internal/paths/models"
+	"github.com/ufukty/gonfique/internal/transform"
 )
 
 type parentRefDetails struct {
-	Fieldname models.FieldName
+	Fieldname transform.FieldName
 }
 
-func detailsForParentRefs(d *Directives) (map[models.TypeName]parentRefDetails, error) {
-	details := map[models.TypeName]parentRefDetails{}
+func detailsForParentRefs(d *Directives) (map[config.Typename]parentRefDetails, error) {
+	details := map[config.Typename]parentRefDetails{}
 
 	for tn, kps := range d.instances {
-		values := collects.WithSources[models.FieldName, models.FlattenKeypath]{}
+		values := collects.WithSources[transform.FieldName, models.FlattenKeypath]{}
 		for _, kp := range kps {
 			dirs := d.directives[kp]
 			if dirs.Parent != "" {

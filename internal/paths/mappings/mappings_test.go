@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/coder"
 	"github.com/ufukty/gonfique/internal/files"
+	"github.com/ufukty/gonfique/internal/files/input"
 	"github.com/ufukty/gonfique/internal/testutils"
 	"github.com/ufukty/gonfique/internal/transform"
 )
@@ -22,7 +22,7 @@ func TestMappings(t *testing.T) {
 		t.Run(tc, func(t *testing.T) {
 			b := bundle.New("Config")
 
-			f, err := files.ReadConfigFile(filepath.Join("testdata", tc, "config.yml"))
+			f, enc, err := input.Read(filepath.Join("testdata", tc, "config.yml"))
 			if err != nil {
 				t.Fatal(fmt.Errorf("resolving the type spec needed: %w", err))
 			}

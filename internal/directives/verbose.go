@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	"github.com/ufukty/gonfique/internal/datas"
+	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/paths/models"
 )
 
@@ -20,12 +21,12 @@ func (d *Directives) debug() {
 		}
 	}
 
-	effects := map[models.FlattenKeypath][]models.WildcardKeypath{}
+	effects := map[models.FlattenKeypath][]config.Path{}
 
 	for wckp := range *d.b.Df {
 		for _, kp := range d.expansions[wckp] {
 			if _, ok := effects[kp]; !ok {
-				effects[kp] = []models.WildcardKeypath{}
+				effects[kp] = []config.Path{}
 			}
 			effects[kp] = append(effects[kp], wckp)
 		}

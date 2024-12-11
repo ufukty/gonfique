@@ -6,7 +6,6 @@ import (
 	"go/token"
 	"slices"
 
-	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/namings"
 )
 

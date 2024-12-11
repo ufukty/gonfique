@@ -7,14 +7,14 @@ package directives
 // )
 
 // type embeddingDetails struct {
-// 	EmbeddedTypeName       models.TypeName
+// 	EmbeddedTypeName       config.Typename
 // 	EmbeddedTypeImportPath string
 // 	EmbeddedTypeImportAs   string
 // 	EmbeddedTypeFieldList  *ast.FieldList
 // }
 
-// func (d *Directives) getEmbeddingDetails(users map[models.TypeName][]models.FlattenKeypath) (map[models.TypeName]embeddingDetails, error) {
-// 	details := map[models.TypeName]embeddingDetails{}
+// func (d *Directives) getEmbeddingDetails(users map[config.Typename][]models.FlattenKeypath) (map[config.Typename]embeddingDetails, error) {
+// 	details := map[config.Typename]embeddingDetails{}
 
 // 	// FIXME: use "types" or "ast" package to inspect field list of specified embedding struct
 // 	for tn, kps := range users {

@@ -1,9 +1,13 @@
-package files
+package config
 
 import (
 	"fmt"
+	"go/ast"
 	"os"
+	"strings"
 
+	"github.com/ufukty/gonfique/internal/files/config/meta"
+	"github.com/ufukty/gonfique/internal/transform"
 	"gopkg.in/yaml.v3"
 )
 
@@ -14,11 +18,6 @@ const (
 	DynamicKeys Dict = "dynamic-keys"
 	Dynamic     Dict = "dynamic"
 )
-
-type Meta struct {
-	Package string `yaml:"package"`
-	Type    string `yaml:"config-type"`
-}
 
 type PathConfig struct {
 	Export  bool
@@ -34,13 +33,29 @@ type TypeConfig struct {
 	Iterator  bool     `yaml:"iterator"`
 }
 
-type File struct {
-	Meta  Meta                  `yaml:"meta"`
-	Paths map[string]PathConfig `yaml:"paths"`
-	Types map[string]TypeConfig `yaml:"types"`
+type Path string
+
+func (p Path) Segments() []string {
+	return strings.Split(string(p), ".")
 }
 
-func ReadConfigFile(src string) (*File, error) {
+func (p Path) WithField(f transform.FieldName) Path {
+	return Path(fmt.Sprintf("%s.%s", p, f))
+}
+
+type Typename string
+
+func (t Typename) Ident() *ast.Ident {
+	return ast.NewIdent(string(t))
+}
+
+type File struct {
+	Meta  meta.Meta               `yaml:"meta"`
+	Paths map[Path]PathConfig     `yaml:"paths"`
+	Types map[Typename]TypeConfig `yaml:"types"`
+}
+
+func Read(src string) (*File, error) {
 	f, err := os.Open(src)
 	if err != nil {
 		return nil, fmt.Errorf("opening: %w", err)

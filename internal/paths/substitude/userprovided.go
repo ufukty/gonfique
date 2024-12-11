@@ -6,7 +6,6 @@ import (
 	"go/parser"
 	"go/token"
 
-	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/compares"
 	"golang.org/x/tools/go/ast/astutil"
 )

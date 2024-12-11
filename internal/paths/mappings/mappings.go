@@ -5,13 +5,12 @@ import (
 	"go/ast"
 	"go/token"
 
-	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/compares"
+	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/matcher"
-	"github.com/ufukty/gonfique/internal/paths/models"
 )
 
-func ApplyMappings(b *bundle.Bundle, mappings map[models.WildcardKeypath]models.TypeName) error {
+func ApplyMappings(b *bundle.Bundle, mappings map[config.Path]config.Typename) error {
 	matchlists := map[*ast.Ident][]ast.Node{}
 	for kp, tn := range mappings {
 		matches, err := matcher.FindTypeDefHoldersForKeypath(b.CfgType, kp, b.OriginalKeys)

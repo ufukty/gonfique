@@ -7,6 +7,7 @@ import (
 
 	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/datas/collects"
+	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/namings"
 	"github.com/ufukty/gonfique/internal/paths/models"
 )
@@ -28,7 +29,7 @@ func (d *Directives) checkKeypathsToReferTheirType() {
 	d.toRefer = datas.Uniq(d.toRefer)
 }
 
-func getAutogen(d *Directives) map[models.FlattenKeypath]models.TypeName {
+func getAutogen(d *Directives) map[models.FlattenKeypath]config.Typename {
 	targets := map[models.FlattenKeypath]bool{}
 	for _, kp := range d.keypaths {
 		targets[kp] = false
@@ -40,8 +41,8 @@ func getAutogen(d *Directives) map[models.FlattenKeypath]models.TypeName {
 	return autogen
 }
 
-func getProvided(d *Directives) map[models.FlattenKeypath]models.TypeName {
-	provided := map[models.FlattenKeypath]models.TypeName{}
+func getProvided(d *Directives) map[models.FlattenKeypath]config.Typename {
+	provided := map[models.FlattenKeypath]config.Typename{}
 	for _, kp := range d.features.Declare {
 		provided[kp] = d.directives[kp].Declare
 	}
@@ -57,7 +58,7 @@ func (d *Directives) typenameElection() error {
 			continue
 		}
 		if id, ok := d.exprs[kp].(*ast.Ident); ok {
-			d.elected[kp] = models.TypeName(id.Name)
+			d.elected[kp] = config.Typename(id.Name)
 			continue
 		}
 		if autogen, ok := autogen[kp]; ok {
@@ -81,7 +82,7 @@ func (d *Directives) implementTypeDeclarations() {
 		}
 	}
 
-	d.molds = map[models.TypeName]ast.Expr{}
+	d.molds = map[config.Typename]ast.Expr{}
 	for kp := range declare.Iter() {
 		d.molds[d.elected[kp]] = d.exprs[kp]
 	}
