@@ -1,4 +1,4 @@
-package config
+package files
 
 import (
 	"fmt"
@@ -40,7 +40,7 @@ type File struct {
 	Types map[string]TypeConfig `yaml:"types"`
 }
 
-func Read(src string) (*File, error) {
+func ReadConfigFile(src string) (*File, error) {
 	f, err := os.Open(src)
 	if err != nil {
 		return nil, fmt.Errorf("opening: %w", err)
