@@ -6,8 +6,8 @@ import (
 	"go/token"
 	"slices"
 
-	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/namings"
+	"github.com/ufukty/gonfique/internal/paths/models"
 	"golang.org/x/exp/maps"
 )
 

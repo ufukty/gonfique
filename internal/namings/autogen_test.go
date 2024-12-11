@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ufukty/gonfique/internal/models"
+	"github.com/ufukty/gonfique/internal/paths/models"
 )
 
 func TestAutogen(t *testing.T) {

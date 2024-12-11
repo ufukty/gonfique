@@ -5,7 +5,7 @@ import (
 	"slices"
 
 	"github.com/ufukty/gonfique/internal/datas"
-	"github.com/ufukty/gonfique/internal/models"
+	"github.com/ufukty/gonfique/internal/paths/models"
 )
 
 func (d *Directives) debug() {

@@ -3,7 +3,7 @@ package namings
 import (
 	"slices"
 
-	"github.com/ufukty/gonfique/internal/models"
+	"github.com/ufukty/gonfique/internal/paths/models"
 	"golang.org/x/exp/maps"
 )
 

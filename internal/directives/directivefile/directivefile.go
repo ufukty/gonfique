@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ufukty/gonfique/internal/models"
+	"github.com/ufukty/gonfique/internal/paths/models"
 	"gopkg.in/yaml.v3"
 )
 

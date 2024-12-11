@@ -5,7 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 
-	"github.com/ufukty/gonfique/internal/models"
+	"github.com/ufukty/gonfique/internal/paths/models"
 )
 
 var ConfigType = &ast.StructType{

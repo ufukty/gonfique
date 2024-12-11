@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/ufukty/gonfique/internal/bundle"
-	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/namings"
+	"github.com/ufukty/gonfique/internal/paths/models"
 )
 
 type transformer struct {

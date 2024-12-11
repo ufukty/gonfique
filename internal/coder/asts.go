@@ -6,7 +6,7 @@ import (
 	"slices"
 
 	"github.com/ufukty/gonfique/internal/bundle"
-	"github.com/ufukty/gonfique/internal/models"
+	"github.com/ufukty/gonfique/internal/paths/models"
 )
 
 func addParentRefAssignmentsFunction(b *bundle.Bundle, dst *ast.File) {

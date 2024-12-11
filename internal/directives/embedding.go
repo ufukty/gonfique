@@ -3,7 +3,7 @@ package directives
 // import (
 // 	"go/ast"
 
-// 	"github.com/ufukty/gonfique/internal/models"
+// 	"github.com/ufukty/gonfique/internal/paths/models"
 // )
 
 // type embeddingDetails struct {

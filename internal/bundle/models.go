@@ -4,8 +4,8 @@ import (
 	"go/ast"
 
 	"github.com/ufukty/gonfique/internal/directives/directivefile"
-	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/namings"
+	"github.com/ufukty/gonfique/internal/paths/models"
 )
 
 type Bundle struct {

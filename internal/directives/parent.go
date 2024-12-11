@@ -7,8 +7,8 @@ import (
 	"slices"
 
 	"github.com/ufukty/gonfique/internal/datas/collects"
-	"github.com/ufukty/gonfique/internal/models"
 	"github.com/ufukty/gonfique/internal/namings"
+	"github.com/ufukty/gonfique/internal/paths/models"
 )
 
 type parentRefDetails struct {

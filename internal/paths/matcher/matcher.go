@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/ufukty/gonfique/internal/datas"
-	"github.com/ufukty/gonfique/internal/models"
+	"github.com/ufukty/gonfique/internal/paths/models"
 )
 
 func callMatcherHelperOnFields(st *ast.StructType, kp []string, keys map[ast.Node]string) ([]ast.Node, error) {

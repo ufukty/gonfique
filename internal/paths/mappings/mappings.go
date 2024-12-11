@@ -8,7 +8,7 @@ import (
 	"github.com/ufukty/gonfique/internal/bundle"
 	"github.com/ufukty/gonfique/internal/compares"
 	"github.com/ufukty/gonfique/internal/matcher"
-	"github.com/ufukty/gonfique/internal/models"
+	"github.com/ufukty/gonfique/internal/paths/models"
 )
 
 func ApplyMappings(b *bundle.Bundle, mappings map[models.WildcardKeypath]models.TypeName) error {
