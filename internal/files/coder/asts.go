@@ -6,7 +6,6 @@ import (
 	"go/token"
 
 	"github.com/ufukty/gonfique/internal/files/input"
-	"github.com/ufukty/gonfique/internal/namings"
 )
 
 func (c Coder) addParentRefAssignmentsFunction(dst *ast.File) {
@@ -17,7 +16,7 @@ func (c Coder) addParentRefAssignmentsFunction(dst *ast.File) {
 		Name: ast.NewIdent("parentRefAssignments"),
 		Type: &ast.FuncType{Params: &ast.FieldList{
 			List: []*ast.Field{{
-				Names: []*ast.Ident{ast.NewIdent("c")},
+				Names: []*ast.Ident{c.ti},
 				Type:  &ast.StarExpr{X: ast.NewIdent(c.Meta.Type)},
 			}},
 		}},
@@ -42,8 +41,6 @@ func (c Coder) addReaderFunction(dst *ast.File) error {
 	default:
 		return fmt.Errorf("unknown encoding: %q", c.Encoding)
 	}
-
-	ti := ast.NewIdent(namings.Initial(c.Meta.Type))
 
 	fd := &ast.FuncDecl{
 		Name: &ast.Ident{Name: "Read" + c.Meta.Type},
@@ -91,7 +88,7 @@ func (c Coder) addReaderFunction(dst *ast.File) error {
 					},
 				},
 				&ast.AssignStmt{
-					Lhs: []ast.Expr{ti},
+					Lhs: []ast.Expr{c.ti},
 					Tok: token.DEFINE,
 					Rhs: []ast.Expr{
 						&ast.UnaryExpr{Op: token.AND, X: &ast.CompositeLit{
@@ -107,7 +104,7 @@ func (c Coder) addReaderFunction(dst *ast.File) error {
 							X:   &ast.CallExpr{Fun: decoder, Args: []ast.Expr{&ast.Ident{Name: "file"}}},
 							Sel: &ast.Ident{Name: "Decode"},
 						},
-						Args: []ast.Expr{ti},
+						Args: []ast.Expr{c.ti},
 					}},
 				},
 				&ast.IfStmt{
@@ -131,12 +128,12 @@ func (c Coder) addReaderFunction(dst *ast.File) error {
 
 	if len(c.ParentRefAssignments) > 0 {
 		fd.Body.List = append(fd.Body.List, &ast.ExprStmt{
-			X: &ast.CallExpr{Fun: ast.NewIdent("parentRefAssignments"), Args: []ast.Expr{ti}},
+			X: &ast.CallExpr{Fun: ast.NewIdent("parentRefAssignments"), Args: []ast.Expr{c.ti}},
 		})
 	}
 
 	fd.Body.List = append(fd.Body.List, &ast.ReturnStmt{
-		Results: []ast.Expr{ti, &ast.Ident{Name: "nil"}},
+		Results: []ast.Expr{c.ti, &ast.Ident{Name: "nil"}},
 	})
 
 	dst.Decls = append(dst.Decls, fd)

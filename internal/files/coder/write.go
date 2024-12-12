@@ -13,9 +13,12 @@ import (
 	"github.com/ufukty/gonfique/internal/files/coder/sort"
 	"github.com/ufukty/gonfique/internal/files/config/meta"
 	"github.com/ufukty/gonfique/internal/files/input"
+	"github.com/ufukty/gonfique/internal/namings"
 )
 
 type Coder struct {
+	ti *ast.Ident
+
 	Meta     meta.Meta
 	Encoding input.Encoding
 
@@ -41,7 +44,7 @@ func (c Coder) addImports(dst *ast.File) {
 	case input.Json:
 		imports = append(imports, "encoding/json")
 	}
-	
+
 	slices.Sort(imports)
 	imports = datas.Uniq(imports)
 
@@ -106,6 +109,8 @@ func (c Coder) addAccessors(dst *ast.File) {
 }
 
 func (c Coder) Write(dst string) error {
+	c.ti = ast.NewIdent(namings.Initial(c.Meta.Type))
+
 	f := &ast.File{
 		Name:  ast.NewIdent(c.Meta.Package),
 		Decls: []ast.Decl{},
