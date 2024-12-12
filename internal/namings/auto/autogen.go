@@ -7,7 +7,7 @@ import (
 	"unicode"
 
 	"github.com/ufukty/gonfique/internal/files/config"
-	"github.com/ufukty/gonfique/internal/paths"
+	"github.com/ufukty/gonfique/internal/paths/resolve"
 	"golang.org/x/exp/maps"
 )
 
@@ -34,22 +34,22 @@ func safeTypeName(keyname string, exported bool) string {
 	return n
 }
 
-func groupKeypathsByDepth(kps []paths.Path) map[int][]paths.Path {
-	groups := map[int][]paths.Path{}
+func groupKeypathsByDepth(kps []resolve.Path) map[int][]resolve.Path {
+	groups := map[int][]resolve.Path{}
 	for _, kp := range kps {
 		depth := len(kp.Segments())
 		if _, ok := groups[depth]; !ok {
-			groups[depth] = []paths.Path{}
+			groups[depth] = []resolve.Path{}
 		}
 		groups[depth] = append(groups[depth], kp)
 	}
 	return groups
 }
 
-func orderKeypaths(kps []paths.Path) []paths.Path {
+func orderKeypaths(kps []resolve.Path) []resolve.Path {
 	// 1. group by depth
 	// 2. order each group alphabetically
-	ordered := []paths.Path{}
+	ordered := []resolve.Path{}
 	grouped := groupKeypathsByDepth(kps)
 	depths := maps.Keys(grouped)
 	slices.Sort(depths)
@@ -81,10 +81,10 @@ func typenameForSegments(segments []string, exported bool) config.Typename {
 
 // FIXME: consider [] containing keypaths
 // targets is map of keypaths and preference of exported typename
-func GenerateTypenames(targets map[paths.Path]bool) map[paths.Path]config.Typename {
+func GenerateTypenames(targets map[resolve.Path]bool) map[resolve.Path]config.Typename {
 	kps := maps.Keys(targets)
 	ordered := orderKeypaths(kps)
-	tns := map[paths.Path]config.Typename{}
+	tns := map[resolve.Path]config.Typename{}
 	reserved := map[config.Typename]bool{
 		"":            true, // defect
 		"break":       true,

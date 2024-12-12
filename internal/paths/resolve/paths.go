@@ -1,6 +1,7 @@
 package resolve
 
 import (
+	"fmt"
 	"go/ast"
 	"strings"
 
@@ -8,6 +9,22 @@ import (
 )
 
 type Path string
+
+type FieldPath string
+
+func (p Path) Segments() []string {
+	return strings.Split(string(p), ".")
+}
+
+func (p Path) WithFieldPath(f FieldPath) Path {
+	return Path(fmt.Sprintf("%s.%s", p, f))
+}
+
+func (p Path) Parent() Path {
+	ss := p.Segments()
+	l := max(len(ss)-1, 0)
+	return Path(strings.Join(ss[:l], "."))
+}
 
 type resolver struct {
 	ti    *transform.Info

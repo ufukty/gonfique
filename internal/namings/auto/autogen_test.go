@@ -5,19 +5,19 @@ import (
 	"testing"
 
 	"github.com/ufukty/gonfique/internal/files/config"
-	"github.com/ufukty/gonfique/internal/paths"
+	"github.com/ufukty/gonfique/internal/paths/resolve"
 )
 
 func TestAutogen(t *testing.T) {
 	type testcase struct {
-		input  map[paths.Path]bool
-		output map[paths.Path]config.Typename
+		input  map[resolve.Path]bool
+		output map[resolve.Path]config.Typename
 	}
 
 	tcs := map[string]testcase{
 		"empty": {
-			input:  map[paths.Path]bool{},
-			output: map[paths.Path]config.Typename{},
+			input:  map[resolve.Path]bool{},
+			output: map[resolve.Path]config.Typename{},
 		},
 		// TODO: consider producing args.TypeName for empty keypath
 		// "config": {
@@ -29,14 +29,14 @@ func TestAutogen(t *testing.T) {
 		// 	},
 		// },
 		"letters, 1": {
-			input: map[paths.Path]bool{
+			input: map[resolve.Path]bool{
 				"a": false,
 				"b": false,
 				"c": false,
 				"d": false,
 				"e": false,
 			},
-			output: map[paths.Path]config.Typename{
+			output: map[resolve.Path]config.Typename{
 				"a": "a",
 				"b": "b",
 				"c": "c",
@@ -45,14 +45,14 @@ func TestAutogen(t *testing.T) {
 			},
 		},
 		"letters, 1, exported": {
-			input: map[paths.Path]bool{
+			input: map[resolve.Path]bool{
 				"a": true,
 				"b": true,
 				"c": true,
 				"d": true,
 				"e": true,
 			},
-			output: map[paths.Path]config.Typename{
+			output: map[resolve.Path]config.Typename{
 				"a": "A",
 				"b": "B",
 				"c": "C",
@@ -61,81 +61,81 @@ func TestAutogen(t *testing.T) {
 			},
 		},
 		"letters, 2": {
-			input: map[paths.Path]bool{
+			input: map[resolve.Path]bool{
 				"a.a": false,
 				"a.b": false,
 				"b.a": false,
 			},
-			output: map[paths.Path]config.Typename{
+			output: map[resolve.Path]config.Typename{
 				"a.a": "a", // alphabetical order rewarded with generic type name...
 				"a.b": "b",
 				"b.a": "bA", //
 			},
 		},
 		"letters, 3": {
-			input: map[paths.Path]bool{
+			input: map[resolve.Path]bool{
 				"a.a.a": false,
 				"a.b.a": false,
 			},
-			output: map[paths.Path]config.Typename{
+			output: map[resolve.Path]config.Typename{
 				"a.a.a": "a",
 				"a.b.a": "bA",
 			},
 		},
 		"letters, 3, exported": {
-			input: map[paths.Path]bool{
+			input: map[resolve.Path]bool{
 				"a.a.a": true,
 				"a.b.a": true,
 			},
-			output: map[paths.Path]config.Typename{
+			output: map[resolve.Path]config.Typename{
 				"a.a.a": "A",
 				"a.b.a": "BA",
 			},
 		},
 		"letters, 4": {
-			input: map[paths.Path]bool{
+			input: map[resolve.Path]bool{
 				"a.a.a": false,
 				"a.b.a": false,
 				"b.a.a": false,
 			},
-			output: map[paths.Path]config.Typename{
+			output: map[resolve.Path]config.Typename{
 				"a.a.a": "a",
 				"a.b.a": "bA",
 				"b.a.a": "aA",
 			},
 		},
 		"letters, 4, exported": {
-			input: map[paths.Path]bool{
+			input: map[resolve.Path]bool{
 				"a.a.a": true,
 				"a.b.a": true,
 				"b.a.a": true,
 			},
-			output: map[paths.Path]config.Typename{
+			output: map[resolve.Path]config.Typename{
 				"a.a.a": "A",
 				"a.b.a": "BA",
 				"b.a.a": "AA",
 			},
 		},
 		"words, 1": {
-			input: map[paths.Path]bool{
+			input: map[resolve.Path]bool{
 				"lorem.ipsum.dolor": false,
 				"sit.amet":          false,
 				"consectetur":       false,
 			},
-			output: map[paths.Path]config.Typename{
+			output: map[resolve.Path]config.Typename{
 				"lorem.ipsum.dolor": "dolor",
 				"sit.amet":          "amet",
 				"consectetur":       "consectetur",
 			},
 		},
 		"words, 2": { // conflicting on different leveltestcases
-			input: map[paths.Path]bool{
+			input: map[resolve.Path]bool{
 				"lorem.ipsum.dolor": false,
 				"sit.amet":          false,
 				"consectetur":       false,
 				"dolor":             false,
 			},
-			output: map[paths.Path]config.Typename{
+			output: map[resolve.Path]config.Typename{
 				"lorem.ipsum.dolor": "ipsumDolor",
 				"sit.amet":          "amet",
 				"consectetur":       "consectetur",
@@ -143,14 +143,14 @@ func TestAutogen(t *testing.T) {
 			},
 		},
 		"words, 3": { // conflicting on different leveltestcases
-			input: map[paths.Path]bool{
+			input: map[resolve.Path]bool{
 				"lorem.dolor":       false,
 				"lorem.ipsum.dolor": false,
 				"lorem.ipsum.sit":   false,
 				"lorem.ipsum":       false,
 				"lorem.sit":         false,
 			},
-			output: map[paths.Path]config.Typename{
+			output: map[resolve.Path]config.Typename{
 				"lorem.dolor":       "dolor",
 				"lorem.ipsum.dolor": "ipsumDolor",
 				"lorem.ipsum.sit":   "ipsumSit",
@@ -159,11 +159,11 @@ func TestAutogen(t *testing.T) {
 			},
 		},
 		"words, 4": { // conflicting on different leveltestcases
-			input: map[paths.Path]bool{
+			input: map[resolve.Path]bool{
 				"lorem.ipsum": false,
 				"ipsum":       false,
 			},
-			output: map[paths.Path]config.Typename{
+			output: map[resolve.Path]config.Typename{
 				"lorem.ipsum": "loremIpsum",
 				"ipsum":       "ipsum",
 			},
