@@ -1,29 +1,55 @@
-package namings
+package auto
 
 import (
+	"regexp"
 	"slices"
+	"strings"
+	"unicode"
 
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/paths"
 	"golang.org/x/exp/maps"
 )
 
-func groupKeypathsByDepth(kps []paths.FlattenKeypath) map[int][]paths.FlattenKeypath {
-	groups := map[int][]paths.FlattenKeypath{}
+var smallcaps = regexp.MustCompile("[a-z]+")
+
+func safeTypeName(keyname string, exported bool) string {
+	if smallcaps.Find([]byte(keyname)) == nil {
+		keyname = strings.ToLower(keyname)
+	}
+	n := ""
+	newSegment := false
+	for i, r := range keyname {
+		if exported && i == 0 {
+			n += strings.ToUpper(string(r))
+		} else if newSegment {
+			n += strings.ToUpper(string(r))
+			newSegment = false
+		} else if !(unicode.IsLetter(r) || unicode.IsNumber(r)) {
+			newSegment = true
+		} else {
+			n += string(r)
+		}
+	}
+	return n
+}
+
+func groupKeypathsByDepth(kps []paths.Path) map[int][]paths.Path {
+	groups := map[int][]paths.Path{}
 	for _, kp := range kps {
 		depth := len(kp.Segments())
 		if _, ok := groups[depth]; !ok {
-			groups[depth] = []paths.FlattenKeypath{}
+			groups[depth] = []paths.Path{}
 		}
 		groups[depth] = append(groups[depth], kp)
 	}
 	return groups
 }
 
-func orderKeypaths(kps []paths.FlattenKeypath) []paths.FlattenKeypath {
+func orderKeypaths(kps []paths.Path) []paths.Path {
 	// 1. group by depth
 	// 2. order each group alphabetically
-	ordered := []paths.FlattenKeypath{}
+	ordered := []paths.Path{}
 	grouped := groupKeypathsByDepth(kps)
 	depths := maps.Keys(grouped)
 	slices.Sort(depths)
@@ -42,7 +68,7 @@ func typenameForSegments(segments []string, exported bool) config.Typename {
 	tn := ""
 	for i, s := range segments {
 		if s != "[]" {
-			tn += SafeTypeName(s, i != 0 || exported)
+			tn += safeTypeName(s, i != 0 || exported)
 		} else if i == 0 {
 			tn += "item"
 		} else {
@@ -55,10 +81,10 @@ func typenameForSegments(segments []string, exported bool) config.Typename {
 
 // FIXME: consider [] containing keypaths
 // targets is map of keypaths and preference of exported typename
-func GenerateTypenames(targets map[paths.FlattenKeypath]bool) map[paths.FlattenKeypath]config.Typename {
+func GenerateTypenames(targets map[paths.Path]bool) map[paths.Path]config.Typename {
 	kps := maps.Keys(targets)
 	ordered := orderKeypaths(kps)
-	tns := map[paths.FlattenKeypath]config.Typename{}
+	tns := map[paths.Path]config.Typename{}
 	reserved := map[config.Typename]bool{
 		"":            true, // defect
 		"break":       true,

@@ -1,4 +1,4 @@
-package namings
+package bijective
 
 import (
 	"fmt"

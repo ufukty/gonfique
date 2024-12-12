@@ -1,4 +1,4 @@
-package namings
+package bijective
 
 func Bijective26(i int) string {
 	const q = 26
