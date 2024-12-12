@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ufukty/gonfique/internal/coder"
+	"github.com/ufukty/gonfique/internal/files/coder"
+	"github.com/ufukty/gonfique/internal/files/config/meta"
 	"github.com/ufukty/gonfique/internal/files/input"
 	"github.com/ufukty/gonfique/internal/transform"
 )
@@ -36,7 +37,7 @@ func missing(args Args) error {
 		ms = append(ms, "-out")
 	}
 	if len(ms) > 0 {
-		return fmt.Errorf("some arguments are missing: %s", strings.Join(ms, ", "))
+		return fmt.Errorf("missing args: %s", strings.Join(ms, ", "))
 	}
 	return nil
 }
@@ -47,11 +48,11 @@ func Run() error {
 		return fmt.Errorf("checking args: %w", err)
 	}
 
-	i, e, err := input.Read(args.In)
+	i, enc, err := input.Read(args.In)
 	if err != nil {
-		return fmt.Errorf("reading input file: %w", err)
+		return fmt.Errorf("read: %w", err)
 	}
-	t := transform.Transform(i, e)
+	ti := transform.Transform(i, enc)
 
 	// directives
 	// substitude
@@ -59,8 +60,14 @@ func Run() error {
 	// organizer
 	// iterables
 
-	if err := coder.Write(t, args.Out, args.Pkg); err != nil {
-		return fmt.Errorf("creating %q: %w", args.Out, err)
+	c := coder.Coder{
+		Meta:     meta.Default,
+		Encoding: enc,
+		Config:   ti.Type,
+	}
+	err = c.Write(args.Out)
+	if err != nil {
+		return fmt.Errorf("write: %w", err)
 	}
 
 	return nil

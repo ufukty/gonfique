@@ -8,137 +8,130 @@ import (
 	"os"
 	"slices"
 
-	"github.com/ufukty/gonfique/internal/bundle"
+	"github.com/ufukty/gonfique/cmd/gonfique/commands/version"
 	"github.com/ufukty/gonfique/internal/datas"
+	"github.com/ufukty/gonfique/internal/files/coder/sort"
+	"github.com/ufukty/gonfique/internal/files/config/meta"
+	"github.com/ufukty/gonfique/internal/files/input"
 )
 
-func addImports(dst *ast.File, imports []string) {
+type Coder struct {
+	Meta     meta.Meta
+	Encoding input.Encoding
+
+	Accessors, Iterators []*ast.FuncDecl
+	Config               ast.Expr
+	Imports              []string
+	Isolated             *ast.GenDecl
+	Named                []*ast.GenDecl
+	ParentRefAssignments []ast.Stmt
+}
+
+func quotes(s string) string {
+	return fmt.Sprintf("%q", s)
+}
+
+func (c Coder) addImports(dst *ast.File) {
+	imports := slices.Clone(c.Imports)
+
 	imports = append(imports, "fmt", "os") // ReadConfig
-	specs := []ast.Spec{}
+	switch c.Encoding {
+	case input.Yaml:
+		imports = append(imports, "gopkg.in/yaml.v3")
+	case input.Json:
+		imports = append(imports, "encoding/json")
+	}
+	
 	slices.Sort(imports)
 	imports = datas.Uniq(imports)
+
+	specs := []ast.Spec{}
 	for _, imp := range imports {
 		specs = append(specs, &ast.ImportSpec{
-			Name:    nil,
-			Comment: nil,
-			Path: &ast.BasicLit{
-				Kind:  token.STRING,
-				Value: fmt.Sprintf("\"%s\"", imp),
-			},
+			Path: &ast.BasicLit{Kind: token.STRING, Value: quotes(imp)},
 		})
 	}
-	slices.SortFunc(specs, func(a, b ast.Spec) int {
-		sa := a.(*ast.ImportSpec).Path.Value
-		sb := b.(*ast.ImportSpec).Path.Value
-		if sa < sb {
-			return -1
-		} else if sa == sb {
-			return 0
-		} else {
-			return 1
-		}
-	})
+	sort.Imports(specs)
+
 	dst.Decls = append(dst.Decls, &ast.GenDecl{
 		Tok:   token.IMPORT,
 		Specs: specs,
 	})
 }
 
-func addIsolatedTypeSpecifications(dst *ast.File, isolated *ast.GenDecl) {
-	if isolated != nil {
-		dst.Decls = append(dst.Decls, isolated)
+func (c Coder) addIsolatedTypeSpecifications(dst *ast.File) {
+	if c.Isolated == nil {
+		return
 	}
+	dst.Decls = append(dst.Decls, c.Isolated)
 }
 
-func addIteratorMethods(dst *ast.File, iterators []*ast.FuncDecl) {
-	for _, fd := range iterators {
+func (c Coder) addIteratorMethods(dst *ast.File) {
+	if c.Iterators == nil {
+		return
+	}
+	for _, fd := range c.Iterators {
 		dst.Decls = append(dst.Decls, fd)
 	}
 }
 
-func addNamedTypeSpecifications(dst *ast.File, named []*ast.GenDecl) {
-	slices.SortFunc(named, func(a, b *ast.GenDecl) int {
-		if a.Specs[0].(*ast.TypeSpec).Name.Name > b.Specs[0].(*ast.TypeSpec).Name.Name {
-			return 1
-		} else {
-			return -1
-		}
-	})
-	for _, n := range named {
+func (c Coder) addNamedTypes(dst *ast.File) {
+	if c.Named == nil {
+		return
+	}
+	sort.FuncDecls(c.Named)
+	for _, n := range c.Named {
 		dst.Decls = append(dst.Decls, n)
 	}
 }
 
-func addConfig(dst *ast.File, cfg ast.Expr, typeName string) {
+func (c Coder) addConfig(dst *ast.File) {
 	dst.Decls = append(dst.Decls, &ast.GenDecl{
 		Tok: token.TYPE,
 		Specs: []ast.Spec{&ast.TypeSpec{
-			Name: ast.NewIdent(typeName),
-			Type: cfg,
+			Name: ast.NewIdent(c.Meta.Type),
+			Type: c.Config,
 		}},
 	})
 }
 
-func addAccessors(dst *ast.File, accessors []*ast.FuncDecl) {
-	// sorts accessors by receiver name first then method name
-	slices.SortFunc(accessors, func(i, j *ast.FuncDecl) int {
-		it, jt := i.Recv.List[0].Type, j.Recv.List[0].Type
-		if se, ok := it.(*ast.StarExpr); ok {
-			it = se.X
-		}
-		if se, ok := jt.(*ast.StarExpr); ok {
-			jt = se.X
-		}
-		in := it.(*ast.Ident).Name
-		jn := jt.(*ast.Ident).Name
-		if in < jn {
-			return -1
-		} else if in > jn {
-			return 1
-		}
-		ifn := i.Name.Name
-		jfn := j.Name.Name
-		if i.Name.Name < j.Name.Name {
-			return -1
-		} else if ifn > jfn {
-			return 1
-		}
-		return 0
-	})
-	for _, fd := range accessors {
+func (c Coder) addAccessors(dst *ast.File) {
+	if len(c.Accessors) == 0 {
+		return
+	}
+	sort.Accessors(c.Accessors)
+	for _, fd := range c.Accessors {
 		dst.Decls = append(dst.Decls, fd)
 	}
 }
 
-func Write(b *bundle.Bundle, dst, pkgname string) error {
-	af := &ast.File{
-		Name:  ast.NewIdent(pkgname),
+func (c Coder) Write(dst string) error {
+	f := &ast.File{
+		Name:  ast.NewIdent(c.Meta.Package),
 		Decls: []ast.Decl{},
 	}
 
-	addImports(af, b.Imports)
-	addIsolatedTypeSpecifications(af, b.Isolated)
-	addIteratorMethods(af, b.Iterators)
-	addNamedTypeSpecifications(af, b.Named)
-	addConfig(af, b.CfgType, b.TypeName)
-	if b.ParentRefAssignStmts != nil && len(b.ParentRefAssignStmts) > 0 {
-		addParentRefAssignmentsFunction(b, af)
+	c.addImports(f)
+	c.addIsolatedTypeSpecifications(f)
+	c.addIteratorMethods(f)
+	c.addNamedTypes(f)
+	c.addConfig(f)
+	c.addParentRefAssignmentsFunction(f)
+	if err := c.addReaderFunction(f); err != nil {
+		return fmt.Errorf("reader: %w", err)
 	}
-	addReaderFunction(b, af)
-	if b.Accessors != nil {
-		addAccessors(af, b.Accessors)
-	}
+	c.addAccessors(f)
 
 	o, err := os.Create(dst)
 	if err != nil {
-		return fmt.Errorf("creating output file: %w", err)
+		return fmt.Errorf("create: %w", err)
 	}
 	defer o.Close()
 
-	fmt.Fprintf(o, "// Code generated by gonfique. DO NOT EDIT.\n\n")
-	err = format.Node(o, token.NewFileSet(), af)
+	fmt.Fprintf(o, "// Code generated by gonfique %s. DO NOT EDIT.\n\n", version.Version)
+	err = format.Node(o, token.NewFileSet(), f)
 	if err != nil {
-		return fmt.Errorf("writing into output file: %w", err)
+		return fmt.Errorf("write: %w", err)
 	}
 
 	return nil

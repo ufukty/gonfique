@@ -6,7 +6,7 @@ import (
 )
 
 func TestConfig(t *testing.T) {
-	cfg, err := ReadConfig("config.json")
+	cfg, err := ReadConfig("input.json")
 	if err != nil {
 		t.Fatal(fmt.Errorf("reading config: %w", err))
 	}
