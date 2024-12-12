@@ -3,17 +3,21 @@ package matcher
 import (
 	"fmt"
 	"go/ast"
-	"reflect"
 
 	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/files/config"
+	"github.com/ufukty/gonfique/internal/transform"
 )
 
-func callMatcherHelperOnFields(st *ast.StructType, kp []string, keys map[ast.Node]string) ([]ast.Node, error) {
+type matcher struct {
+	ti *transform.Info
+}
+
+func (m matcher) onFields(st *ast.StructType, kp []string) ([]ast.Node, error) {
 	matches := []ast.Node{}
 	if st.Fields != nil && st.Fields.List != nil {
 		for _, f := range st.Fields.List {
-			submatches, err := matchTypeDefHolderHelper(f, kp, keys)
+			submatches, err := m.holders(f, kp)
 			if err != nil {
 				return nil, fmt.Errorf("recurring to fields: %w", err)
 			}
@@ -26,20 +30,20 @@ func callMatcherHelperOnFields(st *ast.StructType, kp []string, keys map[ast.Nod
 // n is Field or ArrayType
 // return is Field or ArrayType.
 // use a typeswitch to replace .Type or .Elt fields.
-func matchTypeDefHolderHelper(n ast.Node, kp []string, keys map[ast.Node]string) ([]ast.Node, error) {
+func (m matcher) holders(n ast.Node, path []string) ([]ast.Node, error) {
 	matches := []ast.Node{}
 
-	if len(kp) == 0 {
+	if len(path) == 0 {
 		return matches, nil
 	}
 
 	if st, ok := n.(*ast.StructType); ok {
-		return callMatcherHelperOnFields(st, kp, keys)
+		return m.onFields(st, path)
 	}
 
-	if len(kp) == 1 {
+	if len(path) == 1 {
 
-		switch segment := kp[0]; segment {
+		switch segment := path[0]; segment {
 		case "**":
 			// match everything in current depth except *ast.Ident{"string"}
 
@@ -57,7 +61,7 @@ func matchTypeDefHolderHelper(n ast.Node, kp []string, keys map[ast.Node]string)
 				next = at.Elt
 			}
 			if next != nil {
-				submatches, err := matchTypeDefHolderHelper(next, kp, keys)
+				submatches, err := m.holders(next, path)
 				if err != nil {
 					return nil, fmt.Errorf("passing the '**' for next depths of all keys or the array's item type: %w", err)
 				}
@@ -77,14 +81,14 @@ func matchTypeDefHolderHelper(n ast.Node, kp []string, keys map[ast.Node]string)
 			}
 
 		default:
-			if f, ok := n.(*ast.Field); ok && keys[f] == segment {
+			if f, ok := n.(*ast.Field); ok && m.ti.Keys[f] == segment {
 				return []ast.Node{f}, nil
 			}
 		}
 
-	} else if len(kp) > 1 {
+	} else if len(path) > 1 {
 
-		switch segment := kp[0]; segment {
+		switch segment := path[0]; segment {
 		case "**": // ., *, **
 			// consume the "**" at the current depth and continue recurring without it
 
@@ -96,7 +100,7 @@ func matchTypeDefHolderHelper(n ast.Node, kp []string, keys map[ast.Node]string)
 					next = at.Elt
 				}
 				if next != nil {
-					submatches, err := matchTypeDefHolderHelper(next, kp[1:], keys)
+					submatches, err := m.holders(next, path[1:])
 					if err != nil {
 						return nil, fmt.Errorf("consuming '**' and matching all keys in current dict: %w", err)
 					}
@@ -114,7 +118,7 @@ func matchTypeDefHolderHelper(n ast.Node, kp []string, keys map[ast.Node]string)
 				next = at.Elt
 			}
 			if next != nil {
-				submatches, err := matchTypeDefHolderHelper(next, kp, keys)
+				submatches, err := m.holders(next, path)
 				if err != nil {
 					return nil, fmt.Errorf("passing the '**' for next depths of all keys or the array's item type: %w", err)
 				}
@@ -125,12 +129,12 @@ func matchTypeDefHolderHelper(n ast.Node, kp []string, keys map[ast.Node]string)
 
 		case "*":
 			if f, ok := n.(*ast.Field); ok && f.Type != nil {
-				return matchTypeDefHolderHelper(f.Type, kp[1:], keys)
+				return m.holders(f.Type, path[1:])
 			}
 
 		case "[]":
 			if at, ok := n.(*ast.ArrayType); ok && at.Elt != nil {
-				submatches, err := matchTypeDefHolderHelper(at.Elt, kp[1:], keys)
+				submatches, err := m.holders(at.Elt, path[1:])
 				if err != nil {
 					return nil, fmt.Errorf("checking matches for '[]': %w", err)
 				}
@@ -139,12 +143,12 @@ func matchTypeDefHolderHelper(n ast.Node, kp []string, keys map[ast.Node]string)
 
 		default:
 			if f, ok := n.(*ast.Field); ok {
-				orgkey, ok := keys[f]
+				orgkey, ok := m.ti.Keys[f]
 				if !ok {
 					return nil, fmt.Errorf("could not retrieve the original keyname for %s (AST %p)", f.Names[0].Name, f)
 				}
 				if orgkey == segment && f.Type != nil {
-					return matchTypeDefHolderHelper(f.Type, kp[1:], keys)
+					return m.holders(f.Type, path[1:])
 				}
 			}
 		}
@@ -152,24 +156,25 @@ func matchTypeDefHolderHelper(n ast.Node, kp []string, keys map[ast.Node]string)
 	return matches, nil
 }
 
-// root should be either of ArrayType or StructType
+// Find type definition holderss for path
+//
 // accepts processed form of Config type AST which:
 //   - should not have multiple names per ast.Field
 //   - array types should be defined by combining compatible item fields
-func FindTypeDefHoldersForKeypath(root ast.Expr, p config.Path, keys map[ast.Node]string) ([]ast.Node, error) {
-	switch root.(type) {
-	case *ast.ArrayType, *ast.StructType:
-		break
-	default:
-		return nil, fmt.Errorf("unsupported root type: %s", reflect.TypeOf(root).String())
-	}
+func (m matcher) FindHolders(p config.Path) ([]ast.Node, error) {
 	segments := p.Segments()
 	if len(segments) == 0 {
-		return []ast.Node{}, fmt.Errorf("empty keypath %q", p)
+		return nil, fmt.Errorf("empty path")
 	}
-	mis, err := matchTypeDefHolderHelper(root, segments, keys)
+	mis, err := m.holders(m.ti.Type, segments)
 	if err != nil {
-		return nil, fmt.Errorf("checking against keypath: %w", err)
+		return nil, fmt.Errorf("holders: %w", err)
 	}
 	return datas.Uniq(mis), nil
+}
+
+func New(ti *transform.Info) matcher {
+	return matcher{
+		ti: ti,
+	}
 }

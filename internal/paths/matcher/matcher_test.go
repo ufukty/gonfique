@@ -10,9 +10,10 @@ import (
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/paths/matcher/testdata/appendix"
 	"github.com/ufukty/gonfique/internal/testutils"
+	"github.com/ufukty/gonfique/internal/transform"
 )
 
-func compareMatchs(got []ast.Node, want []ast.Node) bool {
+func compareMatches(got []ast.Node, want []ast.Node) bool {
 	if len(got) != len(want) {
 		return false
 	}
@@ -76,11 +77,16 @@ func TestMatch(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(string(tc.input), func(t *testing.T) {
-			got, err := FindTypeDefHoldersForKeypath(appendix.K8sCfgTs.Type, tc.input, appendix.Keys)
+			ti := &transform.Info{
+				Type: appendix.K8sCfgTs.Type,
+				Keys: appendix.Keys,
+			}
+			m := New(ti)
+			got, err := m.FindHolders(tc.input)
 			if err != nil {
 				t.Fatal(fmt.Errorf("act: %w", err))
 			}
-			if !compareMatchs(got, tc.want) {
+			if !compareMatches(got, tc.want) {
 				t.Fatalf("mismatch\nwant: %#v\ngot : %#v", testutils.NodeSliceString(tc.want), matchitemsToString(got))
 			}
 		})
