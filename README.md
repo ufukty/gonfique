@@ -99,6 +99,7 @@ This one was an easy one. No one have enough time to deal with this in repeat. Y
 ## TOC
 
 - [Install](#install)
+- [Building from source](#building-from-source)
 - [CLI usage](#cli-usage)
   - [Generation](#generation)
   - [Version](#version)
@@ -138,10 +139,40 @@ This one was an easy one. No one have enough time to deal with this in repeat. Y
 
 ## Install
 
-Use version tags to avoid development versions as such:
+Since Gonfique needs the version information to be embedded into the binary, you need to compile it with necessary flags. The Makefile in the root of project contains a recipe that conforms the criteria.
+
+Version information is important because Gonfique stamps the generated file with it. Which is to allow your colleagues to reproduce the same results by getting the correct version of Gonfique in future.
+
+### Download
+
+Simply download the Gonfique binary compiled for your operating system and architecture. Then put it into some directory listed in the `$PATH` variable.
+
+Make sure shell can find Gonfique:
 
 ```sh
-go install github.com/ufukty/gonfique@v1.5.3
+which gonfique
+```
+
+If there is no output, then check if the directory is in `$PATH`. If the path is printed, you are ready to roll.
+
+### Install from source
+
+You need to clone repository and to run the Make recipe installs the binary after compiling with correct version information:
+
+```sh
+git clone github.com/ufukty/gonfique
+cd gonfique
+make install
+```
+
+## Build
+
+You can build the Gonfique binaries for all architectures and operating systems at once. Clone the repository and run the Makefile recipe installs the binary after compiling with correct version information:
+
+```sh
+git clone github.com/ufukty/gonfique
+cd gonfique
+make build
 ```
 
 ## CLI usage
@@ -787,8 +818,14 @@ func ReadConfig(path string) (Config, error) {
 
 ### Pipeline
 
-- Decode: `file` -> `map[string]any`
-- Transform: `reflect.Type` -> `ast.TypeSpec`
+- Decide on language between JSON and YAML
+- Decode the file into a `map[string]any` with the language's decoder
+- Get the `reflect.Type` for `map`
+- Transform `reflect.Type` -> `ast.TypeSpec`
+- Traverse from top to children in DFS by keeping track of path:
+  - Check if `replace` set on path. If so, apply and skip.
+  - Check if `dict: dynamic-keys` set on path. If so, apply and skip.
+  - Check if `declare` is
 - Substitude: replace types matching with user provided types
 - Mapping: match user-provided paths and separate type expressions as type specs named as instructed by user
 - Organize: separate the type definitions as standalone type specs and reuse them when definitions match
@@ -915,8 +952,6 @@ When both directives set together on a group of matches, make sure parents of ma
 ## Contribution
 
 Issues are open for discussions and rest.
-
-- [How it works?](docs/how-it-works.md)
 
 ## License
 
