@@ -99,7 +99,9 @@ This one was an easy one. No one have enough time to deal with this in repeat. Y
 ## TOC
 
 - [Install](#install)
-- [Building from source](#building-from-source)
+  - [Download](#download)
+  - [Install from source](#install-from-source)
+- [Build](#build)
 - [CLI usage](#cli-usage)
   - [Generation](#generation)
   - [Version](#version)
@@ -217,7 +219,7 @@ Better keep reading
     - Parent refs
 - Abstracts boring stuff:
   - Smart array support that concludes on one common or combined item type
-  - Recognizes `time.Duration` values
+  - Version stamping for reproducibility
 - Supports JSON and YAML files
 
 ## Gonfique config (puns&funs)
