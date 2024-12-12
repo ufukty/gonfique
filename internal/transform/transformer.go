@@ -129,7 +129,11 @@ func (tr *transformer) transform(v reflect.Value) ast.Expr {
 // reconstructs a reflect-value's type in ast.TypeSpec.
 // limited with types used by YAML decoder.
 func Transform(d any, encoding input.Encoding) Info {
-	tr := transformer{tagname: string(encoding)}
+	tr := transformer{
+		keys:       map[ast.Node]string{},
+		fieldnames: map[ast.Node]FieldName{},
+		tagname:    string(encoding),
+	}
 	ty := tr.transform(reflect.ValueOf(d))
 	return Info{
 		Type:       ty,
