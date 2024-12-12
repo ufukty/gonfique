@@ -21,7 +21,7 @@ const (
 
 type PathConfig struct {
 	Export  bool
-	Declare string
+	Declare Typename
 	Dict    Dict
 	Replace string
 }
