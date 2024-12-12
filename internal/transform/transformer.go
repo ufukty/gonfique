@@ -70,7 +70,7 @@ func (tr *transformer) structType(v reflect.Value) *ast.StructType {
 	for iter.Next() {
 		ik := iter.Key()
 		iv := iter.Value()
-		fieldname := FieldName(safeFieldName(ik.String()))
+		fieldname := safeFieldName(ik.String())
 		f := &ast.Field{
 			Names: []*ast.Ident{fieldname.Ident()},
 			Type:  tr.transform(iv),
