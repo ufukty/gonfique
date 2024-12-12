@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"go/ast"
 
-	"github.com/ufukty/gonfique/internal/directives/resolve"
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/paths/expand/matcher"
+	"github.com/ufukty/gonfique/internal/paths/resolve"
 	"github.com/ufukty/gonfique/internal/transform"
 )
 
