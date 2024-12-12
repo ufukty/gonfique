@@ -21,7 +21,7 @@ func getArgs() Args {
 	args := Args{}
 	flag.StringVar(&args.In, "in", "", "path")
 	flag.StringVar(&args.Out, "out", "", "path")
-	flag.StringVar(&args.Config, "out", "", "(optional) path to a Gonfique config")
+	flag.StringVar(&args.Config, "config", "", "(optional) path to a Gonfique config")
 	flag.BoolVar(&args.Verbose, "verbose", false, "(optional) print information regarding to processes.")
 	flag.Parse()
 	return args
