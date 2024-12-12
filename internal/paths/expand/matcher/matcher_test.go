@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/ufukty/gonfique/internal/files/config"
-	"github.com/ufukty/gonfique/internal/paths/matcher/testdata/appendix"
+	"github.com/ufukty/gonfique/internal/paths/expand/matcher/testdata/appendix"
 	"github.com/ufukty/gonfique/internal/testutils"
 	"github.com/ufukty/gonfique/internal/transform"
 )
