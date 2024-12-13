@@ -9,70 +9,75 @@ import (
 	"github.com/ufukty/gonfique/internal/paths/resolve"
 )
 
-// use when parameters are already comparable (unlike slices, such as in accessors)
-type withcompare[K comparable] map[K][]config.Path
+type valueSources[C comparable] map[C][]config.Path
 
-// this is for convenience opposed to sliceParameterDetailsSources.AddSource()
-func (m withcompare[K]) AddSource(parameters K, source config.Path) {
+func (m valueSources[K]) Add(parameters K, source config.Path) {
 	if _, ok := m[parameters]; !ok {
 		m[parameters] = []config.Path{}
 	}
 	m[parameters] = append(m[parameters], source)
 }
 
-type params struct {
-	Declare withcompare[config.Typename]
-	Export  withcompare[bool]
-	Replace withcompare[string]
-	Dict    withcompare[config.Dict]
+func indent(n int) string {
+	s := ""
+	for range n {
+		s += " "
+	}
+	return s
+}
+
+func indentlines(s string, n int) string {
+	return indent(n) + strings.ReplaceAll(s, "\n", "\n"+indent(n))
+}
+
+// it returns an error of conflicting values on same target set by different paths
+// it uses 'value' argument to get the value from correct directive
+func assertSingleValuePerPath[C comparable](rev map[resolve.Path][]config.Path, value func(cp config.Path) C) error {
+	var zero C
+	vss := map[resolve.Path]valueSources[C]{}
+	for rp, cps := range rev {
+		vss[rp] = valueSources[C]{}
+		for _, cp := range cps {
+			if v := value(cp); v != zero {
+				vss[rp].Add(v, cp)
+			}
+		}
+	}
+
+	msgs := []string{}
+	for rp, vs := range vss {
+		if len(vs) > 1 {
+			msg := fmt.Sprintf("path: %s\n", rp)
+			for value, cps := range vs {
+				msg += fmt.Sprintf("%svalue: %v\n", indent(2), value)
+				for _, cp := range cps {
+					msg += fmt.Sprintf("%sset by: %s\n", indent(4), cp)
+				}
+			}
+			msgs = append(msgs, msg)
+		}
+	}
+
+	if len(msgs) > 0 {
+		return fmt.Errorf(strings.Join(msgs, ""))
+	}
+	return nil
 }
 
 func Check(expansions map[config.Path][]resolve.Path, c *config.File) error {
-	sources := map[resolve.Path]params{}
-	for p, cps := range datas.RevSliceMap(expansions) {
-		ss := params{
-			Declare: withcompare[config.Typename]{},
-			Export:  withcompare[bool]{},
-			Replace: withcompare[string]{},
-			Dict:    withcompare[config.Dict]{},
-		}
-		for _, cp := range cps {
-			ds := c.Paths[cp]
-			ss.Declare.AddSource(ds.Declare, cp)
-			ss.Export.AddSource(ds.Export, cp)
-			ss.Replace.AddSource(ds.Replace, cp)
-			ss.Dict.AddSource(ds.Dict, cp)
-		}
-		// remove default values
-		delete(ss.Declare, config.Typename(""))
-		delete(ss.Export, false)
-		delete(ss.Replace, "")
-		delete(ss.Dict, "")
-		sources[p] = ss
+	rev := datas.RevSliceMap(expansions)
+
+	checks := map[string]error{
+		"declare": assertSingleValuePerPath(rev, func(cp config.Path) config.Typename { return c.Paths[cp].Declare }),
+		"export":  assertSingleValuePerPath(rev, func(cp config.Path) bool { return c.Paths[cp].Export }),
+		"dict":    assertSingleValuePerPath(rev, func(cp config.Path) config.Dict { return c.Paths[cp].Dict }),
+		"replace": assertSingleValuePerPath(rev, func(cp config.Path) string { return c.Paths[cp].Replace }),
 	}
 
 	conflicts := []string{}
-	for kp, ss := range sources {
-		if len(ss.Declare) > 1 {
-			msg := fmt.Sprintf("%s: conflicting 'declare' parameters:", kp)
-			for val, wckps := range ss.Declare {
-				msg += fmt.Sprintf("\n  %v => %q", wckps, val)
-			}
-			conflicts = append(conflicts, msg)
-		}
-		if len(ss.Dict) > 1 {
-			msg := fmt.Sprintf("%s: conflicting 'dict' parameters:", kp)
-			for val, wckps := range ss.Dict {
-				msg += fmt.Sprintf("\n  %v => %v", wckps, val)
-			}
-			conflicts = append(conflicts, msg)
-		}
-		if len(ss.Replace) > 1 {
-			msg := fmt.Sprintf("%s: conflicting 'replace' parameters:", kp)
-			for val, wckps := range ss.Replace {
-				msg += fmt.Sprintf("\n  %v => %v", wckps, val)
-			}
-			conflicts = append(conflicts, msg)
+	for directive, err := range checks {
+		if err != nil {
+			conflicts = append(conflicts, fmt.Sprintf("directive: %s\n%s", directive, indentlines(err.Error(), 2)))
 		}
 	}
 	if len(conflicts) > 0 {
