@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/paths/resolve"
 )
@@ -64,9 +63,7 @@ func assertSingleValuePerPath[C comparable](rev map[resolve.Path][]config.Path, 
 	return nil
 }
 
-func Check(expansions map[config.Path][]resolve.Path, c *config.File) error {
-	rev := datas.RevSliceMap(expansions)
-
+func Check(rev map[resolve.Path][]config.Path, c *config.File) error {
 	checks := map[string]error{
 		"declare": assertSingleValuePerPath(rev, func(cp config.Path) config.Typename { return c.Paths[cp].Declare }),
 		"export":  assertSingleValuePerPath(rev, func(cp config.Path) bool { return c.Paths[cp].Export }),
