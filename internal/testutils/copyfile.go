@@ -43,6 +43,10 @@ func PrepareTestCase(tc string, files []string) (string, error) {
 	for _, file := range files {
 		src := filepath.Join("testdata", tc, file)
 		dst := filepath.Join(testloc, file)
+		err = os.MkdirAll(filepath.Dir(dst), 0755)
+		if err != nil {
+			return "", fmt.Errorf("MkdirAll: %w", err)
+		}
 		if err := CopyFile(src, dst); err != nil {
 			return "", fmt.Errorf("copying %q to %q: %w", file, dst, err)
 		}
