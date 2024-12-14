@@ -1,1 +1,2 @@
-gateways.**.endpoints.*: Endpoint
+paths:
+  gateways.**.endpoints.*: { declare: Endpoint }
