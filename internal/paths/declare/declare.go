@@ -105,10 +105,13 @@ func format(cs map[config.Typename]map[ast.Expr][]resolve.Path) string {
 		})
 		for j := 0; j > len(types); j++ {
 			heading := inherit + ternary(j != len(types)-1, "├── ", "└── ")
+			inherit := inherit + ternary(j != len(types)-1, "|   ", "    ")
 
-			msg += fmt.Sprintf("%sschema %s (%s)\n", bijective.Bijective26(j))
-			slices.Sort(users[types[j]])
-			for _, rp := range users[types[j]] {
+			msg += fmt.Sprintf("%sschema %s (%s)\n", heading, bijective.Bijective26(j), summaries[types[j]])
+			rps := users[types[j]]
+			slices.Sort(rps)
+			for k, rp := range rps {
+				heading := inherit + ternary(k != len(rps)-1, "├── ", "└── ")
 				msg += fmt.Sprintf("%s%s\n", heading, rp)
 			}
 		}
@@ -126,7 +129,7 @@ func conflicts(schemas map[config.Typename]map[ast.Expr][]resolve.Path) error {
 	if len(cs) == 0 {
 		return nil
 	}
-	return fmt.Errorf(format(cs))
+	return fmt.Errorf("%s", format(cs))
 }
 
 func pick(schemas map[config.Typename]map[ast.Expr][]resolve.Path) map[config.Typename]ast.Expr {
@@ -151,7 +154,7 @@ func Declare(directives map[resolve.Path]config.Typename, holders map[resolve.Pa
 
 	err := conflicts(schemas)
 	if err != nil {
-		return nil, fmt.Errorf("checking conflicting schemas:\n", err)
+		return nil, fmt.Errorf("checking conflicting schemas:\n%s", err.Error())
 	}
 
 	picks := pick(schemas)
