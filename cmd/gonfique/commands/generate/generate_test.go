@@ -11,26 +11,43 @@ import (
 )
 
 func TestWithConfig(t *testing.T) {
-	files := []string{
-		"config_test.go",
-		"extend.go",
-		"go.mod",
-		"go.sum",
-		"input.yml",
+	type tc struct {
+		folder string
+		files  []string
 	}
-	tcs := []string{
-		"api", "k8s",
+	tcs := []tc{
+		{
+			folder: "api",
+			files: []string{
+				"config_test.go",
+				"extend.go",
+				"go.mod",
+				"go.sum",
+				"http/methods.go",
+				"input.yml",
+			},
+		},
+		{
+			folder: "k8s",
+			files: []string{
+				"config_test.go",
+				"extend.go",
+				"go.mod",
+				"go.sum",
+				"input.yml",
+			},
+		},
 	}
 	for _, tc := range tcs {
-		t.Run(tc, func(t *testing.T) {
-			testloc, err := testutils.PrepareTestCase(tc, files)
+		t.Run(tc.folder, func(t *testing.T) {
+			testloc, err := testutils.PrepareTestCase(tc.folder, tc.files)
 			if err != nil {
 				t.Fatal(fmt.Errorf("prep, test folder: %w", err))
 			}
 
 			err = withconfig(
 				filepath.Join(testloc, "input.yml"),
-				filepath.Join("testdata", tc, "config.yml"),
+				filepath.Join("testdata", tc.folder, "config.yml"),
 				filepath.Join(testloc, "config.go"),
 				true,
 			)
