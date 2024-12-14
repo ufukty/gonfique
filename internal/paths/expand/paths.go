@@ -10,6 +10,7 @@ import (
 	"github.com/ufukty/gonfique/internal/transform"
 )
 
+// TODO: update argument list after rewriting [matcher.matcher.FindHolders] for strings
 func Paths(ti *transform.Info, c *config.File, paths map[ast.Node]resolve.Path) (map[config.Path][]resolve.Path, error) {
 	expansions := map[config.Path][]resolve.Path{}
 

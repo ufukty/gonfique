@@ -51,6 +51,7 @@ func (r *resolver) dfs(n ast.Node, path []string) {
 	}
 }
 
+// NOTE: Nodes are holders
 func Paths(ti *transform.Info) map[ast.Node]Path {
 	r := resolver{ti: ti, paths: map[ast.Node]Path{}}
 	r.dfs(ti.Type, []string{})
