@@ -28,7 +28,7 @@ func (p Path) Parent() Path {
 
 type resolver struct {
 	ti    *transform.Info
-	paths map[ast.Node]Path
+	paths map[Path]ast.Node
 }
 
 func (r *resolver) dfs(n ast.Node, path []string) {
@@ -38,7 +38,7 @@ func (r *resolver) dfs(n ast.Node, path []string) {
 			for _, f := range n.Fields.List {
 				if f != nil && f.Type != nil {
 					path := append(path, r.ti.Keys[f])
-					r.paths[f] = Path(strings.Join(path, "."))
+					r.paths[Path(strings.Join(path, "."))] = f
 					r.dfs(f.Type, path)
 				}
 			}
@@ -46,14 +46,13 @@ func (r *resolver) dfs(n ast.Node, path []string) {
 
 	case *ast.ArrayType:
 		path := append(path, "[]")
-		r.paths[n] = Path(strings.Join(path, "."))
+		r.paths[Path(strings.Join(path, "."))] = n
 		r.dfs(n.Elt, path)
 	}
 }
 
-// NOTE: Nodes are holders
-func Paths(ti *transform.Info) map[ast.Node]Path {
-	r := resolver{ti: ti, paths: map[ast.Node]Path{}}
+func Holders(ti *transform.Info) map[Path]ast.Node {
+	r := resolver{ti: ti, paths: map[Path]ast.Node{}}
 	r.dfs(ti.Type, []string{})
 	return r.paths
 }

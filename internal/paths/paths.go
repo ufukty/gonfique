@@ -32,8 +32,8 @@ type aux struct {
 // DONE: declare
 // TODO: export
 func Process(ti *transform.Info, c *config.File, verbose bool) (*aux, error) {
-	paths := resolve.Paths(ti)
-	expansions, err := expand.Paths(ti, c, paths)
+	holders := resolve.Holders(ti)
+	expansions, err := expand.Paths(ti, c, holders)
 	if err != nil {
 		return nil, fmt.Errorf("expanding paths: %w", err)
 	}
@@ -48,18 +48,14 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*aux, error) {
 		replace: pick.Values(rev, func(cp config.Path) string { return c.Paths[cp].Replace }),
 		// dict:    pick.Values(rev, func(cp config.Path) config.Dict { return c.Paths[cp].Dict }),
 	}
-
-	holders := datas.Invmap(paths)
 	imports, err := replace.Expressions(ps.replace, holders)
 	if err != nil {
 		return nil, fmt.Errorf("replacing: %w", err)
 	}
-
 	decls, err := declare.Declare(ps.declare, holders)
 	if err != nil {
 		return nil, fmt.Errorf("declaring: %w", err)
 	}
-
 	a := &aux{
 		Imports: imports,
 		Decls:   decls,

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 
+	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/paths/expand/matcher"
 	"github.com/ufukty/gonfique/internal/paths/resolve"
@@ -11,7 +12,8 @@ import (
 )
 
 // TODO: update argument list after rewriting [matcher.matcher.FindHolders] for strings
-func Paths(ti *transform.Info, c *config.File, paths map[ast.Node]resolve.Path) (map[config.Path][]resolve.Path, error) {
+func Paths(ti *transform.Info, c *config.File, holders map[resolve.Path]ast.Node) (map[config.Path][]resolve.Path, error) {
+	paths := datas.Invmap(holders)
 	expansions := map[config.Path][]resolve.Path{}
 
 	m := matcher.New(ti)
