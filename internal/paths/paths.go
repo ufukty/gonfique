@@ -2,10 +2,12 @@ package paths
 
 import (
 	"fmt"
+	"go/ast"
 
 	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/paths/conflicts"
+	"github.com/ufukty/gonfique/internal/paths/declare"
 	"github.com/ufukty/gonfique/internal/paths/expand"
 	"github.com/ufukty/gonfique/internal/paths/pick"
 	"github.com/ufukty/gonfique/internal/paths/replace"
@@ -20,11 +22,16 @@ type picks struct {
 	dict    map[resolve.Path]config.Dict
 }
 
+type aux struct {
+	Imports []string
+	Decls   []ast.Decl
+}
+
 // TODO: dict
 // DONE: replace
-// TODO: declare
+// DONE: declare
 // TODO: export
-func Process(ti *transform.Info, c *config.File, verbose bool) ([]string, error) {
+func Process(ti *transform.Info, c *config.File, verbose bool) (*aux, error) {
 	paths := resolve.Paths(ti)
 	expansions, err := expand.Paths(ti, c, paths)
 	if err != nil {
@@ -48,5 +55,14 @@ func Process(ti *transform.Info, c *config.File, verbose bool) ([]string, error)
 		return nil, fmt.Errorf("replacing: %w", err)
 	}
 
-	return imports, nil
+	decls, err := declare.Declare(ps.declare, holders)
+	if err != nil {
+		return nil, fmt.Errorf("declaring: %w", err)
+	}
+
+	a := &aux{
+		Imports: imports,
+		Decls:   decls,
+	}
+	return a, nil
 }
