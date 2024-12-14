@@ -18,18 +18,6 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-func indent(n int) string {
-	s := ""
-	for range n {
-		s += " "
-	}
-	return s
-}
-
-func indentlines(s string, n int) string {
-	return indent(n) + strings.ReplaceAll(s, "\n", "\n"+indent(n))
-}
-
 func getType(holder ast.Node) ast.Expr {
 	switch h := holder.(type) {
 	case *ast.Field:
