@@ -33,9 +33,9 @@ func groupSchemas(users []resolve.Path, holders map[resolve.Path]ast.Node) map[a
 	groups := map[ast.Expr][]resolve.Path{}
 	for _, rp := range users {
 		found := false
-		for alt, users := range groups {
+		for alt := range groups {
 			if compares.Compare(alt, getType(holders[rp])) {
-				users = append(users, rp)
+				groups[alt] = append(groups[alt], rp)
 				found = true
 				break
 			}
