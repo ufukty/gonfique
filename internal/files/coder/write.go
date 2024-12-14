@@ -22,11 +22,12 @@ type Coder struct {
 	Meta     meta.Meta
 	Encoding input.Encoding
 
+	Config ast.Expr
+
+	Imports []string
+	Named   []*ast.GenDecl
+
 	Accessors, Iterators []*ast.FuncDecl
-	Config               ast.Expr
-	Imports              []string
-	Isolated             *ast.GenDecl
-	Named                []*ast.GenDecl
 	ParentRefAssignments []ast.Stmt
 }
 
@@ -60,13 +61,6 @@ func (c Coder) addImports(dst *ast.File) {
 		Tok:   token.IMPORT,
 		Specs: specs,
 	})
-}
-
-func (c Coder) addIsolatedTypeSpecifications(dst *ast.File) {
-	if c.Isolated == nil {
-		return
-	}
-	dst.Decls = append(dst.Decls, c.Isolated)
 }
 
 func (c Coder) addIteratorMethods(dst *ast.File) {
@@ -117,7 +111,6 @@ func (c Coder) Write(dst string) error {
 	}
 
 	c.addImports(f)
-	c.addIsolatedTypeSpecifications(f)
 	c.addIteratorMethods(f)
 	c.addNamedTypes(f)
 	c.addConfig(f)

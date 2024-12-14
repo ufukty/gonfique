@@ -24,7 +24,7 @@ type picks struct {
 
 type aux struct {
 	Imports []string
-	Decls   []ast.Decl
+	Decls   []*ast.GenDecl
 }
 
 // TODO: dict
@@ -44,9 +44,9 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*aux, error) {
 	}
 	ps := picks{
 		declare: pick.Values(rev, func(cp config.Path) config.Typename { return c.Paths[cp].Declare }),
-		export:  pick.Values(rev, func(cp config.Path) bool { return c.Paths[cp].Export }),
+		// export:  pick.Values(rev, func(cp config.Path) bool { return c.Paths[cp].Export }),
 		replace: pick.Values(rev, func(cp config.Path) string { return c.Paths[cp].Replace }),
-		dict:    pick.Values(rev, func(cp config.Path) config.Dict { return c.Paths[cp].Dict }),
+		// dict:    pick.Values(rev, func(cp config.Path) config.Dict { return c.Paths[cp].Dict }),
 	}
 
 	holders := datas.Invmap(paths)

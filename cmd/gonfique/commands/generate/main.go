@@ -4,11 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"strings"
-
-	"github.com/ufukty/gonfique/internal/files/coder"
-	"github.com/ufukty/gonfique/internal/files/config/meta"
-	"github.com/ufukty/gonfique/internal/files/input"
-	"github.com/ufukty/gonfique/internal/transform"
 )
 
 type Args struct {
@@ -48,27 +43,9 @@ func Run() error {
 		return fmt.Errorf("checking args: %w", err)
 	}
 
-	i, enc, err := input.Read(args.In)
-	if err != nil {
-		return fmt.Errorf("read: %w", err)
+	if args.Config == "" {
+		return simple(args.In, args.Out)
+	} else {
+		return withconfig(args.In, args.Config, args.Out, args.Verbose)
 	}
-	ti := transform.Transform(i, enc)
-
-	// directives
-	// substitude
-	// mappings
-	// organizer
-	// iterables
-
-	c := coder.Coder{
-		Meta:     meta.Default,
-		Encoding: enc,
-		Config:   ti.Type,
-	}
-	err = c.Write(args.Out)
-	if err != nil {
-		return fmt.Errorf("write: %w", err)
-	}
-
-	return nil
 }

@@ -137,7 +137,7 @@ func set(holder ast.Node, typeExpr ast.Expr) {
 	}
 }
 
-func Declare(directives map[resolve.Path]config.Typename, holders map[resolve.Path]ast.Node) ([]ast.Decl, error) {
+func Declare(directives map[resolve.Path]config.Typename, holders map[resolve.Path]ast.Node) ([]*ast.GenDecl, error) {
 	schemas := group(directives, holders)
 
 	err := conflicts(schemas)
@@ -146,7 +146,7 @@ func Declare(directives map[resolve.Path]config.Typename, holders map[resolve.Pa
 	}
 
 	picks := pick(schemas)
-	decls := []ast.Decl{}
+	decls := []*ast.GenDecl{}
 
 	for tn, exp := range picks {
 		decls = append(decls, &ast.GenDecl{
