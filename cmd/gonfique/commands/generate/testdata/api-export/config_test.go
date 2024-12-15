@@ -6,12 +6,10 @@ import (
 )
 
 func TestConfig(t *testing.T) {
-	cfg, err := ReadConfig("config.yml")
+	cfg, err := ReadConfig("input.yml")
 	if err != nil {
 		t.Fatal(fmt.Errorf("reading config: %w", err))
 	}
 
-	for _, container := range cfg.Spec.Template.Spec.Containers {
-		fmt.Println(container.Name)
-	}
+	fmt.Println(cfg.Gateways.Public.Services.Tags.Endpoints.Assign)
 }

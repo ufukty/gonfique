@@ -24,8 +24,8 @@ type Coder struct {
 
 	Config ast.Expr
 
-	Imports []string
-	Named   []*ast.GenDecl
+	Imports     []string
+	Named, Auto []*ast.GenDecl
 
 	Accessors, Iterators []*ast.FuncDecl
 	ParentRefAssignments []ast.Stmt
@@ -72,6 +72,16 @@ func (c Coder) addIteratorMethods(dst *ast.File) {
 	}
 }
 
+func (c Coder) addAutoTypes(dst *ast.File) {
+	if c.Auto == nil {
+		return
+	}
+	sort.FuncDecls(c.Auto)
+	for _, n := range c.Auto {
+		dst.Decls = append(dst.Decls, n)
+	}
+}
+
 func (c Coder) addNamedTypes(dst *ast.File) {
 	if c.Named == nil {
 		return
@@ -112,6 +122,7 @@ func (c Coder) Write(dst string) error {
 
 	c.addImports(f)
 	c.addIteratorMethods(f)
+	c.addAutoTypes(f)
 	c.addNamedTypes(f)
 	c.addConfig(f)
 	c.addParentRefAssignmentsFunction(f)

@@ -1,2 +1,0 @@
-"**.backend.service":
-  accessors: ["name"]

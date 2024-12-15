@@ -49,7 +49,8 @@ func withconfig(in, conf, out string, verbose bool) error {
 		Encoding: enc,
 		Config:   ti.Type,
 		Imports:  aux.Imports,
-		Named:    aux.Decls,
+		Named:    aux.Declare,
+		Auto:     aux.Auto,
 	}
 	err = c.Write(out)
 	if err != nil {
