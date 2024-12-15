@@ -1,20 +1,15 @@
 package declare
 
 import (
-	"bytes"
 	"cmp"
 	"fmt"
 	"go/ast"
-	"go/printer"
 	"go/token"
-	"regexp"
 	"slices"
-	"strings"
 
 	"github.com/ufukty/gonfique/internal/compares"
 	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/files/config"
-	"github.com/ufukty/gonfique/internal/namings/bijective"
 	"github.com/ufukty/gonfique/internal/paths/resolve"
 	"golang.org/x/exp/maps"
 )
@@ -63,12 +58,46 @@ func ternary(cond bool, t, f string) string {
 	return f
 }
 
-var spaces = regexp.MustCompile("[ \t]+")
+// doesn't recur on structs
+func further(e ast.Expr) string {
+	switch t := e.(type) {
+	case *ast.Ident:
+		return t.Name
+	case *ast.ArrayType:
+		return "[]" + further(t.Elt)
+	case *ast.SelectorExpr:
+		return fmt.Sprintf("%s.%s", further(t.X), t.Sel.Name)
+	case *ast.StructType:
+		return "struct{...}"
+	default:
+		return "..."
+	}
+}
 
 func summarize(n ast.Node) string {
-	b := bytes.NewBufferString("")
-	printer.Fprint(b, token.NewFileSet(), n)
-	return strings.ReplaceAll(spaces.ReplaceAllString(b.String(), " "), "\n", ";")
+	msg := ""
+	switch n := n.(type) {
+	case *ast.StructType:
+		msg += "struct{"
+		for i, f := range n.Fields.List {
+			for i, id := range f.Names {
+				msg += id.Name
+				if i != len(f.Names)-1 {
+					msg += ", "
+				}
+			}
+			msg += " " + further(f.Type)
+			if i != len(n.Fields.List)-1 {
+				msg += "; "
+			}
+		}
+		msg += "}"
+	case *ast.ArrayType:
+		msg += "[]" + further(n.Elt)
+	case *ast.Ident:
+		msg += n.Name
+	}
+	return msg
 }
 
 // prints targets
@@ -98,7 +127,7 @@ func format(cs map[config.Typename]map[ast.Expr][]resolve.Path) string {
 			heading := inherit + ternary(j != len(types)-1, "├── ", "└── ")
 			inherit := inherit + ternary(j != len(types)-1, "|   ", "    ")
 
-			msg += fmt.Sprintf("%sschema %s (%s)\n", heading, bijective.Bijective26(j), summaries[types[j]])
+			msg += fmt.Sprintf("%stype expression: %s\n", heading, summaries[types[j]])
 			rps := users[types[j]]
 			slices.Sort(rps)
 			for k, rp := range rps {
