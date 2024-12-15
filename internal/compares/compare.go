@@ -64,6 +64,11 @@ func Compare(a, b any) bool {
 			}
 			return true
 		}
+	case *ast.SelectorExpr:
+		if b, ok := b.(*ast.SelectorExpr); ok {
+			return Compare(a.X, b.X) && Compare(a.Sel, b.Sel)
+		}
+
 	case *ast.StructType:
 		if b, ok := b.(*ast.StructType); ok {
 			return Compare(a.Fields, b.Fields)
