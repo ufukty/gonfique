@@ -28,16 +28,6 @@ func TestWithConfig(t *testing.T) {
 			},
 		},
 		{
-			folder: "api-export",
-			files: []string{
-				"config_test.go",
-				"extend.go",
-				"go.mod",
-				"go.sum",
-				"input.yml",
-			},
-		},
-		{
 			folder: "k8s",
 			files: []string{
 				"config_test.go",

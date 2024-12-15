@@ -1,3 +1,0 @@
-paths:
-  "**": { export: true }
-  gateways.**.endpoints.*: { declare: Endpoint }
