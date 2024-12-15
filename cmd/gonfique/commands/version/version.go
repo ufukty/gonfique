@@ -2,7 +2,7 @@ package version
 
 import "fmt"
 
-var Version = "v0"
+var Version = "test version"
 
 func Run() error {
 	fmt.Println(Version)
