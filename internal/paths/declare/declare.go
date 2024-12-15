@@ -78,7 +78,7 @@ func summarize(n ast.Node) string {
 	msg := ""
 	switch n := n.(type) {
 	case *ast.StructType:
-		msg += "struct{"
+		msg += "struct{ "
 		for i, f := range n.Fields.List {
 			for i, id := range f.Names {
 				msg += id.Name
@@ -91,7 +91,7 @@ func summarize(n ast.Node) string {
 				msg += "; "
 			}
 		}
-		msg += "}"
+		msg += " }"
 	case *ast.ArrayType:
 		msg += "[]" + further(n.Elt)
 	case *ast.Ident:
@@ -110,11 +110,11 @@ func format(cs map[config.Typename]map[ast.Expr][]resolve.Path) string {
 	tns := maps.Keys(cs)
 	slices.Sort(tns)
 	for i := 0; i < len(tns); i++ {
-		heading := ternary(i != len(tns)-1, "├── ", "└── ")
-		inherit := ternary(i != len(tns)-1, "|   ", "    ")
+		heading := ternary(i != len(tns)-1, "├─ ", "╰─ ")
+		inherit := ternary(i != len(tns)-1, "│  ", "   ")
 
 		users := cs[tns[i]]
-		msg += fmt.Sprintf("%stypename: %s\n", heading, tns[i])
+		msg += fmt.Sprintf("%sdeclared typename: %s\n", heading, tns[i])
 		summaries := map[ast.Node]string{}
 		for t := range users {
 			summaries[t] = summarize(t)
@@ -124,15 +124,15 @@ func format(cs map[config.Typename]map[ast.Expr][]resolve.Path) string {
 			return cmp.Compare(summaries[a], summaries[b])
 		})
 		for j := 0; j < len(types); j++ {
-			heading := inherit + ternary(j != len(types)-1, "├── ", "└── ")
-			inherit := inherit + ternary(j != len(types)-1, "|   ", "    ")
+			heading := inherit + ternary(j != len(types)-1, "├─ ", "╰─ ")
+			inherit := inherit + ternary(j != len(types)-1, "│  ", "   ")
 
 			msg += fmt.Sprintf("%stype expression: %s\n", heading, summaries[types[j]])
 			rps := users[types[j]]
 			slices.Sort(rps)
 			for k, rp := range rps {
-				heading := inherit + ternary(k != len(rps)-1, "├── ", "└── ")
-				msg += fmt.Sprintf("%s%s\n", heading, rp)
+				heading := inherit + ternary(k != len(rps)-1, "├─ ", "╰─ ")
+				msg += fmt.Sprintf("%ssource: %s\n", heading, rp)
 			}
 		}
 	}
