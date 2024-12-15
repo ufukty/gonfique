@@ -6,52 +6,29 @@ import (
 
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/paths/resolve"
+	"golang.org/x/exp/maps"
 )
 
 func TestAutogen(t *testing.T) {
 	type testcase struct {
-		input  map[resolve.Path]bool
-		output map[resolve.Path]config.Typename
+		testname string
+		output   map[resolve.Path]config.Typename // input set is [maps.Keys]
 	}
 
-	tcs := map[string]testcase{
-		"empty": {
-			input:  map[resolve.Path]bool{},
-			output: map[resolve.Path]config.Typename{},
+	tcs := []testcase{
+		{
+			testname: "empty",
+			output:   map[resolve.Path]config.Typename{},
 		},
 		// TODO: consider producing args.TypeName for empty keypath
-		// "config": {
-		// 	input: map[paths.FlattenKeypath]bool{
-		// 		"": false,
-		// 	},
+		// {
+		// 	testname: "config",
 		// 	output: map[paths.FlattenKeypath]config.Typename{
 		// 		"": "Config",
 		// 	},
 		// },
-		"letters, 1": {
-			input: map[resolve.Path]bool{
-				"a": false,
-				"b": false,
-				"c": false,
-				"d": false,
-				"e": false,
-			},
-			output: map[resolve.Path]config.Typename{
-				"a": "a",
-				"b": "b",
-				"c": "c",
-				"d": "d",
-				"e": "e",
-			},
-		},
-		"letters, 1, exported": {
-			input: map[resolve.Path]bool{
-				"a": true,
-				"b": true,
-				"c": true,
-				"d": true,
-				"e": true,
-			},
+		{
+			testname: "1 letters",
 			output: map[resolve.Path]config.Typename{
 				"a": "A",
 				"b": "B",
@@ -60,119 +37,68 @@ func TestAutogen(t *testing.T) {
 				"e": "E",
 			},
 		},
-		"letters, 2": {
-			input: map[resolve.Path]bool{
-				"a.a": false,
-				"a.b": false,
-				"b.a": false,
-			},
+		{
+			testname: "2 letters",
 			output: map[resolve.Path]config.Typename{
-				"a.a": "a", // alphabetical order rewarded with generic type name...
-				"a.b": "b",
-				"b.a": "bA", //
+				"a.a": "A", // alphabetical order rewarded with generic type name...
+				"a.b": "B",
+				"b.a": "BA", //
 			},
 		},
-		"letters, 3": {
-			input: map[resolve.Path]bool{
-				"a.a.a": false,
-				"a.b.a": false,
-			},
-			output: map[resolve.Path]config.Typename{
-				"a.a.a": "a",
-				"a.b.a": "bA",
-			},
-		},
-		"letters, 3, exported": {
-			input: map[resolve.Path]bool{
-				"a.a.a": true,
-				"a.b.a": true,
-			},
+		{
+			testname: "3 letters",
 			output: map[resolve.Path]config.Typename{
 				"a.a.a": "A",
 				"a.b.a": "BA",
 			},
 		},
-		"letters, 4": {
-			input: map[resolve.Path]bool{
-				"a.a.a": false,
-				"a.b.a": false,
-				"b.a.a": false,
-			},
+		{
+			testname: "4 letters",
 			output: map[resolve.Path]config.Typename{
-				"a.a.a": "a",
-				"a.b.a": "bA",
-				"b.a.a": "aA",
+				"a.a.a.a": "A",
+				"a.b.a.a": "AA",
+				"b.a.a.a": "AAA",
 			},
 		},
-		"letters, 4, exported": {
-			input: map[resolve.Path]bool{
-				"a.a.a": true,
-				"a.b.a": true,
-				"b.a.a": true,
-			},
+		{
+			testname: "1 word",
 			output: map[resolve.Path]config.Typename{
-				"a.a.a": "A",
-				"a.b.a": "BA",
-				"b.a.a": "AA",
+				"lorem.ipsum.dolor": "Dolor",
+				"sit.amet":          "Amet",
+				"consectetur":       "Consectetur",
 			},
 		},
-		"words, 1": {
-			input: map[resolve.Path]bool{
-				"lorem.ipsum.dolor": false,
-				"sit.amet":          false,
-				"consectetur":       false,
-			},
+		{
+			testname: "2 words conflicting on different leveltestcases",
 			output: map[resolve.Path]config.Typename{
-				"lorem.ipsum.dolor": "dolor",
-				"sit.amet":          "amet",
-				"consectetur":       "consectetur",
+				"lorem.ipsum.dolor": "IpsumDolor",
+				"sit.amet":          "Amet",
+				"consectetur":       "Consectetur",
+				"dolor":             "Dolor",
 			},
 		},
-		"words, 2": { // conflicting on different leveltestcases
-			input: map[resolve.Path]bool{
-				"lorem.ipsum.dolor": false,
-				"sit.amet":          false,
-				"consectetur":       false,
-				"dolor":             false,
-			},
+		{
+			testname: "3 words conflicting on different leveltestcases",
 			output: map[resolve.Path]config.Typename{
-				"lorem.ipsum.dolor": "ipsumDolor",
-				"sit.amet":          "amet",
-				"consectetur":       "consectetur",
-				"dolor":             "dolor",
+				"lorem.dolor":       "Dolor",
+				"lorem.ipsum.dolor": "IpsumDolor",
+				"lorem.ipsum.sit":   "IpsumSit",
+				"lorem.ipsum":       "Ipsum",
+				"lorem.sit":         "Sit",
 			},
 		},
-		"words, 3": { // conflicting on different leveltestcases
-			input: map[resolve.Path]bool{
-				"lorem.dolor":       false,
-				"lorem.ipsum.dolor": false,
-				"lorem.ipsum.sit":   false,
-				"lorem.ipsum":       false,
-				"lorem.sit":         false,
-			},
+		{
+			testname: "4 words conflicting on different leveltestcases",
 			output: map[resolve.Path]config.Typename{
-				"lorem.dolor":       "dolor",
-				"lorem.ipsum.dolor": "ipsumDolor",
-				"lorem.ipsum.sit":   "ipsumSit",
-				"lorem.ipsum":       "ipsum",
-				"lorem.sit":         "sit",
-			},
-		},
-		"words, 4": { // conflicting on different leveltestcases
-			input: map[resolve.Path]bool{
-				"lorem.ipsum": false,
-				"ipsum":       false,
-			},
-			output: map[resolve.Path]config.Typename{
-				"lorem.ipsum": "loremIpsum",
-				"ipsum":       "ipsum",
+				"lorem.ipsum": "LoremIpsum",
+				"ipsum":       "Ipsum",
 			},
 		},
 	}
 
-	for tn, tc := range tcs {
-		t.Run(tn, func(t *testing.T) {
-			got := GenerateTypenames(tc.input)
+	for _, tc := range tcs {
+		t.Run(tc.testname, func(t *testing.T) {
+			got := GenerateTypenames(maps.Keys(tc.output), []config.Typename{})
 
 			fmt.Printf("%-20s %-10s %s\n", "Keypath", "Want", "Got")
 			for kp, tn := range tc.output {
