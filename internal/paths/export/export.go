@@ -6,7 +6,7 @@ import (
 	"go/token"
 
 	"github.com/ufukty/gonfique/internal/files/config"
-	"github.com/ufukty/gonfique/internal/namings/auto"
+	"github.com/ufukty/gonfique/internal/paths/export/auto"
 	"github.com/ufukty/gonfique/internal/paths/resolve"
 )
 
