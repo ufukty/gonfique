@@ -44,6 +44,7 @@ func Types(targets []resolve.Path, reserved []config.Typename, holders map[resol
 			return nil, fmt.Errorf("getting type expression of target: %w", err)
 		}
 		decls = append(decls, &ast.GenDecl{
+			Doc:   &ast.CommentGroup{List: []*ast.Comment{{Text: fmt.Sprintf("// exported for %s", rp)}}},
 			Tok:   token.TYPE,
 			Specs: []ast.Spec{&ast.TypeSpec{Name: tn.Ident(), Type: expr}},
 		})
