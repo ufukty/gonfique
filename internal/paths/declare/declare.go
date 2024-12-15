@@ -7,6 +7,7 @@ import (
 	"go/ast"
 	"go/printer"
 	"go/token"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -62,10 +63,12 @@ func ternary(cond bool, t, f string) string {
 	return f
 }
 
+var spaces = regexp.MustCompile("[ \t]+")
+
 func summarize(n ast.Node) string {
 	b := bytes.NewBufferString("")
 	printer.Fprint(b, token.NewFileSet(), n)
-	return strings.ReplaceAll(b.String(), "\n", ";")
+	return strings.ReplaceAll(spaces.ReplaceAllString(b.String(), " "), "\n", ";")
 }
 
 // prints targets
@@ -91,7 +94,7 @@ func format(cs map[config.Typename]map[ast.Expr][]resolve.Path) string {
 		slices.SortFunc(types, func(a, b ast.Expr) int {
 			return cmp.Compare(summaries[a], summaries[b])
 		})
-		for j := 0; j > len(types); j++ {
+		for j := 0; j < len(types); j++ {
 			heading := inherit + ternary(j != len(types)-1, "├── ", "└── ")
 			inherit := inherit + ternary(j != len(types)-1, "|   ", "    ")
 
