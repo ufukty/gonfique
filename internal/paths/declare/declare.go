@@ -69,17 +69,19 @@ func further(e ast.Expr) string {
 		return fmt.Sprintf("%s.%s", further(t.X), t.Sel.Name)
 	case *ast.StructType:
 		return "struct{...}"
+	case *ast.MapType:
+		return fmt.Sprintf("map[%s]%s", further(t.Key), further(t.Value))
 	default:
 		return "..."
 	}
 }
 
-func summarize(n ast.Node) string {
-	msg := ""
-	switch n := n.(type) {
+// prints fields for structs only in first depth
+func summarize(e ast.Expr) string {
+	switch t := e.(type) {
 	case *ast.StructType:
-		msg += "struct{ "
-		for i, f := range n.Fields.List {
+		msg := "struct{ "
+		for i, f := range t.Fields.List {
 			for i, id := range f.Names {
 				msg += id.Name
 				if i != len(f.Names)-1 {
@@ -87,19 +89,15 @@ func summarize(n ast.Node) string {
 				}
 			}
 			msg += " " + further(f.Type)
-			if i != len(n.Fields.List)-1 {
+			if i != len(t.Fields.List)-1 {
 				msg += "; "
 			}
 		}
 		msg += " }"
-	case *ast.MapType:
-		msg += fmt.Sprintf("map[%s]%s", further(n.Key), further(n.Value))
-	case *ast.ArrayType:
-		msg += "[]" + further(n.Elt)
-	case *ast.Ident:
-		msg += n.Name
+		return msg
+	default:
+		return further(t)
 	}
-	return msg
 }
 
 // prints targets
