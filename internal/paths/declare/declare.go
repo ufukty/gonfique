@@ -92,6 +92,8 @@ func summarize(n ast.Node) string {
 			}
 		}
 		msg += " }"
+	case *ast.MapType:
+		msg += fmt.Sprintf("map[%s]%s", further(n.Key), further(n.Value))
 	case *ast.ArrayType:
 		msg += "[]" + further(n.Elt)
 	case *ast.Ident:
