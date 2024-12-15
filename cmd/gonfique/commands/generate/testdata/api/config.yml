@@ -1,4 +1,4 @@
 paths:
   "**": { export: true }
   gateways.**.endpoints.*: { declare: Endpoint }
-  "**.endpoints.*.method": { replace: http.Method http }
+  "**.endpoints.*.method": { replace: http.Method test/http }
