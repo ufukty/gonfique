@@ -14,9 +14,8 @@ import (
 type Dict string
 
 const (
-	Static      Dict = "static"
-	DynamicKeys Dict = "dynamic-keys"
-	Dynamic     Dict = "dynamic"
+	Struct Dict = "struct"
+	Map    Dict = "map"
 )
 
 type PathConfig struct {
