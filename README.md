@@ -226,9 +226,16 @@ Better keep reading
 
 Gonfique config is a YAML file which contains the customizations developer wants. Gonfique config is completely optional. If there is no need for any customization, this section is safe to skip.
 
-Gonfique accepts most of the customizations on resolved types and derived types. Beside that there is also couple small things we gonna talk in `meta` section.
-
 Overall structure of a Gonfique config is very simple. They can contain 3 sections: `meta`, `paths` and `types`.
+
+The distinction between sections `paths` and `types` are related with the target of each customization directive. The directives `declare`, `explore`, `dict` and `replace` are applied on targets (the type expressions belong to dict keys and list items). Since those targets are described with their paths, they are expected to be written under `paths` section. Other set of directives which consists by `accessors`, `embed`, `iterator` and `parent` target types. The types that are declared by `declare` directive from `paths` section. Since those directives target types rather than paths, customizations involve those are expected to be listed in `types` section.
+
+It might be helpful imagining `types` section processed after `paths` section to understand the relation better. Order is because of both reasons:
+
+- you need to declare types before implementing methods on them,
+- one type can be used for more than one target.
+
+  Here is the syntax of the Gonfique config:
 
 ```yml
 # Values wrapped with `<` and `>` are provided by user.
@@ -240,7 +247,7 @@ meta:
 paths:
   <path>:
     declare: <typename>
-    dict: [ static | dynamic-keys | dynamic ]
+    dict: [ struct | map ]
     export: <bool>
     replace: <typename> <import-path>
 
@@ -354,7 +361,7 @@ type Config struct {
 </tbody>
 </table>
 
-Key targeting paths are only read when the containing map set either `dict: dynamic-keys` or `dict: dynamic`. Value targeting paths are only processed when containing dict set `dict: dynamic`.
+Paths contain `[key]` and `[value]` are only read when the containing map set `dict: map`.
 
 #### Path directives
 
@@ -365,7 +372,7 @@ There are 4 alternative directives:
 - **declare**  
   Like `export` but you provide the typename
 - **dict**  
-  Choose between `map` and `struct` to represent a dict
+  Use `map` instead of `struct` for a dictionary
 - **replace**  
   Overwrites the resolved type definition with the provided typename
 
@@ -462,19 +469,24 @@ Assign specified type name instead resolving from source file. For example: `rep
 
 ```yaml
 paths:
-  <path>:
-    dict: [static | dynamic-keys | dynamic]
+  <direct-path>:
+    dict: [ struct | map ]
+.
 ```
 
 Use a Go `map` instead of a `struct` to represent a dict. This might be useful when the set of keys for a dict is not fixed until the build time, but extends to runtime. Using `map` requires all values of the dict in path to have same or compatible schemas. Otherwise Gonfique will print an error on stderr and return with status other than 0.
 
-The default value is `static`. It would result the dict as to be represented in Go with a `struct` just like how it is normally.
+| Value              | Paths made available with value  | Result                |
+| ------------------ | -------------------------------- | --------------------- |
+| `struct` (Default) | `<dict>.<key>`                   | `struct{ ... }`       |
+| `map`              | `<dict>.[key]`, `<dict>.[value]` | `map[string]combined` |
 
-When the value is set to `dynamic` Gonfique will seek for both `<path>.[key]` and `<path>.[value]` for `replace` directives. Gonfique won't try to resolve types from input file for key and value types in this mode.
+> [!NOTE]
+> Anything between angle brackets just like `<key>` is to describe the the value you provide. At the other hand `[key]` is a keyword. Don't use angle brackets in real file.
 
-When the value is set to `dynamic-keys` Gonfique will only seek for `<path>.[key]` for `replace` directive. The value type will be resolved by input file. So, in `dynamic-keys`, Gonfique still resolves value type.
+If you want to get a standard map type such as a `map[string]any`, you might as well use `replace: map[string]any` at the dict's path instead. `dict` directive suits better when only the keys are map and values are fixed in build time. The advantage of using `dict: map` over `replace: map[K]V` is when you also want to customize resolved key and value types through `[map]` and `[value]`.
 
-If you want to get a standard map type such as a `map[string]any`, you might as well use `replace: map[string]any` at the dict's path instead. `dict` directive suits better when only the keys are dynamic and values are fixed in build time. The advantage of using `dict: dynamic` over `replace: map[K]V` is when you also want to use `declare` on replaced type and apply type directives on the declared type.
+Note that Gonfique will use `any` value type if any two of dict key's type conflict when the dict is requested to be defined as `map`. If your key types conflict but you need to keep the type safety without making the dict iterable; you might as well use [iterator](#making-structs-iterable-with-iterator) on a struct representation.
 
 ### Types section
 
