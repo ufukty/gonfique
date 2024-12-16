@@ -94,6 +94,16 @@ func TestAutogen(t *testing.T) {
 				"ipsum":       "Ipsum",
 			},
 		},
+		{
+			testname: "specials",
+			output: map[resolve.Path]config.Typename{
+				"ipsum":         "Ipsum",
+				"ipsum.[]":      "IpsumItem",
+				"lorem":         "Lorem",
+				"lorem.[key]":   "LoremKey",
+				"lorem.[value]": "LoremValue",
+			},
+		},
 	}
 
 	for _, tc := range tcs {

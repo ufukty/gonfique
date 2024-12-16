@@ -60,19 +60,24 @@ func orderKeypaths(kps []resolve.Path) []resolve.Path {
 	return ordered
 }
 
+var specials = []string{"[]", "[key]", "[value]"}
+
 func typenameForSegments(segments []string) config.Typename {
 	l := len(segments)
-	if l == 1 && segments[0] == "[]" {
+	if l == 1 && slices.Contains(specials, segments[0]) {
 		return "" // come back next round with 2 segments
 	}
 	tn := ""
-	for i, s := range segments {
-		if s != "[]" {
-			tn += safeTypeName(s)
-		} else if i == 0 {
-			tn += "item"
-		} else {
+	for _, s := range segments {
+		switch s {
+		case "[key]":
+			tn += "Key"
+		case "[value]":
+			tn += "Value"
+		case "[]":
 			tn += "Item"
+		default:
+			tn += safeTypeName(s)
 		}
 	}
 	return config.Typename(tn)
