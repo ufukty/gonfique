@@ -6,6 +6,18 @@ import (
 	"github.com/ufukty/gonfique/internal/files/config"
 )
 
+func consume(c []string) []string {
+	return c[1:]
+}
+
+func downgrade(s []string) []string {
+	s2 := slices.Clone(s)
+	s2[0] = "*"
+	return s2
+}
+
+var keywords = []string{"[]", "[key]", "[value]"}
+
 // returns true if [c]onfig path matches the [r]esolved path
 func matches(c []string, r []string) bool {
 	if len(c) == 0 && len(r) == 0 {
@@ -16,9 +28,9 @@ func matches(c []string, r []string) bool {
 	}
 	switch c[0] {
 	case "**":
-		return matches(c[1:], r) || matches(slices.Insert(c[1:], 0, "*"), r)
+		return matches(consume(c), r) || matches(downgrade(c), r) || matches(c, r[1:])
 	case "*":
-		return !slices.Contains([]string{"[]", "[key]", "[value]"}, r[0]) && matches(c[1:], r[1:])
+		return !slices.Contains(keywords, r[0]) && matches(c[1:], r[1:])
 	case "[]", "[key]", "[value]":
 		fallthrough
 	default:
