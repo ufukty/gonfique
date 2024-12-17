@@ -10,18 +10,24 @@ import (
 	"github.com/ufukty/gonfique/internal/paths/resolve"
 )
 
-func get(holder ast.Node) (ast.Expr, error) {
+func get(holder ast.Node, termination string) (ast.Expr, error) {
 	switch h := holder.(type) {
 	case *ast.Field:
 		return h.Type, nil
 	case *ast.ArrayType:
 		return h.Elt, nil
-	default:
-		return nil, fmt.Errorf("unknown holder type: %T", holder)
+	case *ast.MapType:
+		switch termination {
+		case "[key]":
+			return h.Key, nil
+		case "[value]":
+			return h.Value, nil
+		}
 	}
+	return nil, fmt.Errorf("unknown holder type (%T) or path termination (%s)", holder, termination)
 }
 
-func set(holder ast.Node, expr ast.Expr) error {
+func set(holder ast.Node, termination string, expr ast.Expr) error {
 	switch h := holder.(type) {
 	case *ast.Field:
 		h.Type = expr
@@ -29,30 +35,37 @@ func set(holder ast.Node, expr ast.Expr) error {
 	case *ast.ArrayType:
 		h.Elt = expr
 		return nil
-	default:
-		return fmt.Errorf("unknown holder type: %T", holder)
+	case *ast.MapType:
+		switch termination {
+		case "[key]":
+			h.Key = expr
+			return nil
+		case "[value]":
+			h.Value = expr
+			return nil
+		}
 	}
+	return fmt.Errorf("unknown holder type (%T) or path termination (%s)", holder, termination)
 }
 
-func Types(targets []resolve.Path, reserved []config.Typename, holders map[resolve.Path]ast.Node) ([]*ast.GenDecl, error) {
-	decls := []*ast.GenDecl{}
-
-	types := auto.GenerateTypenames(targets, reserved)
-	for rp, tn := range types {
-		expr, err := get(holders[rp])
-		if err != nil {
-			return nil, fmt.Errorf("getting type expression of target: %w", err)
-		}
-		decls = append(decls, &ast.GenDecl{
-			Doc:   &ast.CommentGroup{List: []*ast.Comment{{Text: fmt.Sprintf("// exported for %s", rp)}}},
-			Tok:   token.TYPE,
-			Specs: []ast.Spec{&ast.TypeSpec{Name: tn.Ident(), Type: expr}},
-		})
-		err = set(holders[rp], tn.Ident())
-		if err != nil {
-			return nil, fmt.Errorf("replacing type def with typename on target: %w", err)
-		}
+func Type(rp resolve.Path, reserved []config.Typename, holder ast.Node, termination string) (*ast.GenDecl, error) {
+	tn, ok := auto.Typename(rp, reserved)
+	if !ok {
+		return nil, fmt.Errorf("could not produce typename for %s", rp)
 	}
 
-	return decls, nil
+	expr, err := get(holder, termination)
+	if err != nil {
+		return nil, fmt.Errorf("getting type expression of target: %w", err)
+	}
+	err = set(holder, termination, tn.Ident())
+	if err != nil {
+		return nil, fmt.Errorf("replacing type def with typename on target: %w", err)
+	}
+	gd := &ast.GenDecl{
+		Doc:   &ast.CommentGroup{List: []*ast.Comment{{Text: fmt.Sprintf("// exported for %s", rp)}}},
+		Tok:   token.TYPE,
+		Specs: []ast.Spec{&ast.TypeSpec{Name: tn.Ident(), Type: expr}},
+	}
+	return gd, nil
 }

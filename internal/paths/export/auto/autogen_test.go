@@ -1,13 +1,44 @@
 package auto
 
 import (
+	"cmp"
 	"fmt"
+	"slices"
+	"strings"
 	"testing"
 
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/paths/resolve"
 	"golang.org/x/exp/maps"
 )
+
+func bfs(a, b resolve.Path) int {
+	if strings.Count(string(b), ".") < strings.Count(string(a), ".") {
+		return 1
+	} else if strings.Count(string(a), ".") < strings.Count(string(b), ".") {
+		return -1
+	} else if strings.Contains(string(a), string(b)) {
+		return 1
+	} else if strings.Contains(string(b), string(a)) {
+		return -1
+	} else {
+		return cmp.Compare(string(a), string(b))
+	}
+}
+
+// to produce series of typenames instead of one without collisions
+func typenames(rps []resolve.Path) (map[resolve.Path]config.Typename, error) {
+	slices.SortFunc(rps, bfs)
+	tns := map[resolve.Path]config.Typename{}
+	for _, rp := range rps {
+		tn, ok := Typename(rp, maps.Values(tns))
+		if !ok {
+			return nil, fmt.Errorf("could not produce typename for %s", rp)
+		}
+		tns[rp] = tn
+	}
+	return tns, nil
+}
 
 func TestAutogen(t *testing.T) {
 	type testcase struct {
@@ -108,11 +139,14 @@ func TestAutogen(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.testname, func(t *testing.T) {
-			got := GenerateTypenames(maps.Keys(tc.output), []config.Typename{})
+			got, err := typenames(maps.Keys(tc.output))
+			if err != nil {
+				t.Fatal(fmt.Errorf("act: %w", err))
+			}
 
-			fmt.Printf("%-20s %-10s %s\n", "Keypath", "Want", "Got")
+			t.Logf("%-20s %-10s %s\n", "Keypath", "Want", "Got")
 			for kp, tn := range tc.output {
-				fmt.Printf("%-20s %-10s %s\n", kp, tn, got[kp])
+				t.Logf("%-20s %-10s %s\n", kp, tn, got[kp])
 			}
 
 			if len(got) != len(tc.output) {

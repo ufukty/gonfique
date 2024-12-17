@@ -84,52 +84,49 @@ func typenameForSegments(segments []string) config.Typename {
 
 }
 
+var keywords = map[config.Typename]bool{
+	"":            true, // defect
+	"break":       true,
+	"case":        true,
+	"chan":        true,
+	"const":       true,
+	"continue":    true,
+	"default":     true,
+	"defer":       true,
+	"else":        true,
+	"fallthrough": true,
+	"for":         true,
+	"func":        true,
+	"go":          true,
+	"goto":        true,
+	"if":          true,
+	"import":      true,
+	"interface":   true,
+	"map":         true,
+	"package":     true,
+	"range":       true,
+	"return":      true,
+	"select":      true,
+	"struct":      true,
+	"switch":      true,
+	"type":        true,
+	"var":         true,
+}
+
+func isKeyword(tn config.Typename) bool {
+	_, ok := keywords[tn]
+	return ok
+}
+
 // FIXME: consider [] containing keypaths
 // targets is map of keypaths and preference of exported typename
-func GenerateTypenames(targets []resolve.Path, reserved []config.Typename) map[resolve.Path]config.Typename {
-	ordered := orderKeypaths(targets)
-	tns := map[resolve.Path]config.Typename{}
-	reserved2 := map[config.Typename]bool{
-		"":            true, // defect
-		"break":       true,
-		"case":        true,
-		"chan":        true,
-		"const":       true,
-		"continue":    true,
-		"default":     true,
-		"defer":       true,
-		"else":        true,
-		"fallthrough": true,
-		"for":         true,
-		"func":        true,
-		"go":          true,
-		"goto":        true,
-		"if":          true,
-		"import":      true,
-		"interface":   true,
-		"map":         true,
-		"package":     true,
-		"range":       true,
-		"return":      true,
-		"select":      true,
-		"struct":      true,
-		"switch":      true,
-		"type":        true,
-		"var":         true,
-	}
-	for _, r := range reserved {
-		reserved2[r] = true
-	}
-	for _, kp := range ordered {
-		segments := kp.Segments()
-		for i := len(segments) - 1; i >= 0; i-- {
-			tn := typenameForSegments(segments[i:])
-			if _, found := reserved2[tn]; !found {
-				reserved2[tn] = true
-				tns[kp] = tn
-				break
-			}
+func Typename(rp resolve.Path, reserved []config.Typename) (config.Typename, bool) {
+	segments := rp.Segments()
+	for i := len(segments) - 1; i >= 0; i-- {
+		tn := typenameForSegments(segments[i:])
+		if !(isKeyword(tn) || slices.Contains(reserved, tn)) {
+			return tn, true
 		}
 	}
-	return tns
+	return "", false
 }
