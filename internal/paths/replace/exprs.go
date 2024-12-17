@@ -5,8 +5,6 @@ import (
 	"go/ast"
 	"regexp"
 	"strings"
-
-	"github.com/ufukty/gonfique/internal/paths/resolve"
 )
 
 type value struct {
@@ -14,18 +12,20 @@ type value struct {
 	ImportPath string
 }
 
-var spaces = regexp.MustCompile(" +")
+var spaces = regexp.MustCompile(`\s+`)
 
-func (v *value) from(s string) error {
+func parse(s string) (*value, error) {
 	ss := strings.Split(spaces.ReplaceAllString(s, ";"), ";")
 	if len(ss) > 2 {
-		return fmt.Errorf("more than 2 values")
+		return nil, fmt.Errorf("more than 2 values")
 	}
-	v.Typename = ss[0]
+	v := &value{
+		Typename: ss[0],
+	}
 	if len(ss) == 2 {
 		v.ImportPath = ss[1]
 	}
-	return nil
+	return v, nil
 }
 
 func expr(s string) (ast.Expr, error) {
@@ -40,27 +40,34 @@ func expr(s string) (ast.Expr, error) {
 	}
 }
 
-func Expressions(directives map[resolve.Path]string, holders map[resolve.Path]ast.Node) ([]string, error) {
-	v2 := value{}
-	imports := []string{}
-	for rp, v1 := range directives {
-		err := v2.from(v1)
-		if err != nil {
-			return nil, fmt.Errorf("parsing: %w", err)
-		}
-		e, err := expr(v2.Typename)
-		if err != nil {
-			return nil, fmt.Errorf("building ast for typename: %w", err)
-		}
-		switch h := holders[rp].(type) {
-		case *ast.Field:
-			h.Type = e
-		case *ast.ArrayType:
-			h.Elt = e
-		}
-		if v2.ImportPath != "" {
-			imports = append(imports, v2.ImportPath)
+func set(holder ast.Node, last string, e ast.Expr) {
+	switch h := holder.(type) {
+	case *ast.Field:
+		h.Type = e
+	case *ast.ArrayType:
+		h.Elt = e
+	case *ast.MapType:
+		switch last {
+		case "[key]":
+			h.Key = e
+		case "[value]":
+			h.Value = e
 		}
 	}
-	return imports, nil
+}
+
+func Expression(v string, holder ast.Node, last string) (string, error) {
+	v2, err := parse(v)
+	if err != nil {
+		return "", fmt.Errorf("parse: %w", err)
+	}
+	e, err := expr(v2.Typename)
+	if err != nil {
+		return "", fmt.Errorf("building ast for typename: %w", err)
+	}
+	set(holder, last, e)
+	if v2.ImportPath != "" {
+		return v2.ImportPath, nil
+	}
+	return "", nil
 }
