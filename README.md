@@ -228,7 +228,7 @@ Gonfique config is a YAML file which contains the customizations developer wants
 
 Overall structure of a Gonfique config is very simple. They can contain 3 sections: `meta`, `paths` and `types`.
 
-The distinction between sections `paths` and `types` are related with the target of each customization directive. The directives `declare`, `explore`, `dict` and `replace` are applied on targets (the type expressions belong to dict keys and list items). Since those targets are described with their paths, they are expected to be written under `paths` section. Other set of directives which consists by `accessors`, `embed`, `iterator` and `parent` target types. The types that are declared by `declare` directive from `paths` section. Since those directives target types rather than paths, customizations involve those are expected to be listed in `types` section.
+The distinction between sections `paths` and `types` are related with the target of each customization directive. The directives `declare`, `explore`, `dict` and `replace` are applied on dicts, lists and literal values in the input file. Since those targets are described with their paths, they are expected to be written under `paths` section. Other set of directives which consists by `accessors`, `embed`, `iterator` and `parent` target types. Those directives can further customize the types produced by `declare` directives. Since those directives target types rather than paths, they are expected in `types` section.
 
 It might be helpful imagining `types` section processed after `paths` section to understand the relation better. Order is because of both reasons:
 
