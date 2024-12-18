@@ -20,19 +20,14 @@ func TestConfig(t *testing.T) {
 			t.Errorf("expected %s, got %s", "Employee", f.Paths["c"].Declare)
 		}
 	})
-	t.Run("e.Dict static", func(t *testing.T) {
-		if f.Paths["e"].Dict != "static" {
-			t.Errorf("expected 'static', got %s", f.Paths["e"].Dict)
+	t.Run("e.Dict struct", func(t *testing.T) {
+		if f.Paths["e"].Dict != "struct" {
+			t.Errorf("expected 'struct', got %s", f.Paths["e"].Dict)
 		}
 	})
-	t.Run("f.Dict dynamic-keys", func(t *testing.T) {
-		if f.Paths["f"].Dict != "dynamic-keys" {
-			t.Errorf("expected 'dynamic-keys', got %s", f.Paths["f"].Dict)
-		}
-	})
-	t.Run("g.Dict dynamic", func(t *testing.T) {
-		if f.Paths["g"].Dict != "dynamic" {
-			t.Errorf("expected 'dynamic', got %s", f.Paths["g"].Dict)
+	t.Run("g.Dict map", func(t *testing.T) {
+		if f.Paths["g"].Dict != "map" {
+			t.Errorf("expected 'map', got %s", f.Paths["g"].Dict)
 		}
 	})
 	t.Run("d.Replace", func(t *testing.T) {

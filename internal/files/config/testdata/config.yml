@@ -1,7 +1,6 @@
 paths:
   b: { export: true }
   c: { declare: Employee }
-  e: { dict: static }
-  f: { dict: dynamic-keys }
-  g: { dict: dynamic }
+  e: { dict: struct }
+  g: { dict: map }
   d: { replace: Date time }
