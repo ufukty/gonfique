@@ -56,18 +56,18 @@ func set(holder ast.Node, last string, e ast.Expr) {
 	}
 }
 
-func Expression(v string, holder ast.Node, last string) (string, error) {
+func (a *Agent) Expression(v string, holder ast.Node, last string) error {
 	v2, err := parse(v)
 	if err != nil {
-		return "", fmt.Errorf("parse: %w", err)
+		return fmt.Errorf("parse: %w", err)
 	}
 	e, err := expr(v2.Typename)
 	if err != nil {
-		return "", fmt.Errorf("building ast for typename: %w", err)
+		return fmt.Errorf("building ast for typename: %w", err)
 	}
 	set(holder, last, e)
 	if v2.ImportPath != "" {
-		return v2.ImportPath, nil
+		a.Imports = append(a.Imports, v2.ImportPath)
 	}
-	return "", nil
+	return nil
 }

@@ -1,197 +1,77 @@
 package declare
 
 import (
-	"cmp"
 	"fmt"
 	"go/ast"
 	"go/token"
-	"slices"
 
-	"github.com/ufukty/gonfique/internal/compares"
-	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/paths/resolve"
-	"golang.org/x/exp/maps"
 )
 
-func getType(holder ast.Node) ast.Expr {
+func get(holder ast.Node, termination string) (ast.Expr, error) {
 	switch h := holder.(type) {
 	case *ast.Field:
-		return h.Type
+		return h.Type, nil
 	case *ast.ArrayType:
-		return h.Elt
-	default:
-		panic("implementation error")
-	}
-}
-
-func groupSchemas(users []resolve.Path, holders map[resolve.Path]ast.Node) map[ast.Expr][]resolve.Path {
-	groups := map[ast.Expr][]resolve.Path{}
-	for _, rp := range users {
-		found := false
-		for alt := range groups {
-			if compares.Compare(alt, getType(holders[rp])) {
-				groups[alt] = append(groups[alt], rp)
-				found = true
-				break
-			}
-		}
-		if !found {
-			groups[getType(holders[rp])] = []resolve.Path{rp}
-		}
-	}
-	return groups
-}
-
-func group(directives map[resolve.Path]config.Typename, holders map[resolve.Path]ast.Node) map[config.Typename]map[ast.Expr][]resolve.Path {
-	schemas := map[config.Typename]map[ast.Expr][]resolve.Path{}
-	for tn, rps := range datas.Revmap(directives) {
-		schemas[tn] = groupSchemas(rps, holders)
-	}
-	return schemas
-}
-
-func ternary(cond bool, t, f string) string {
-	if cond {
-		return t
-	}
-	return f
-}
-
-// doesn't recur on structs
-func further(e ast.Expr) string {
-	switch t := e.(type) {
-	case *ast.Ident:
-		return t.Name
-	case *ast.ArrayType:
-		return "[]" + further(t.Elt)
-	case *ast.SelectorExpr:
-		return fmt.Sprintf("%s.%s", further(t.X), t.Sel.Name)
-	case *ast.StructType:
-		return "struct{...}"
+		return h.Elt, nil
 	case *ast.MapType:
-		return fmt.Sprintf("map[%s]%s", further(t.Key), further(t.Value))
-	default:
-		return "..."
-	}
-}
-
-// prints fields for structs only in first depth
-func summarize(e ast.Expr) string {
-	switch t := e.(type) {
-	case *ast.StructType:
-		msg := "struct{ "
-		for i, f := range t.Fields.List {
-			for i, id := range f.Names {
-				msg += id.Name
-				if i != len(f.Names)-1 {
-					msg += ", "
-				}
-			}
-			msg += " " + further(f.Type)
-			if i != len(t.Fields.List)-1 {
-				msg += "; "
-			}
-		}
-		msg += " }"
-		return msg
-	default:
-		return further(t)
-	}
-}
-
-// prints targets
-// with conflicting schemas
-// directed to be declared with same typename
-// in directory tree format
-// in sorted order
-func format(cs map[config.Typename]map[ast.Expr][]resolve.Path) string {
-	msg := ""
-	tns := maps.Keys(cs)
-	slices.Sort(tns)
-	for i := 0; i < len(tns); i++ {
-		heading := ternary(i != len(tns)-1, "├─ ", "╰─ ")
-		inherit := ternary(i != len(tns)-1, "│  ", "   ")
-
-		users := cs[tns[i]]
-		msg += fmt.Sprintf("%sdeclared typename: %s\n", heading, tns[i])
-		summaries := map[ast.Node]string{}
-		for t := range users {
-			summaries[t] = summarize(t)
-		}
-		types := maps.Keys(users)
-		slices.SortFunc(types, func(a, b ast.Expr) int {
-			return cmp.Compare(summaries[a], summaries[b])
-		})
-		for j := 0; j < len(types); j++ {
-			heading := inherit + ternary(j != len(types)-1, "├─ ", "╰─ ")
-			inherit := inherit + ternary(j != len(types)-1, "│  ", "   ")
-
-			msg += fmt.Sprintf("%stype expression: %s\n", heading, summaries[types[j]])
-			rps := users[types[j]]
-			slices.Sort(rps)
-			for k, rp := range rps {
-				heading := inherit + ternary(k != len(rps)-1, "├─ ", "╰─ ")
-				msg += fmt.Sprintf("%ssource: %s\n", heading, rp)
-			}
+		switch termination {
+		case "[key]":
+			return h.Key, nil
+		case "[value]":
+			return h.Value, nil
 		}
 	}
-	return msg
+	return nil, fmt.Errorf("unknown holder type (%T) or path termination (%s)", holder, termination)
 }
 
-func conflicts(schemas map[config.Typename]map[ast.Expr][]resolve.Path) error {
-	cs := map[config.Typename]map[ast.Expr][]resolve.Path{}
-	for tn, groups := range schemas {
-		if len(groups) > 1 {
-			cs[tn] = groups
-		}
-	}
-	if len(cs) == 0 {
-		return nil
-	}
-	return fmt.Errorf("%s", format(cs))
-}
-
-func pick(schemas map[config.Typename]map[ast.Expr][]resolve.Path) map[config.Typename]ast.Expr {
-	picks := map[config.Typename]ast.Expr{}
-	for tn, users := range schemas {
-		picks[tn] = maps.Keys(users)[0]
-	}
-	return picks
-}
-
-func set(holder ast.Node, typeExpr ast.Expr) {
+func set(holder ast.Node, last string, expr ast.Expr) error {
 	switch h := holder.(type) {
 	case *ast.Field:
-		h.Type = typeExpr
+		h.Type = expr
+		return nil
 	case *ast.ArrayType:
-		h.Elt = typeExpr
+		h.Elt = expr
+		return nil
+	case *ast.MapType:
+		switch last {
+		case "[key]":
+			h.Key = expr
+			return nil
+		case "[value]":
+			h.Value = expr
+			return nil
+		}
 	}
+	return fmt.Errorf("unkown holder type (%T) or path termination (%s)", holder, last)
 }
 
-func Declare(directives map[resolve.Path]config.Typename, holders map[resolve.Path]ast.Node) ([]*ast.GenDecl, error) {
-	schemas := group(directives, holders)
-
-	err := conflicts(schemas)
+func (a *Agent) Declare(holder ast.Node, last string, tn config.Typename, rp resolve.Path) error {
+	expr, err := get(holder, last)
 	if err != nil {
-		return nil, fmt.Errorf("checking conflicting schemas:\n%s", err.Error())
+		return fmt.Errorf("checking existing type: %w", err)
 	}
 
-	picks := pick(schemas)
-	decls := []*ast.GenDecl{}
+	gd := &ast.GenDecl{
+		Tok: token.TYPE,
+		Specs: []ast.Spec{
+			&ast.TypeSpec{Name: tn.Ident(), Type: expr},
+		},
+	}
+	a.Decls = append(a.Decls, gd)
 
-	for tn, exp := range picks {
-		decls = append(decls, &ast.GenDecl{
-			Tok: token.TYPE,
-			Specs: []ast.Spec{
-				&ast.TypeSpec{Name: tn.Ident(), Type: exp},
-			},
-		})
+	err = set(holder, last, tn.Ident())
+	if err != nil {
+		return fmt.Errorf("replacing type expression with declared type: %w", err)
 	}
 
-	for rp, tn := range directives {
-		set(holders[rp], tn.Ident())
+	// to check conflicts later
+	if _, ok := a.users[tn]; ok {
+		a.users[tn] = []resolve.Path{}
 	}
+	a.users[tn] = append(a.users[tn], rp)
+	a.exprs[rp] = expr
 
-	return decls, nil
+	return nil
 }
