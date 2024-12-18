@@ -463,7 +463,7 @@ paths:
     replace: <typename> <import-path>
 ```
 
-Assign specified type name instead resolving from source file. For example: `replace: int` or `replace: Employee acme/models`.
+Assign specified type name instead resolving from source file. For example: `replace: int` or `replace: models.Employee acme/models`.
 
 ##### Using maps for dicts with `dict`
 
