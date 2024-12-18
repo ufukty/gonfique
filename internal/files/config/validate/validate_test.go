@@ -7,7 +7,7 @@ import (
 	"github.com/ufukty/gonfique/internal/files/config/meta"
 )
 
-func ExampleValidate() {
+func ExampleFile() {
 	f := &config.File{
 		Meta: meta.Default,
 		Paths: map[config.Path]config.PathConfig{
