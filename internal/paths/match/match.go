@@ -31,8 +31,6 @@ func matches(c []string, r []string) bool {
 		return matches(consume(c), r) || matches(downgrade(c), r) || matches(c, r[1:])
 	case "*":
 		return !slices.Contains(keywords, r[0]) && matches(c[1:], r[1:])
-	case "[]", "[key]", "[value]":
-		fallthrough
 	default:
 		return c[0] == r[0] && matches(c[1:], r[1:])
 	}

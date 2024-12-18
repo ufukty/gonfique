@@ -16,6 +16,7 @@ func TestMatches(t *testing.T) {
 	tests := []tc{
 		// Test exact match
 		{"Exact match", "a.b.c", "a.b.c", true},
+		{"Exact match with typename start", "<Config>.a.b.c", "<Config>.a.b.c", true},
 
 		// Test empty paths
 		{"Both paths empty", "", "", true},
@@ -45,6 +46,10 @@ func TestMatches(t *testing.T) {
 		{"Wildcard excludes []", "a.*.c", "a.[].c", false},
 		{"Wildcard excludes [key]", "a.*.c", "a.[key].c", false},
 		{"Wildcard excludes [value]", "a.*.c", "a.[value].c", false},
+
+		// Rules from 'api' example
+		{"api case endpoints", "<Config>.gateways.**.endpoints.*", "<Config>.gateways.public.services.document.endpoints.list", true},
+		{"api case endpoints wrong example", "<Config>.gateways.**.endpoints.*", "<Config>.gateways.public.services.document.endpoints", false},
 	}
 
 	for _, tt := range tests {
