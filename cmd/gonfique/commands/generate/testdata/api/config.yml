@@ -1,4 +1,7 @@
+meta:
+  type: Config
+
 paths:
-  "**": { export: true }
-  gateways.**.endpoints.*: { declare: Endpoint }
-  "**.endpoints.*.method": { replace: http.Method test/http }
+  <Config>.**: { export: true }
+  <Config>.gateways.**.endpoints.*: { declare: Endpoint }
+  <Endpoint>.method: { replace: http.Method test/http }

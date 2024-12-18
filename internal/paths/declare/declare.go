@@ -6,6 +6,7 @@ import (
 	"go/token"
 
 	"github.com/ufukty/gonfique/internal/files/config"
+	"github.com/ufukty/gonfique/internal/paths/declare/clone"
 	"github.com/ufukty/gonfique/internal/paths/resolve"
 )
 
@@ -47,32 +48,31 @@ func set(holder ast.Node, last string, expr ast.Expr) error {
 	return fmt.Errorf("unkown holder type (%T) or path termination (%s)", holder, last)
 }
 
-func (a *Agent) Declare(holder ast.Node, last string, tn config.Typename, rp resolve.Path) error {
+func (a *Agent) Declare(holder ast.Node, last string, tn config.Typename, rp resolve.Path) (*ast.TypeSpec, error) {
 	expr, err := get(holder, last)
 	if err != nil {
-		return fmt.Errorf("checking existing type: %w", err)
+		return nil, fmt.Errorf("checking existing type: %w", err)
 	}
 
 	err = set(holder, last, tn.Ident())
 	if err != nil {
-		return fmt.Errorf("replacing type expression with declared type: %w", err)
+		return nil, fmt.Errorf("replacing type expression with declared type: %w", err)
 	}
 
-	// to check conflicts later
-	if _, ok := a.users[tn]; !ok {
-		a.users[tn] = []resolve.Path{}
-
-		// also
-		gd := &ast.GenDecl{
-			Tok: token.TYPE,
-			Specs: []ast.Spec{
-				&ast.TypeSpec{Name: tn.Ident(), Type: expr},
-			},
-		}
-		a.Decls = append(a.Decls, gd)
-	}
-	a.users[tn] = append(a.users[tn], rp)
 	a.exprs[rp] = expr
 
-	return nil
+	_, declared := a.users[tn]
+	if declared {
+		a.users[tn] = append(a.users[tn], rp)
+		return nil, nil
+
+	} else {
+		a.users[tn] = []resolve.Path{rp}
+		ts := &ast.TypeSpec{Name: tn.Ident(), Type: clone.Expr(expr)}
+		a.Decls = append(a.Decls, &ast.GenDecl{
+			Tok:   token.TYPE,
+			Specs: []ast.Spec{ts},
+		})
+		return ts, nil
+	}
 }

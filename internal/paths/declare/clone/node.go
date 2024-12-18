@@ -6,6 +6,9 @@ import (
 )
 
 func Decl(n ast.Decl) ast.Decl {
+	if n == nil {
+		return nil
+	}
 	switch n := n.(type) {
 	case *ast.BadDecl:
 		return BadDecl(n)
@@ -19,6 +22,9 @@ func Decl(n ast.Decl) ast.Decl {
 }
 
 func Expr(n ast.Expr) ast.Expr {
+	if n == nil {
+		return nil
+	}
 	switch n := n.(type) {
 	case *ast.BadExpr:
 		return BadExpr(n)
@@ -72,6 +78,9 @@ func Expr(n ast.Expr) ast.Expr {
 }
 
 func Stmt(n ast.Stmt) ast.Stmt {
+	if n == nil {
+		return nil
+	}
 	switch n := n.(type) {
 	case *ast.BadStmt:
 		return BadStmt(n)
@@ -121,6 +130,9 @@ func Stmt(n ast.Stmt) ast.Stmt {
 }
 
 func Spec(n ast.Spec) ast.Spec {
+	if n == nil {
+		return nil
+	}
 	switch n := n.(type) {
 	case *ast.ImportSpec:
 		return ImportSpec(n)
@@ -134,6 +146,9 @@ func Spec(n ast.Spec) ast.Spec {
 }
 
 func Node(n ast.Node) ast.Node {
+	if n == nil {
+		return nil
+	}
 	switch n := n.(type) {
 	case ast.Decl:
 		return Decl(n)

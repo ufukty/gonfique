@@ -3,6 +3,7 @@ package paths
 import (
 	"fmt"
 	"go/ast"
+	"slices"
 	"strings"
 
 	"github.com/ufukty/gonfique/internal/files/config"
@@ -27,16 +28,20 @@ type args struct {
 	path   []string
 }
 
+func with[E any](s []E, v E) []E {
+	return append(slices.Clone(s), v)
+}
+
 func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error) {
 	declare := declare.New()
 	export := export.New()
 	replace := replace.New()
 
 	// bfs (auto package needs it)
-	queue := []args{{ti.Type, nil, []string{}}}
+	queue := []args{{ti.Type, nil, []string{"<Config>"}}}
+	later := []args{} // after finishing traversal in the current tree, start for declared types
 	for len(queue) > 0 {
 		node, holder, path := queue[0].node, queue[0].holder, queue[0].path
-
 		recursion := true
 		if holder != nil {
 			cps := match.Matches(c.Paths, path)
@@ -59,9 +64,16 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 			rp := resolve.Path(strings.Join(path, "."))
 
 			if decl, ok := pick.Declare(cps, c.Paths); ok {
-				if err := declare.Declare(holder, path[len(path)-1], decl, rp); err != nil {
+				ts, err := declare.Declare(holder, path[len(path)-1], decl, rp)
+				if err != nil {
 					return nil, fmt.Errorf("declaring: %w", err)
 				}
+				if ts != nil {
+					later = append(later, args{
+						ts.Type, ts, []string{fmt.Sprintf("<%s>", decl)},
+					})
+				}
+				recursion = false // manually perform traversal later once per declared type (not as many as its users)
 			}
 
 			if _, ok := pick.Export(cps, c.Paths); ok {
@@ -78,26 +90,29 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 					for _, f := range n.Fields.List {
 						if f != nil && f.Type != nil {
 							// TODO: sort by field names to stabilize export typename generation
-							queue = append(queue, args{f.Type, f, append(path, ti.Keys[f])})
+							queue = append(queue, args{f.Type, f, with(path, ti.Keys[f])})
 						}
 					}
 				}
 
 			case *ast.MapType:
-				queue = append(queue, args{n.Key, n, append(path, "[key]")})
-				queue = append(queue, args{n.Value, n, append(path, "[value]")})
+				queue = append(queue, args{n.Key, n, with(path, "[key]")})
+				queue = append(queue, args{n.Value, n, with(path, "[value]")})
 
 			case *ast.ArrayType:
-				queue = append(queue, args{n.Elt, n, append(path, "[]")})
+				queue = append(queue, args{n.Elt, n, with(path, "[]")})
 			}
 		}
 
 		queue = queue[1:]
+		if len(queue) == 0 && len(later) > 0 {
+			queue, later = append(queue, later[0]), later[1:]
+		}
 	}
 
 	err := declare.Conflicts()
 	if err != nil {
-		return nil, fmt.Errorf("checking conflicts on declare directives: %w", err)
+		return nil, fmt.Errorf("checking conflicts on declare directives:\n%w", err)
 	}
 
 	return &products{
