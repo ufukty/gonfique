@@ -53,22 +53,23 @@ func (a *Agent) Declare(holder ast.Node, last string, tn config.Typename, rp res
 		return fmt.Errorf("checking existing type: %w", err)
 	}
 
-	gd := &ast.GenDecl{
-		Tok: token.TYPE,
-		Specs: []ast.Spec{
-			&ast.TypeSpec{Name: tn.Ident(), Type: expr},
-		},
-	}
-	a.Decls = append(a.Decls, gd)
-
 	err = set(holder, last, tn.Ident())
 	if err != nil {
 		return fmt.Errorf("replacing type expression with declared type: %w", err)
 	}
 
 	// to check conflicts later
-	if _, ok := a.users[tn]; ok {
+	if _, ok := a.users[tn]; !ok {
 		a.users[tn] = []resolve.Path{}
+
+		// also
+		gd := &ast.GenDecl{
+			Tok: token.TYPE,
+			Specs: []ast.Spec{
+				&ast.TypeSpec{Name: tn.Ident(), Type: expr},
+			},
+		}
+		a.Decls = append(a.Decls, gd)
 	}
 	a.users[tn] = append(a.users[tn], rp)
 	a.exprs[rp] = expr
