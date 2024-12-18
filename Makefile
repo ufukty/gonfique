@@ -1,3 +1,6 @@
+all:
+	$(MAKE) -C internal
+
 .PHONY: build
 
 VERSION := $(shell git describe --tags --always --dirty)
