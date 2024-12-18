@@ -15,7 +15,6 @@ func TestList(t *testing.T) {
 	// ├─ Dolor
 	// ├─ Sit
 	// ╰─ Amet
-	//
 }
 
 func TestListSecondLevel(t *testing.T) {
@@ -31,19 +30,16 @@ func TestListSecondLevel(t *testing.T) {
 	// │  ├─ Dolor
 	// │  ├─ Sit
 	// │  ╰─ Amet
-	// │
 	// ├─ Placeholders
 	// │  ├─ Lorem
 	// │  ├─ Ipsum
 	// │  ├─ Dolor
 	// │  ├─ Sit
 	// │  ╰─ Amet
-	// │
 	// ╰─ Placeholders
 	//    ├─ Lorem
 	//    ├─ Ipsum
 	//    ├─ Dolor
 	//    ├─ Sit
 	//    ╰─ Amet
-	//
 }

@@ -22,7 +22,7 @@ func List(heading string, items []string) string {
 			msg += fmt.Sprintf("├─ %s\n", indent(item, false))
 
 		} else {
-			msg += fmt.Sprintf("╰─ %s\n", indent(item, true))
+			msg += fmt.Sprintf("╰─ %s", indent(item, true))
 
 		}
 	}

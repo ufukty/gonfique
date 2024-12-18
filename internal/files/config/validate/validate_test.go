@@ -20,13 +20,14 @@ func ExampleFile() {
 	fmt.Println(File(f))
 	// Output:
 	// file
-	// ╰─ path section
+	// ╰─ paths
 	//    ├─ <A>
-	//    │  ╰─ checking `dict` directive value: invalid value
-	//    │
+	//    │  ╰─ directives
+	//    │     ╰─ checking 'dict' value: invalid value: "hello world"
 	//    ├─ <A>.<B>
-	//    │  ╰─ paths should not contain a typename after the beginning: <B>
-	//    │
+	//    │  ╰─ path
+	//    │     ╰─ paths should not contain a typename after the beginning: <B>
 	//    ╰─ <A>.*.<B>
-	//       ╰─ paths should not contain a typename after the beginning: <B>
+	//       ╰─ path
+	//          ╰─ paths should not contain a typename after the beginning: <B>
 }
