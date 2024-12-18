@@ -19,10 +19,10 @@ const (
 )
 
 type PathConfig struct {
-	Export  bool
-	Declare Typename
-	Dict    Dict
-	Replace string
+	Export  bool     `yaml:"export"`
+	Declare Typename `yaml:"declare"`
+	Dict    Dict     `yaml:"dict"`
+	Replace string   `yaml:"replace"`
 }
 
 type TypeConfig struct {
@@ -54,6 +54,16 @@ type File struct {
 	Types map[Typename]TypeConfig `yaml:"types"`
 }
 
+func defaults(f *File) {
+	for cp, pc := range f.Paths {
+		if pc.Dict == "" {
+			d := f.Paths[cp]
+			d.Dict = Struct
+			f.Paths[cp] = d
+		}
+	}
+}
+
 func Read(src string) (*File, error) {
 	f, err := os.Open(src)
 	if err != nil {
@@ -65,5 +75,6 @@ func Read(src string) (*File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("decoding: %w", err)
 	}
+	defaults(n)
 	return n, nil
 }

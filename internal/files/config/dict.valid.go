@@ -11,5 +11,5 @@ func (d Dict) Validate() error {
 	case Struct:
 		return nil
 	}
-	return fmt.Errorf("invalid value")
+	return fmt.Errorf("invalid value: %q", d)
 }

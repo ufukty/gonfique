@@ -6,6 +6,7 @@ import (
 	"github.com/ufukty/gonfique/internal/files/coder"
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/files/config/meta"
+	"github.com/ufukty/gonfique/internal/files/config/validate"
 	"github.com/ufukty/gonfique/internal/files/input"
 	"github.com/ufukty/gonfique/internal/paths"
 	"github.com/ufukty/gonfique/internal/transform"
@@ -38,6 +39,10 @@ func withconfig(in, conf, out string, verbose bool) error {
 	f, err := config.Read(conf)
 	if err != nil {
 		return fmt.Errorf("config: %w", err)
+	}
+	err = validate.File(f)
+	if err != nil {
+		return fmt.Errorf("validating config file: %w", err)
 	}
 	aux, err := paths.Process(&ti, f, verbose)
 	if err != nil {

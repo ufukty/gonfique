@@ -20,9 +20,9 @@ func TestConfig(t *testing.T) {
 			t.Errorf("expected %s, got %s", "Employee", f.Paths["c"].Declare)
 		}
 	})
-	t.Run("e.Dict struct", func(t *testing.T) {
-		if f.Paths["e"].Dict != "struct" {
-			t.Errorf("expected 'struct', got %s", f.Paths["e"].Dict)
+	t.Run("e.Dict struct (default value = zero value)", func(t *testing.T) {
+		if f.Paths["e"].Dict != "" {
+			t.Errorf("expected '', got %s", f.Paths["e"].Dict)
 		}
 	})
 	t.Run("g.Dict map", func(t *testing.T) {
