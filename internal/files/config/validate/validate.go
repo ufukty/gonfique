@@ -12,11 +12,8 @@ var typenames = regexp.MustCompile(`<\w+>`)
 
 func path(cp config.Path, b *bucket.Bucket) {
 	for i, s := range cp.Segments() {
-		if i == 0 && !typenames.MatchString(s) {
-			b.Add(fmt.Sprintf("path should start with a typename that is a word enclosed with angle brackets: %s", s))
-		}
 		if i != 0 && typenames.MatchString(s) {
-			b.Add(fmt.Sprintf("paths should not contain a typename after the beginning: %s", s))
+			b.Add(fmt.Sprintf("non-starting type segment: %s", s))
 		}
 	}
 }
