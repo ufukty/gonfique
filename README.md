@@ -107,17 +107,17 @@ This one was an easy one. No one have enough time to deal with this in repeat. Y
   - [Version](#version)
   - [Help](#help)
 - [Features](#features)
-- [Gonfique config](#gonfique-config-punsfuns)
-  - [Paths section](#paths-section)
-    - [Writing paths](#writing-paths)
+- [Gonfique config puns&funs](#gonfique-config-punsfuns)
+  - [Rules](#rules)
+    - [Paths](#paths)
       - [Wildcards](#wildcards)
       - [Arrays](#arrays)
-    - [Path directives](#path-directives)
+      - [Maps](#maps)
+    - [Directives](#directives)
       - [Creating named separate type declarations with auto generated names with export](#creating-named-separate-type-declarations-with-auto-generated-names-with-export)
       - [Creating named separate type declarations with declare](#creating-named-separate-type-declarations-with-declare)
       - [Assigning types manually with replace](#assigning-types-manually-with-replace)
-  - [Types section](#types-section)
-    - [Type directives](#type-directives)
+      - [Using maps for dicts with dict](#using-maps-for-dicts-with-dict)
       - [Implementing getters and setters with accessors](#implementing-getters-and-setters-with-accessors)
       - [Making the hierarchy of types explicit with embed](#making-the-hierarchy-of-types-explicit-with-embed)
       - [Making structs iterable with iterator](#making-structs-iterable-with-iterator)
@@ -217,6 +217,10 @@ Better keep reading
   - Enriches declared types:
     - Embedding with other declared types
     - Parent refs
+- Easy troubleshoot:
+  - Path-directive kind mismatch
+  - Directive value conflicts
+  - Declaration conflicts
 - Abstracts boring stuff:
   - Smart array support that concludes on one common or combined item type
   - Version stamping for reproducibility
@@ -226,16 +230,7 @@ Better keep reading
 
 Gonfique config is a YAML file which contains the customizations developer wants. Gonfique config is completely optional. If there is no need for any customization, this section is safe to skip.
 
-Overall structure of a Gonfique config is very simple. They can contain 3 sections: `meta`, `paths` and `types`.
-
-The distinction between sections `paths` and `types` are related with the target of each customization directive. The directives `declare`, `explore`, `dict` and `replace` are applied on dicts, lists and literal values in the input file. Since those targets are described with their paths, they are expected to be written under `paths` section. Other set of directives which consists by `accessors`, `embed`, `iterator` and `parent` target types. Those directives can further customize the types produced by `declare` directives. Since those directives target types rather than paths, they are expected in `types` section.
-
-It might be helpful imagining `types` section processed after `paths` section to understand the relation better. Order is because of both reasons:
-
-- you need to declare types before implementing methods on them,
-- one type can be used for more than one target.
-
-  Here is the syntax of the Gonfique config:
+Overall structure of a Gonfique config is very simple. They can contain 2 sections: `meta` and `rules`. Here is the syntax of the Gonfique config:
 
 ```yml
 # Values wrapped with `<` and `>` are provided by user.
@@ -244,15 +239,15 @@ meta:
   package: <package-name>
   config-type: <typename>
 
-paths:
+rules:
   <path>:
+    # customizations for 'value' or 'type-value' targeting rules:
     declare: <typename>
     dict: [ struct | map ]
     export: <bool>
     replace: <typename> <import-path>
 
-types:
-  <typename>:
+    # customizations for 'Go type' targeting rules:
     accessors: <keys...>
     embed: <typename>
     iterator: <bool>
@@ -261,27 +256,80 @@ types:
 .
 ```
 
-The section `paths` is processed earlier than the `types` in the generation process. The types which are declared by the `declare` directives in the `paths` section can be further customized by directives in the `types` section. Keep reading for the explanation of `declare`. If none of the entries in the `path` section contain `declare` directive on any path, than there is no need for `types` section.
+### Rules
 
-### Paths section
+Rules section is where all the customizations are described in the Gonfique config. The whole section is a dict where the keys are individual targets and the values are sequence of one directive and its arguments.
 
-Which is a dict where the keys are individual paths and the values are sequence of one directive and its arguments. Paths are strings that matches one or more target in the input file.
+##### Paths
 
-#### Writing paths
+Paths are written in a special yet simple syntax in the form of dot-separated sequence of 'terms'. Those terms can be in variety of kinds.
 
-Paths are written in a special yet simple syntax in the form of dot-separated sequence of keys and square brackets. Keys are for selecting a key from the dictionary, brackets are for passing from an array to the item (resolved item type). Each path expected to match one or more sections in the input file. Gonfique checks matches and warns the developer if a path matches no target in the input file.
+| Term kind   | Description                                                                                                              | Examples                  |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
+| `key`       | A key of a dict that is in YAML/JSON file                                                                                | `alice`, `bob`, `charlie` |
+| `wildcard`  | Matches one or multiple number of nodes in the key hierarchy in YAML/JSON file                                           | `*`, `**`                 |
+| `component` | One of the 3 special symbols to went from a container's (dict/list) type down to its resolved element, key or value type | `[]`, `[key]`, `[value]`  |
+| `type`      | A typename in Go which is previously declared by another rule with first 2 kind of path; wrapped with angle brackets     | `<Student>`               |
 
-In the example below, the path of `alpha.beta.charlie` resolves to the string `Hello world`.
+Depending on 'what' you want to target; there are 3 different writing style for paths:
+
+- When you are targeting values,
+- When you are targeting values beneath other values previously declared a type for,
+- When you are targeting types
+
+> [!NOTE]  
+> The need to separate between paths targeting 'values' and paths targeting 'types' arose by some directives working on 'values' and others on 'types'.  
+> The separation between paths targeting values is caused by declaring a type allows its use for multiple values in YAML/JSON file, so targeting their subtypes through one instance of a type makes the Gonfique configs harder for the developer to maintain.
+
+When you write a rule on a path targeting `value` or `type-value`, Gonfique actually applies the directives on those rules to the _resolved types_ of addressed values in YAML/JSON file. This is different than `type` targeting paths, which targets by a typename rather than a YAML/JSON file path and applied on an already declared Go type.
+
+| Path kind    | Rule                                                                 | Example                | The target of example                                                 |
+| ------------ | -------------------------------------------------------------------- | ---------------------- | --------------------------------------------------------------------- |
+| `value`      | Use `key` or `component` terms. Order follows file hierarchy.        | `students.[]`          | item type of `student` list                                           |
+| `type-value` | Start with a `type` term. Continue with the rule for `value` target. | `<Student>.classes.[]` | item type of `classes` list which is a field of the Go type `Student` |
+| `type`       | Use only one `type` term.                                            | `<Student>`            | Go type `Student`                                                     |
+
+Here is an example that demonstrates the usage of 3 kind of paths below. Notice that the second rule starts with a type term which contains the name of type declared by first rule. The 3rd rule only have one segment that contains the name of type that is requested to be implement accessors on one of its fields.
+
+<table>
+<thead>
+<tr>
+<td>Input</td>
+<td>Config</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
 
 ```yml
-alpha:
-  beta:
-    charlie: Hello world
+students:
+  alice:
+    classes:
+      - name: math
+        scores:
+          - 100
+          - 100
 ```
+
+</td>
+<td>
+
+```yml
+rules:
+  students.[]: { declare: Student }
+  <Student>.classes.[]: { declare: Class }
+  <Class>: { accessors: ["name"] }
+```
+
+</td>
+</tr>
+</tbody>
+</table>
 
 After completing this section, look at the [examples](#creating-named-separate-type-declarations-with-declare) in `declare` section.
 
-##### Wildcards
+###### Wildcards
 
 Use wildcards to increase flexibility of directives against partial content shifts, changes in the config files which are expected to happen over time.
 
@@ -298,7 +346,7 @@ Gonfique will notify if a path doesn't get any match.
 | `*`      | `x`, `y`, `z`, ...             |
 | `**`     | `x`, `x.x`, `x.x.x`, ...       |
 
-##### Arrays
+###### Arrays
 
 Arrays can be given directives too. But there is a separation between an array's type and its element type.
 
@@ -314,7 +362,7 @@ If there is a pair of square brackets like `[]`, then Gonfique expects to see an
 | `a.[].*` | the item type's every key | `a` must be an array, item type of `a` must be a dict                                     |
 | `a.[].b` | the item type's `b` key   | `a` must be an array, item type of `a` must be a dict, the dict must have a key named `b` |
 
-##### Maps
+###### Maps
 
 Use `[key]` operator to target a key type and use `[value]` operator to target a value type.
 
@@ -328,7 +376,7 @@ Use `[key]` operator to target a key type and use `[value]` operator to target a
 <td>
 
 ```yml
-paths:
+rules:
   events:
     dict: dynamic #
 
@@ -363,9 +411,9 @@ type Config struct {
 
 Paths contain `[key]` and `[value]` are only read when the containing map set `dict: map`.
 
-#### Path directives
+#### Directives
 
-There are 4 alternative directives:
+There are 4 types of directives that can be used within `value` and `type-value` targeting rules:
 
 - **export**  
   Generate a separate type declaration
@@ -376,10 +424,25 @@ There are 4 alternative directives:
 - **replace**  
   Overwrites the resolved type definition with the provided typename
 
+There are 4 types of directives that can be used within `type` targeting rules:
+
+- **accessors**  
+  Implement getter and setter method for fields
+- **embed**  
+  Embed another type
+- **iterator**  
+  Make structs iterable
+- **parent**  
+  Add a field to struct and assign the ref of parent
+
+The directives `declare`, `explore`, `dict` and `replace` are applied on (resolved types of) dicts, lists and literal values in the input file. Other set of directives which consists by `accessors`, `embed`, `iterator` and `parent` target types. Those directives can further customize the types produced by `declare` directives. Since those directives target types rather than paths, they are expected in `types` section.
+
+It might be helpful imagining `type` targeting rules are processed after than the `value` and `type-value` section. Order is because of both reasons: types needed to be declared before implementing methods on them, and one type can be used for more than one target.
+
 ##### Creating named (separate) type declarations with auto generated names with `export`
 
 ```yaml
-paths:
+rules:
   <path>:
     export: true
 ```
@@ -389,7 +452,7 @@ Exporting a path, will result every matching target's type to be declared as sep
 ##### Creating named (separate) type declarations with `declare`
 
 ```yaml
-paths:
+rules:
   <path>:
     declare: <typename>
 ```
@@ -401,10 +464,10 @@ Use `declare` directive to generate named type declaration(s) for matching targe
 > Examples with paths and `declare` directive:
 >
 > ```yaml
-> paths:
+> rules:
 >   apiVersion: { declare: ApiVersion }
->   metadata.name: { declare: Name }
->   spec.template.metadata.labels.app: { declare: AppLabel }
+>   spec.template.metadata: { declare: Metadata }
+>   <Metadata>.labels.app: { declare: AppLabel }
 > ```
 >
 > Don't confuse your mind with braces.
@@ -418,7 +481,7 @@ Use `declare` directive to generate named type declaration(s) for matching targe
 > Wildcards lets users to write more flexible mappings. Single-level wildcards match with any key in a dictionary, and they can be used many times in a pathway:
 >
 > ```yaml
-> paths:
+> rules:
 >   spec.*.*.labels.app: { declare: AppLabel }
 >   spec.template.*.labels.app: { declare: AppLabel }
 > ```
@@ -426,17 +489,17 @@ Use `declare` directive to generate named type declaration(s) for matching targe
 > Multi-level wildcards passes many times from a dict to its keys and from an array to its item type. Below would match all of the `spec.app`, `spec.foo.app` and `spec.bar.[].app` same time:
 >
 > ```yaml
-> paths:
+> rules:
 >   spec.**.app: { declare: AppLabel }
 > ```
 >
 > Square brackets can be used to pass from an array to its item type only once:
 >
 > ```yaml
-> paths:
+> rules:
 >   spec.template.spec.containers: { declare: Containers }
->   spec.template.spec.containers.[]: { declare: Container }
->   spec.template.spec.containers.[].Name: { declare: ContainerName }
+>   <Containers>.[]: { declare: Container }
+>   <Container>.name: { declare: ContainerName }
 > ```
 
 > [!TIP]
@@ -444,7 +507,7 @@ Use `declare` directive to generate named type declaration(s) for matching targe
 > Multiple paths can declare same name on different targets. This is useful when the willing is reducing the number of types or making the relation between different part of input file explicit in mapping.
 >
 > ```yaml
-> paths:
+> rules:
 >   a.b: { declare: B }
 >   c.b: { declare: B }
 > ```
@@ -458,7 +521,7 @@ Use `declare` directive to generate named type declaration(s) for matching targe
 ##### Assigning types manually with `replace`
 
 ```yaml
-paths:
+rules:
   <path>:
     replace: <typename> <import-path>
 ```
@@ -468,7 +531,7 @@ Assign specified type name instead resolving from source file. For example: `rep
 ##### Using maps for dicts with `dict`
 
 ```yaml
-paths:
+rules:
   <direct-path>:
     dict: [ struct | map ]
 .
@@ -481,22 +544,12 @@ Use a Go `map` instead of a `struct` to represent a dict. This might be useful w
 | `struct` (Default) | `<dict>.<key>`                   | `struct{ ... }`       |
 | `map`              | `<dict>.[key]`, `<dict>.[value]` | `map[string]combined` |
 
-> [!NOTE]
+> [!NOTE]  
 > Anything between angle brackets just like `<key>` is to describe the the value you provide. At the other hand `[key]` is a keyword. Don't use angle brackets in real file.
 
 If you want to get a standard map type such as a `map[string]any`, you might as well use `replace: map[string]any` at the dict's path instead. `dict` directive suits better when only the keys are map and values are fixed in build time. The advantage of using `dict: map` over `replace: map[K]V` is when you also want to customize resolved key and value types through `[map]` and `[value]`.
 
 Note that Gonfique will use `any` value type if any two of dict key's type conflict when the dict is requested to be defined as `map`. If your key types conflict but you need to keep the type safety without making the dict iterable; you might as well use [iterator](#making-structs-iterable-with-iterator) on a struct representation.
-
-### Types section
-
-Developer can customize types declared by Gonfique. Customization list includes implementing methods on types and mutating the field list of generated struct.
-
-Types section is a dictionary where keys are individual typenames and values are a dict of directives and their parameters.
-
-#### Type directives
-
-There are 4 types of type directives: `accessors`, `embed`, `iterator`, `parent`.
 
 ##### Implementing getters and setters with `accessors`
 
@@ -577,7 +630,7 @@ spec:
   rules:
     - host: myapp.example.com
       http:
-        paths:
+        rules:
           - path: /
             pathType: Prefix
             backend:
@@ -611,7 +664,7 @@ meta:
   package: config
   config-type: Kubernetes
 
-paths:
+rules:
   apiVersion: declare ApiVersion
   metadata.name: declare Name
   spec.rules.[]: declare Rule
