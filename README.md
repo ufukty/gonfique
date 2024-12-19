@@ -264,12 +264,12 @@ Rules section is where all the customizations are described in the Gonfique conf
 
 Paths are written in a special yet simple syntax in the form of dot-separated sequence of 'terms'. Those terms can be in variety of kinds.
 
-| Term kind   | Description                                                                                                              | Examples                  |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
-| `key`       | A key of a dict that is in YAML/JSON file                                                                                | `alice`, `bob`, `charlie` |
-| `wildcard`  | Matches one or multiple number of nodes in the key hierarchy in YAML/JSON file                                           | `*`, `**`                 |
-| `component` | One of the 3 special symbols to went from a container's (dict/list) type down to its resolved element, key or value type | `[]`, `[key]`, `[value]`  |
-| `type`      | A typename in Go which is previously declared by another rule with first 2 kind of path; wrapped with angle brackets     | `<Student>`               |
+| Term kind   | Description                                                                                                                    | Examples                  |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
+| `key`       | A key of a dict that is in YAML/JSON file                                                                                      | `alice`, `bob`, `charlie` |
+| `wildcard`  | Matches one or multiple number of nodes<br>in the key hierarchy in YAML/JSON file                                              | `*`, `**`                 |
+| `component` | One of the 3 special symbols to went from<br>a container's (dict/list) type down to<br>its resolved element, key or value type | `[]`, `[key]`, `[value]`  |
+| `type`      | A typename in Go which is previously<br>declared by another rule with first 2 kind<br>of path; wrapped with angle brackets     | `<Student>`               |
 
 Depending on 'what' you want to target; there are 3 different writing style for paths:
 
@@ -283,11 +283,11 @@ Depending on 'what' you want to target; there are 3 different writing style for 
 
 When you write a rule on a path targeting `value` or `type-value`, Gonfique actually applies the directives on those rules to the _resolved types_ of addressed values in YAML/JSON file. This is different than `type` targeting paths, which targets by a typename rather than a YAML/JSON file path and applied on an already declared Go type.
 
-| Path kind    | Rule                                                                 | Example                | The target of example                                                 |
-| ------------ | -------------------------------------------------------------------- | ---------------------- | --------------------------------------------------------------------- |
-| `value`      | Use `key` or `component` terms. Order follows file hierarchy.        | `students.[]`          | item type of `student` list                                           |
-| `type-value` | Start with a `type` term. Continue with the rule for `value` target. | `<Student>.classes.[]` | item type of `classes` list which is a field of the Go type `Student` |
-| `type`       | Use only one `type` term.                                            | `<Student>`            | Go type `Student`                                                     |
+| Path kind    | Rule                                                                       | Example                | The target of example                                                       |
+| ------------ | -------------------------------------------------------------------------- | ---------------------- | --------------------------------------------------------------------------- |
+| `value`      | Use `key` or `component` terms.<br>Order follows file hierarchy.           | `students.[]`          | item type of `student` list                                                 |
+| `type-value` | Start with a `type` term.<br>Continue with the rule<br>for `value` target. | `<Student>.classes.[]` | item type of `classes` list<br>which is a field of<br>the Go type `Student` |
+| `type`       | Use only one `type` term.                                                  | `<Student>`            | Go type `Student`                                                           |
 
 Here is an example that demonstrates the usage of 3 kind of paths below. Notice that the second rule starts with a type term which contains the name of type declared by first rule. The 3rd rule only have one segment that contains the name of type that is requested to be implement accessors on one of its fields.
 
@@ -356,11 +356,11 @@ type ArrayType []ItemType
 
 If there is a pair of square brackets like `[]`, then Gonfique expects to see an array in the target in input file.
 
-| Path     | Matches                   | Consequences                                                                              |
-| -------- | ------------------------- | ----------------------------------------------------------------------------------------- |
-| `a.[]`   | the `a` array's item type | `a` must be an array                                                                      |
-| `a.[].*` | the item type's every key | `a` must be an array, item type of `a` must be a dict                                     |
-| `a.[].b` | the item type's `b` key   | `a` must be an array, item type of `a` must be a dict, the dict must have a key named `b` |
+| Path     | Matches                   | Outcomes                                                                                        |
+| -------- | ------------------------- | ----------------------------------------------------------------------------------------------- |
+| `a.[]`   | the `a` array's item type | `a` must be an array                                                                            |
+| `a.[].*` | the item type's every key | `a` must be an array,<br>item type of `a` must be a dict                                        |
+| `a.[].b` | the item type's `b` key   | `a` must be an array,<br>item type of `a` must be a dict,<br>the dict must have a key named `b` |
 
 ###### Maps
 
@@ -665,14 +665,14 @@ meta:
   config-type: Kubernetes
 
 rules:
-  apiVersion: declare ApiVersion
-  metadata.name: declare Name
-  spec.rules.[]: declare Rule
-  spec.rules.[].http.paths.[]: declare Path
-  spec.ports.[]: declare Port
-  spec.**.containers: declare SpecContainers
-  spec.**.containers.[]: declare SpecContainer
-  spec.**.containers.[].name: declare ContainerName
+  apiVersion: { declare: ApiVersion }
+  metadata.name: { declare: Name }
+  spec.rules.[]: { declare: Rule }
+  <Rule>.http.paths.[]: { declare: Path }
+  spec.ports.[]: { declare: Port }
+  spec.**.containers: { declare: SpecContainers }
+  <SpecContainers>.[]: { declare: SpecContainer }
+  <ContainerName>.name: { declare: ContainerName }
 ```
 
 Output:
