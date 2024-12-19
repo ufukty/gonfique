@@ -17,7 +17,7 @@ func value[C comparable](paths []config.Path, value func(cp config.Path) C) (C, 
 	return zero, false
 }
 
-func Dict(cps []config.Path, paths map[config.Path]config.PathConfig) (config.Dict, bool) {
+func Dict(cps []config.Path, paths map[config.Path]config.Directives) (config.Dict, bool) {
 	return value(cps, func(cp config.Path) config.Dict {
 		if v := paths[cp].Dict; v != config.Struct {
 			return v
@@ -26,19 +26,19 @@ func Dict(cps []config.Path, paths map[config.Path]config.PathConfig) (config.Di
 	})
 }
 
-func Replace(cps []config.Path, paths map[config.Path]config.PathConfig) (string, bool) {
+func Replace(cps []config.Path, paths map[config.Path]config.Directives) (string, bool) {
 	return value(cps, func(cp config.Path) string {
 		return paths[cp].Replace
 	})
 }
 
-func Declare(cps []config.Path, paths map[config.Path]config.PathConfig) (config.Typename, bool) {
+func Declare(cps []config.Path, paths map[config.Path]config.Directives) (config.Typename, bool) {
 	return value(cps, func(cp config.Path) config.Typename {
 		return paths[cp].Declare
 	})
 }
 
-func Export(cps []config.Path, paths map[config.Path]config.PathConfig) (bool, bool) {
+func Export(cps []config.Path, paths map[config.Path]config.Directives) (bool, bool) {
 	return value(cps, func(cp config.Path) bool {
 		return paths[cp].Export && paths[cp].Declare == "" && paths[cp].Replace == ""
 	})

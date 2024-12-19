@@ -11,28 +11,28 @@ func TestConfig(t *testing.T) {
 		t.Fatal(fmt.Errorf("read: %w", err))
 	}
 	t.Run("b.Export", func(t *testing.T) {
-		if f.Paths["b"].Export != true {
-			t.Errorf("expected %t, got %t", true, f.Paths["b"].Export)
+		if f.Rules["b"].Export != true {
+			t.Errorf("expected %t, got %t", true, f.Rules["b"].Export)
 		}
 	})
 	t.Run("c.Declare", func(t *testing.T) {
-		if f.Paths["c"].Declare != "Employee" {
-			t.Errorf("expected %s, got %s", "Employee", f.Paths["c"].Declare)
+		if f.Rules["c"].Declare != "Employee" {
+			t.Errorf("expected %s, got %s", "Employee", f.Rules["c"].Declare)
 		}
 	})
-	t.Run("e.Dict struct (default value = zero value)", func(t *testing.T) {
-		if f.Paths["e"].Dict != "" {
-			t.Errorf("expected '', got %s", f.Paths["e"].Dict)
+	t.Run("e.Dict struct", func(t *testing.T) {
+		if f.Rules["e"].Dict != "struct" {
+			t.Errorf("expected '', got %s", f.Rules["e"].Dict)
 		}
 	})
 	t.Run("g.Dict map", func(t *testing.T) {
-		if f.Paths["g"].Dict != "map" {
-			t.Errorf("expected 'map', got %s", f.Paths["g"].Dict)
+		if f.Rules["g"].Dict != "map" {
+			t.Errorf("expected 'map', got %s", f.Rules["g"].Dict)
 		}
 	})
 	t.Run("d.Replace", func(t *testing.T) {
-		if f.Paths["d"].Replace != "Date time" {
-			t.Errorf("expected %s, got %s", "Date time", f.Paths["d"].Replace)
+		if f.Rules["d"].Replace != "Date time" {
+			t.Errorf("expected %s, got %s", "Date time", f.Rules["d"].Replace)
 		}
 	})
 }

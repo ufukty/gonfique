@@ -10,24 +10,23 @@ import (
 func ExampleFile() {
 	f := &config.File{
 		Meta: meta.Default,
-		Paths: map[config.Path]config.PathConfig{
+		Rules: map[config.Path]config.Directives{
 			"<A>":       {Dict: "hello world"},
-			"<A>.<B>":   {Dict: config.Struct},
-			"<A>.*.<B>": {Dict: config.Struct},
+			"<A>.<B>":   {},
+			"<A>.*.<B>": {Export: true},
 		},
-		Types: map[config.Typename]config.TypeConfig{},
 	}
 	fmt.Println(File(f))
 	// Output:
 	// file
-	// ╰─ paths
+	// ╰─ rules
 	//    ├─ <A>
 	//    │  ╰─ directives
 	//    │     ╰─ checking 'dict' value: invalid value: "hello world"
 	//    ├─ <A>.<B>
-	//    │  ╰─ path
-	//    │     ╰─ paths should not contain a typename after the beginning: <B>
+	//    │  ╰─ rule
+	//    │     ╰─ type segment after start: <B>
 	//    ╰─ <A>.*.<B>
-	//       ╰─ path
-	//          ╰─ paths should not contain a typename after the beginning: <B>
+	//       ╰─ rule
+	//          ╰─ type segment after start: <B>
 }

@@ -14,22 +14,32 @@ import (
 type Dict string
 
 const (
-	Struct Dict = "struct"
-	Map    Dict = "map"
+	ZeroDict Dict = ""
+	Struct   Dict = "struct"
+	Map      Dict = "map"
 )
 
-type PathConfig struct {
+type Directives struct {
 	Export  bool     `yaml:"export"`
 	Declare Typename `yaml:"declare"`
 	Dict    Dict     `yaml:"dict"`
 	Replace string   `yaml:"replace"`
-}
 
-type TypeConfig struct {
 	Parent    string   `yaml:"parent"`
 	Embed     string   `yaml:"embed"`
 	Accessors []string `yaml:"accessors"`
 	Iterator  bool     `yaml:"iterator"`
+}
+
+func (d Directives) IsZero() bool {
+	return !d.Export &&
+		d.Declare == "" &&
+		d.Dict == ZeroDict &&
+		d.Replace == "" &&
+		d.Parent == "" &&
+		d.Embed == "" &&
+		d.Accessors == nil &&
+		!d.Iterator
 }
 
 type Path string
@@ -49,19 +59,8 @@ func (t Typename) Ident() *ast.Ident {
 }
 
 type File struct {
-	Meta  meta.Meta               `yaml:"meta"`
-	Paths map[Path]PathConfig     `yaml:"paths"`
-	Types map[Typename]TypeConfig `yaml:"types"`
-}
-
-func defaults(f *File) {
-	for cp, pc := range f.Paths {
-		if pc.Dict == "" {
-			d := f.Paths[cp]
-			d.Dict = Struct
-			f.Paths[cp] = d
-		}
-	}
+	Meta  meta.Meta           `yaml:"meta"`
+	Rules map[Path]Directives `yaml:"rules"`
 }
 
 func Read(src string) (*File, error) {
@@ -75,6 +74,5 @@ func Read(src string) (*File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("decoding: %w", err)
 	}
-	defaults(n)
 	return n, nil
 }

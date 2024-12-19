@@ -1,4 +1,4 @@
-paths:
+rules:
   b: { export: true }
   c: { declare: Employee }
   e: { dict: struct }

@@ -44,17 +44,17 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 		node, holder, path := queue[0].node, queue[0].holder, queue[0].path
 		recursion := true
 		if holder != nil {
-			cps := match.Matches(c.Paths, path)
-			err := conflicts.Check(c.Paths, cps)
+			cps := match.Matches(c.Rules, path)
+			err := conflicts.Check(c.Rules, cps)
 			if err != nil {
 				return nil, fmt.Errorf("checking conflicts: %w", err)
 			}
 
-			if _, ok := pick.Dict(cps, c.Paths); ok {
+			if _, ok := pick.Dict(cps, c.Rules); ok {
 				panic("to implement") // TODO:
 			}
 
-			if repl, ok := pick.Replace(cps, c.Paths); ok {
+			if repl, ok := pick.Replace(cps, c.Rules); ok {
 				if err := replace.Expression(repl, holder, path[len(path)-1]); err != nil {
 					return nil, fmt.Errorf("replacing: %w", err)
 				}
@@ -63,7 +63,7 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 
 			rp := resolve.Path(strings.Join(path, "."))
 
-			if decl, ok := pick.Declare(cps, c.Paths); ok {
+			if decl, ok := pick.Declare(cps, c.Rules); ok {
 				ts, err := declare.Declare(holder, path[len(path)-1], decl, rp)
 				if err != nil {
 					return nil, fmt.Errorf("declaring: %w", err)
@@ -76,7 +76,7 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 				recursion = false // manually perform traversal later once per declared type (not as many as its users)
 			}
 
-			if _, ok := pick.Export(cps, c.Paths); ok {
+			if _, ok := pick.Export(cps, c.Rules); ok {
 				if err := export.Type(rp, declare.Typenames(), holder, path[len(path)-1]); err != nil {
 					return nil, fmt.Errorf("exporting: %w", err)
 				}

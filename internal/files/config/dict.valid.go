@@ -10,6 +10,8 @@ func (d Dict) Validate() error {
 		return nil
 	case Struct:
 		return nil
+	case ZeroDict:
+		return nil
 	}
 	return fmt.Errorf("invalid value: %q", d)
 }

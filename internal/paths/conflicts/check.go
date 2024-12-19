@@ -55,7 +55,7 @@ func assertSingleValue[C comparable](cps []config.Path, value func(cp config.Pat
 	return nil
 }
 
-func Check(c map[config.Path]config.PathConfig, cps []config.Path) error {
+func Check(c map[config.Path]config.Directives, cps []config.Path) error {
 	checks := map[string]error{
 		"declare": assertSingleValue(cps, func(cp config.Path) config.Typename { return c[cp].Declare }),
 		"export":  assertSingleValue(cps, func(cp config.Path) bool { return c[cp].Export }),
