@@ -242,13 +242,13 @@ meta:
 
 rules:
   <path>:
-    # customizations for 'value' or 'type-value' targeting rules:
+    # customizations for value-targeting rules:
     declare: <typename>
     dict: [ struct | map ]
     export: <bool>
     replace: <typename> <import-path>
 
-    # customizations for 'Go type' targeting rules:
+    # customizations for type-targeting rules:
     accessors: <keys...>
     embed: <typename>
     iterator: <bool>
@@ -272,23 +272,12 @@ Paths are written in a special yet simple syntax in the form of dot-separated se
 | `component` | One of the 3 special<br>symbols to went from<br>a container's<br>(dict/list) type down<br>to its resolved element,<br>key or value type | `[]`, `[key]`, `[value]`  |
 | `type`      | A typename in Go which<br>is previously declared<br>by another rule<br>with first 2<br>kind of path; wrapped with<br>angle brackets     | `<Student>`               |
 
-Depending on 'what' you want to target; there are 3 different writing style for paths:
+Depending on 'what' you want to target (a type or a value) there are different writing styles of those paths. Value targeting paths let's you customize the resolved types of those values you give their addresses in the file. At the other hand you can use type-targeting paths to customize Go types you previously "declare"d with former. The need to separate between paths targeting 'values' and paths targeting 'types' arose by some directives working on 'values' and others on 'types'. When you write a rule with value targeting path, Gonfique actually applies the directives on the _resolved types_ of matching targets values in YAML/JSON file. This is different than type-targeting paths, which targets by a Go typename rather than a YAML/JSON file path and applied on an already declared Go type. Notice that type-targeting paths terminates with a typename, so they match a type.
 
-- When you are targeting values,
-- When you are targeting values beneath other values previously declared a type for,
-- When you are targeting types
-
-> [!NOTE]  
-> The need to separate between paths targeting 'values' and paths targeting 'types' arose by some directives working on 'values' and others on 'types'.  
-> The separation between paths targeting values is caused by declaring a type allows its use for multiple values in YAML/JSON file, so targeting their subtypes through one instance of a type makes the Gonfique configs harder for the developer to maintain.
-
-When you write a rule on a path targeting `value` or `type-value`, Gonfique actually applies the directives on those rules to the _resolved types_ of addressed values in YAML/JSON file. This is different than `type` targeting paths, which targets by a typename rather than a YAML/JSON file path and applied on an already declared Go type.
-
-| Path kind    | Rule                                                                            | Example                | The target of example                                                       |
-| ------------ | ------------------------------------------------------------------------------- | ---------------------- | --------------------------------------------------------------------------- |
-| `value`      | Use `key`, `component`<br>or `wildcard` terms.<br>Order follows file hierarchy. | `students.[]`          | item type of `student` list                                                 |
-| `type-value` | Start with a `type` term.<br>Continue with the rule<br>for `value` target.      | `<Student>.classes.[]` | item type of `classes` list<br>which is a field of<br>the Go type `Student` |
-| `type`       | Use only one `type` term.                                                       | `<Student>`            | Go type `Student`                                                           |
+| Path kind | Rule                                                                                                                                                            | Example / matching targets         |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `value`   | Use `key`, `component` or `wildcard` terms.<br>Order follows file hierarchy.<br>Path should start with a `type` term<br>if the value fall into a declared type. | `students.[]`, `<Student>.classes` |
+| `type`    | Use only one `type` term.                                                                                                                                       | `<Student>`                        |
 
 Here is an example that demonstrates the usage of 3 kind of paths below. Notice that the second rule starts with a type term which contains the name of type declared by first rule. The 3rd rule only have one segment that contains the name of type that is requested to be implement accessors on one of its fields.
 
@@ -308,9 +297,7 @@ students:
   alice:
     classes:
       - name: math
-        scores:
-          - 100
-          - 100
+        scores: [100, 100]
 ```
 
 </td>
@@ -579,8 +566,8 @@ Note that Gonfique will use `any` value type if any two of dict key's type confl
 ##### Implementing getters and setters with `accessors`
 
 ```yaml
-types:
-  <typename>:
+rules:
+  <Typename>:
     accessors: [<key-1>, <key-2>, ...]
 ```
 
@@ -589,8 +576,8 @@ Accessors are getters and setters for fields. Gonfique can implement getters and
 ##### Making the hierarchy of types explicit with `embed`
 
 ```yaml
-types:
-  <typename>:
+rules:
+  <Typename>:
     embed: <typename>
 ```
 
@@ -599,8 +586,8 @@ Using `embed` directive will modify the generated type definition to make it loo
 ##### Making structs iterable with `iterator`
 
 ```yaml
-types:
-  <typename>:
+rules:
+  <Typename>:
     iterator: <bool>
 ```
 
