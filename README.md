@@ -215,15 +215,17 @@ Better keep reading
     - Iterators
     - Accessors (getter/setter)
   - Enriches declared types:
-    - Embedding with other declared types
+    - Embedding other declared types
     - Parent refs
 - Easy troubleshoot:
   - Path-directive kind mismatch
   - Directive value conflicts
   - Declaration conflicts
 - Abstracts boring stuff:
-  - Smart array support that concludes on one common or combined item type
+  - Additive type creation for list-items and dict-values
+- Attention to details:
   - Version stamping for reproducibility
+  - Alphabetical sorting for minimal git diffs
 - Supports JSON and YAML files
 
 ## Gonfique config (puns&funs)
@@ -264,12 +266,12 @@ Rules section is where all the customizations are described in the Gonfique conf
 
 Paths are written in a special yet simple syntax in the form of dot-separated sequence of 'terms'. Those terms can be in variety of kinds.
 
-| Term kind   | Description                                                                                                                    | Examples                  |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
-| `key`       | A key of a dict that is in YAML/JSON file                                                                                      | `alice`, `bob`, `charlie` |
-| `wildcard`  | Matches one or multiple number of nodes<br>in the key hierarchy in YAML/JSON file                                              | `*`, `**`                 |
-| `component` | One of the 3 special symbols to went from<br>a container's (dict/list) type down to<br>its resolved element, key or value type | `[]`, `[key]`, `[value]`  |
-| `type`      | A typename in Go which is previously<br>declared by another rule with first 2 kind<br>of path; wrapped with angle brackets     | `<Student>`               |
+| Term kind   | Description                                                                                                                             | Examples                  |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `key`       | A key of a dict that is<br>in YAML/JSON file                                                                                            | `alice`, `bob`, `charlie` |
+| `wildcard`  | Matches one or multiple<br>number of nodes in<br>the key hierarchy in<br>YAML/JSON file                                                 | `*`, `**`                 |
+| `component` | One of the 3 special<br>symbols to went from<br>a container's<br>(dict/list) type down<br>to its resolved element,<br>key or value type | `[]`, `[key]`, `[value]`  |
+| `type`      | A typename in Go which<br>is previously declared<br>by another rule<br>with first 2<br>kind of path; wrapped with<br>angle brackets     | `<Student>`               |
 
 Depending on 'what' you want to target; there are 3 different writing style for paths:
 
@@ -283,11 +285,11 @@ Depending on 'what' you want to target; there are 3 different writing style for 
 
 When you write a rule on a path targeting `value` or `type-value`, Gonfique actually applies the directives on those rules to the _resolved types_ of addressed values in YAML/JSON file. This is different than `type` targeting paths, which targets by a typename rather than a YAML/JSON file path and applied on an already declared Go type.
 
-| Path kind    | Rule                                                                       | Example                | The target of example                                                       |
-| ------------ | -------------------------------------------------------------------------- | ---------------------- | --------------------------------------------------------------------------- |
-| `value`      | Use `key` or `component` terms.<br>Order follows file hierarchy.           | `students.[]`          | item type of `student` list                                                 |
-| `type-value` | Start with a `type` term.<br>Continue with the rule<br>for `value` target. | `<Student>.classes.[]` | item type of `classes` list<br>which is a field of<br>the Go type `Student` |
-| `type`       | Use only one `type` term.                                                  | `<Student>`            | Go type `Student`                                                           |
+| Path kind    | Rule                                                                            | Example                | The target of example                                                       |
+| ------------ | ------------------------------------------------------------------------------- | ---------------------- | --------------------------------------------------------------------------- |
+| `value`      | Use `key`, `component`<br>or `wildcard` terms.<br>Order follows file hierarchy. | `students.[]`          | item type of `student` list                                                 |
+| `type-value` | Start with a `type` term.<br>Continue with the rule<br>for `value` target.      | `<Student>.classes.[]` | item type of `classes` list<br>which is a field of<br>the Go type `Student` |
+| `type`       | Use only one `type` term.                                                       | `<Student>`            | Go type `Student`                                                           |
 
 Here is an example that demonstrates the usage of 3 kind of paths below. Notice that the second rule starts with a type term which contains the name of type declared by first rule. The 3rd rule only have one segment that contains the name of type that is requested to be implement accessors on one of its fields.
 
@@ -331,20 +333,64 @@ After completing this section, look at the [examples](#creating-named-separate-t
 
 ###### Wildcards
 
-Use wildcards to increase flexibility of directives against partial content shifts, changes in the config files which are expected to happen over time.
+Use wildcards to increase flexibility of paths against partial content shifts, changes in the input file's schema which are expected to happen over time as development continues. There are 2 wildcards: single `*` and double `**` wildcards. A wildcard containing path may match multiple targets. The directives on the rule will be applied to each target, individually. Gonfique will notify if a path doesn't get any match.
 
-There are 2 wildcards: `*`, `**`. The first matches every key of the current dict. Second one matches multiple (0+) levels of keys. Second one also passes from arrays to item types. A wildcard containing path may result with multiple matches. The directives on path will be applied to each match of path.
+The single wildcard matches each key of the current dict. So, the term contains this wildcard doesn't filter the matches further after the previous term. It makes sense to use this wildcard when you want to select every key of a dict where the types match. For example, `students.*.name` makes sense when all keys in the students dictionary have assigned values sharing same schema, in this case, dicts at least sharing a single key named `name`.
 
-Gonfique will notify if a path doesn't get any match.
+The double wildcard matches multiple (0 or more) "depths" of the file. Which also trespasses **from list type to item type** or **dict type to value type**. Using double wildcard makes more sense when you want to define precise rules on far depths of the schema without the burden of writing the whole "ancestry" of the target, which would've need maintenance more frequently, as the overall shape of the schema expected to change more frequently. So, the double wildcard is for increasing flexibility/mobility against verbosity.
 
-| Path     | Example matches                |
-| -------- | ------------------------------ |
-| `a.b`    | `a.b`                          |
-| `*.a.b`  | `x.a.b`                        |
-| `**.a.b` | `a.b`, `x.a.b`, `x.x.a.b`, ... |
-| `a.**.b` | `a.b`, `a.x.b`, `a.x.x.b`, ... |
-| `*`      | `x`, `y`, `z`, ...             |
-| `**`     | `x`, `x.x`, `x.x.x`, ...       |
+<table>
+<thead>
+<tr>
+<td>Input</td>
+<td>Path examples</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+```yaml
+students:
+  alice:
+    fullname: Alice Gamma
+    classes:
+      math:
+        scores: [100, 100]
+  bob:
+    fullname: Bob Delta
+    classes:
+      math:
+        scores: [100, 100]
+      biology:
+        scores: [100, 100]
+employees:
+  charlie:
+    fullname: Charlie Epsilon
+    DoE: 01.01.2024
+```
+
+</td>
+<td>
+
+| Path                 | List of matches                                                                                                            |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `students.alice`     | `students.alice`                                                                                                           |
+| `employees.charlie`  | `employees.charlie`                                                                                                        |
+|                      |                                                                                                                            |
+| `*`                  | `students`, `employees`                                                                                                    |
+| `*.charlie`          | `employees.charlie`                                                                                                        |
+| `students.*`         | `students.alice`, `students.bob`                                                                                           |
+|                      |                                                                                                                            |
+| `**`                 | `students`, `students.alice`, ..., <br>`students.alice.classes.math.scores.[]`,<br>... `employees`, ... (total 20 matches) |
+| `**.alice`           | `students.alice`                                                                                                           |
+| `students.**.scores` | `students.alice.classes.math.scores`,<br>`students.bob.classes.math.scores`                                                |
+| `students.**`        | `students.alice`, ...,<br>`students.bob.classes.biology.scores.[]`<br>(total 15 matches)                                   |
+
+</td>
+</tr>
+</tbody>
+</table>
 
 ###### Arrays
 
