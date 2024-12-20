@@ -111,8 +111,7 @@ This one was an easy one. No one have enough time to deal with this in repeat. Y
   - [Rules](#rules)
     - [Paths](#paths)
       - [Wildcards](#wildcards)
-      - [Arrays](#arrays)
-      - [Maps](#maps)
+      - [Components](#components)
     - [Directives](#directives)
       - [Creating named separate type declarations with auto generated names with export](#creating-named-separate-type-declarations-with-auto-generated-names-with-export)
       - [Creating named separate type declarations with declare](#creating-named-separate-type-declarations-with-declare)
@@ -392,70 +391,50 @@ employees:
 </tbody>
 </table>
 
-###### Arrays
+###### Components
 
-Arrays can be given directives too. But there is a separation between an array's type and its element type.
+There are 3 component selectors. One of them is for narrowing down from array type to its element type `[]`. The other two selectors are `[key]` and `[value]`. Those are to narrow down from a map type to either of key type or value type. If Gonfique sees any of those selectors, it expects the container to not be a struct but a list for element type selector or a dict for key/value type selector.
 
 ```go
 type ArrayType []ItemType
 ```
 
-If there is a pair of square brackets like `[]`, then Gonfique expects to see an array in the target in input file.
-
-| Path     | Matches                   | Outcomes                                                                                        |
-| -------- | ------------------------- | ----------------------------------------------------------------------------------------------- |
-| `a.[]`   | the `a` array's item type | `a` must be an array                                                                            |
-| `a.[].*` | the item type's every key | `a` must be an array,<br>item type of `a` must be a dict                                        |
-| `a.[].b` | the item type's `b` key   | `a` must be an array,<br>item type of `a` must be a dict,<br>the dict must have a key named `b` |
-
-###### Maps
-
 Use `[key]` operator to target a key type and use `[value]` operator to target a value type.
 
-<table>
-<thead>
-<td>Input</td>
-<td>Output</td>
-</thead>
-<tbody>
-<tr>
-<td>
-
-```yml
-rules:
-  events:
-    dict: dynamic #
-
-  events.[key]: #
-    declare: Event
-    replace: string
-
-  events.[value]: #
-    replace: Date time
-```
-
-</td>
-<td>
-
 ```go
-import (
-  "time"
-)
-
-type Event string
-
-type Config struct {
-  Events map[Event]time.Date `json:"events"`
-}
-
+type MapType map[KeyType]ValueType
 ```
 
-</td>
-</tr>
-</tbody>
-</table>
+Paths contain `[key]` and `[value]` are only read when the container set `dict: map`. Gonfique will assign `string` as key type unless a rule on `[key]` dictates else.
 
-Paths contain `[key]` and `[value]` are only read when the containing map set `dict: map`.
+> Input file:
+>
+> ```yml
+> students:
+>   alice: { /**/ }
+>   bob: { /**/ }
+> ```
+>
+> Gonfique config:
+>
+> ```yml
+> rules:
+>   students: { dict: map }
+>   students.[key]: { replace: models.StudentName import/path/to/models }
+>   students.[value]: { declare: Student }
+> ```
+>
+> Output file:
+>
+> ```go
+> import "import/path/to/models"
+>
+> type Student struct { /**/ }
+>
+> type Config struct {
+>   Students map[StudentName]models.Student `yaml:"students"`
+> }
+> ```
 
 #### Directives
 
