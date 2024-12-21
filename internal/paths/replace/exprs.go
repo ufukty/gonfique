@@ -5,6 +5,8 @@ import (
 	"go/ast"
 	"regexp"
 	"strings"
+
+	"github.com/ufukty/gonfique/internal/holders"
 )
 
 type value struct {
@@ -40,22 +42,6 @@ func expr(s string) (ast.Expr, error) {
 	}
 }
 
-func set(holder ast.Node, last string, e ast.Expr) {
-	switch h := holder.(type) {
-	case *ast.Field:
-		h.Type = e
-	case *ast.ArrayType:
-		h.Elt = e
-	case *ast.MapType:
-		switch last {
-		case "[key]":
-			h.Key = e
-		case "[value]":
-			h.Value = e
-		}
-	}
-}
-
 func (a *Agent) Expression(v string, holder ast.Node, last string) error {
 	v2, err := parse(v)
 	if err != nil {
@@ -65,7 +51,7 @@ func (a *Agent) Expression(v string, holder ast.Node, last string) error {
 	if err != nil {
 		return fmt.Errorf("building ast for typename: %w", err)
 	}
-	set(holder, last, e)
+	holders.Set(holder, last, e)
 	if v2.ImportPath != "" {
 		a.Imports = append(a.Imports, v2.ImportPath)
 	}
