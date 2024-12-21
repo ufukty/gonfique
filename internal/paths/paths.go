@@ -38,7 +38,7 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 	replace := replace.New()
 
 	// bfs (auto package needs it)
-	queue := []args{{ti.Type, nil, []string{"<Config>"}}}
+	queue := []args{{ti.Type, nil, []string{}}}
 	later := []args{} // after finishing traversal in the current tree, start for declared types
 	for len(queue) > 0 {
 		node, holder, path := queue[0].node, queue[0].holder, queue[0].path
