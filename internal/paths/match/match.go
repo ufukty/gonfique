@@ -7,12 +7,6 @@ import (
 	"github.com/ufukty/gonfique/internal/files/config"
 )
 
-func downgrade(s []string, c string) []string {
-	s2 := slices.Clone(s)
-	s2[0] = c
-	return s2
-}
-
 var components = []string{"[]", "[key]", "[value]"}
 
 func isComponent(s string) bool {
@@ -41,7 +35,7 @@ func matches(c []string, r []string) bool {
 		return matches(c[1:], r) || matches(c, r[1:]) || matches(c[1:], r[1:])
 	case "*":
 		return !isComponent(r[0]) && matches(c[1:], r[1:])
-	default: 
+	default:
 		return c[0] == r[0] && matches(c[1:], r[1:])
 	}
 }
