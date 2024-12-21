@@ -42,26 +42,26 @@ func TestMatches(t *testing.T) {
 		{
 			"DoubleWildcardAtStart",
 			"**.d",
-			[]string{"a.d", "a.b.c.d"},
-			[]string{"", "d", "a.b.e"},
+			[]string{"d", "a.d", "a.b.c.d"},
+			[]string{"", "a.b.e", "d.e", "a.d.e"},
 		},
 		{
 			"DoubleWildcardInMiddle",
 			"a.**.d",
-			[]string{"a.b.c.d"},
-			[]string{"", "a.d", "a.b.e"},
+			[]string{"a.d", "a.b.d", "a.b.c.d", "a.d.d"},
+			[]string{"", "a.b.e"},
 		},
 		{
 			"DoubleWildcardAtEnd",
 			"a.**",
-			[]string{"a.b.c"},
-			[]string{"", "a"},
+			[]string{"a", "a.b", "a.[]", "a.[key]", "a.[value]", "a.b.c"},
+			[]string{"", "b", "b.a", "[].a"},
 		},
 		{
 			"TwiceDoubleWildcard",
 			"a.**.e.**",
-			[]string{"a.b.c.d.e.f", "a.b.[].d.e.f", "a.b.[].[value].e.f"},
-			[]string{"a.b.[].d.e"},
+			[]string{"a.e", "a.b.e.f", "a.b.[].d.e", "a.b.[].d.e.f", "a.b.[].[value].e.f"},
+			[]string{"e.a"},
 		},
 		{
 			"Components",
@@ -79,7 +79,12 @@ func TestMatches(t *testing.T) {
 			"ApiProject",
 			"<Config>.gateways.**.endpoints.*",
 			[]string{"<Config>.gateways.public.services.document.endpoints.list"},
-			[]string{"<Config>.gateways.public.services.document.endpoints"},
+			[]string{
+				"<Config>.gateways.public.services.document.endpoints",
+				"<Config>.gateways.public.services.document.endpoints.[]",
+				"<Config>.gateways.public.services.document.endpoints.[key]",
+				"<Config>.gateways.public.services.document.endpoints.[value]",
+			},
 		},
 	}
 

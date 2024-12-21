@@ -1,42 +1,47 @@
 package match
 
 import (
+	"regexp"
 	"slices"
 
 	"github.com/ufukty/gonfique/internal/files/config"
 )
 
-func consume(c []string) []string {
-	return c[1:]
-}
-
-func downgrade(s []string) []string {
+func downgrade(s []string, c string) []string {
 	s2 := slices.Clone(s)
-	s2[0] = "*"
+	s2[0] = c
 	return s2
 }
 
-var keywords = []string{"[]", "[key]", "[value]"}
+var components = []string{"[]", "[key]", "[value]"}
+
+func isComponent(s string) bool {
+	return slices.Contains(components, s)
+}
 
 var typename = regexp.MustCompile(`<\w+>`)
 
+func isTypename(s string) bool {
+	return typename.MatchString(s)
+}
+
 // returns true if [c]onfig path matches the [r]esolved path
 func matches(c []string, r []string) bool {
-	if len(c) == 0 && len(r) == 0 {
-		return true
+	if len(c) == 0 {
+		return len(r) == 0
 	}
-	if len(c) == 0 || len(r) == 0 {
-		return false
+	if len(c) != 0 && len(r) == 0 {
+		return len(c) == 1 && c[0] == "**"
 	}
-	if typename.MatchString(c[0]) != typename.MatchString(r[0]) {
+	if isTypename(c[0]) != isTypename(r[0]) {
 		return false
 	}
 	switch c[0] {
 	case "**":
-		return matches(consume(c), r) || matches(downgrade(c), r) || matches(c, r[1:])
+		return matches(c[1:], r) || matches(c, r[1:]) || matches(c[1:], r[1:])
 	case "*":
-		return !slices.Contains(keywords, r[0]) && matches(c[1:], r[1:])
-	default:
+		return !isComponent(r[0]) && matches(c[1:], r[1:])
+	default: 
 		return c[0] == r[0] && matches(c[1:], r[1:])
 	}
 }
