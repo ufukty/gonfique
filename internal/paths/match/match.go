@@ -18,12 +18,17 @@ func downgrade(s []string) []string {
 
 var keywords = []string{"[]", "[key]", "[value]"}
 
+var typename = regexp.MustCompile(`<\w+>`)
+
 // returns true if [c]onfig path matches the [r]esolved path
 func matches(c []string, r []string) bool {
 	if len(c) == 0 && len(r) == 0 {
 		return true
 	}
 	if len(c) == 0 || len(r) == 0 {
+		return false
+	}
+	if typename.MatchString(c[0]) != typename.MatchString(r[0]) {
 		return false
 	}
 	switch c[0] {
