@@ -990,6 +990,14 @@ lorem:
 >   b: ""
 > ```
 
+### Sorting declarations
+
+Gonfique sorts the generated declarations before writing to file in order to minimize Git diffs and make the file reflect the part-whole relationship from top to bottom. This is just how it is like in the C language where the code can't refer to a symbol if it is not declared yet.
+
+The sorting process first creates a dependency graph and places the symbols in reverse order (just to reverse it again at the end). It starts to perform DFS on root which is the type `Config`, if you didn't customize it. Places every declaration into a declaration array; with one exception. The visitor, postpones the placement of a declaration until its last mention placed down. Process ends with reversing the placement, since we started from root (dependent should be after its dependencies).
+
+This process should leave minimum version control footprint and improve the readability of code for developers.
+
 ## Serving suggestions
 
 For existing Makefile users:

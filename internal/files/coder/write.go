@@ -66,53 +66,38 @@ func (c Coder) addImports(dst *ast.File) {
 	})
 }
 
-func (c Coder) addIteratorMethods(dst *ast.File) {
-	if c.Iterators == nil {
-		return
+func (c Coder) createGenDecls(dst *ast.File) {
+	decls := []ast.Decl{}
+	if c.Iterators != nil {
+		for _, fd := range c.Iterators {
+			decls = append(decls, fd)
+		}
 	}
-	for _, fd := range c.Iterators {
-		dst.Decls = append(dst.Decls, fd)
+	if c.Auto != nil {
+		for _, n := range c.Auto {
+			decls = append(decls, n)
+		}
 	}
-}
-
-func (c Coder) addAutoTypes(dst *ast.File) {
-	if c.Auto == nil {
-		return
+	if c.Named != nil {
+		for _, n := range c.Named {
+			decls = append(decls, n)
+		}
 	}
-	sort.FuncDecls(c.Auto)
-	for _, n := range c.Auto {
-		dst.Decls = append(dst.Decls, n)
+	if c.Accessors != nil {
+		for _, fd := range c.Accessors {
+			decls = append(decls, fd)
+		}
 	}
-}
-
-func (c Coder) addNamedTypes(dst *ast.File) {
-	if c.Named == nil {
-		return
+	if c.Config != nil {
+		decls = append(decls, &ast.GenDecl{
+			Tok: token.TYPE,
+			Specs: []ast.Spec{&ast.TypeSpec{
+				Name: ast.NewIdent(c.Meta.Type),
+				Type: c.Config,
+			}},
+		})
 	}
-	sort.FuncDecls(c.Named)
-	for _, n := range c.Named {
-		dst.Decls = append(dst.Decls, n)
-	}
-}
-
-func (c Coder) addConfig(dst *ast.File) {
-	dst.Decls = append(dst.Decls, &ast.GenDecl{
-		Tok: token.TYPE,
-		Specs: []ast.Spec{&ast.TypeSpec{
-			Name: ast.NewIdent(c.Meta.Type),
-			Type: c.Config,
-		}},
-	})
-}
-
-func (c Coder) addAccessors(dst *ast.File) {
-	if len(c.Accessors) == 0 {
-		return
-	}
-	sort.Accessors(c.Accessors)
-	for _, fd := range c.Accessors {
-		dst.Decls = append(dst.Decls, fd)
-	}
+	dst.Decls = append(dst.Decls, sort.Decls(decls)...)
 }
 
 var typedecls = regexp.MustCompile(`(?m)$(\n(?://.*\n)*type)`)
@@ -132,17 +117,13 @@ func (c Coder) Write(dst string) error {
 		Name:  ast.NewIdent(c.Meta.Package),
 		Decls: []ast.Decl{},
 	}
-
 	c.addImports(f)
-	c.addIteratorMethods(f)
-	c.addAutoTypes(f)
-	c.addNamedTypes(f)
-	c.addConfig(f)
+	c.createGenDecls(f)
+
 	c.addParentRefAssignmentsFunction(f)
 	if err := c.addReaderFunction(f); err != nil {
 		return fmt.Errorf("reader: %w", err)
 	}
-	c.addAccessors(f)
 
 	b := bytes.NewBufferString("")
 	err := printer.Fprint(b, token.NewFileSet(), f)
