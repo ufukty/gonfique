@@ -40,9 +40,9 @@ func matches(c []string, r []string) bool {
 	}
 }
 
-func Matches(cps map[config.Path]config.Directives, r []string) []config.Path {
+func Matches(cps []config.Path, r []string) []config.Path {
 	ms := []config.Path{}
-	for cp := range cps {
+	for _, cp := range cps {
 		if matches(cp.Segments(), r) {
 			ms = append(ms, cp)
 		}

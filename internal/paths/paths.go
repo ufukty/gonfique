@@ -15,6 +15,7 @@ import (
 	"github.com/ufukty/gonfique/internal/paths/replace"
 	"github.com/ufukty/gonfique/internal/paths/resolve"
 	"github.com/ufukty/gonfique/internal/transform"
+	"golang.org/x/exp/maps"
 )
 
 type products struct {
@@ -36,6 +37,7 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 	declare := declare.New()
 	export := export.New()
 	replace := replace.New()
+	paths := maps.Keys(c.Rules)
 
 	// bfs (auto package needs it)
 	queue := []args{{ti.Type, nil, []string{}}}
@@ -44,7 +46,7 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 		node, holder, path := queue[0].node, queue[0].holder, queue[0].path
 		recursion := true
 		if holder != nil {
-			cps := match.Matches(c.Rules, path)
+			cps := match.Matches(paths, path)
 			err := conflicts.Check(c.Rules, cps)
 			if err != nil {
 				return nil, fmt.Errorf("checking conflicts: %w", err)
