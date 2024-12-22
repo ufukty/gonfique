@@ -557,7 +557,7 @@ Use a Go `map` instead of a `struct` to represent a dict. This might be useful w
 | `map`              | `<dict>.[key]`, `<dict>.[value]` | `map[string]combined` |
 
 > [!NOTE]  
-> Anything between angle brackets just like `<key>` is to describe the the value you provide. At the other hand `[key]` is a keyword. Don't use angle brackets in real file.
+> Anything between angle brackets just like `<key>` is to describe the value you provide. At the other hand `[key]` is a keyword. Don't use angle brackets in real file.
 
 If you want to get a standard map type such as a `map[string]any`, you might as well use `replace: map[string]any` at the dict's path instead. `dict` directive suits better when only the keys are map and values are fixed in build time. The advantage of using `dict: map` over `replace: map[K]V` is when you also want to customize resolved key and value types through `[map]` and `[value]`.
 
