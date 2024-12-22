@@ -50,6 +50,8 @@ func doesDependOn(dependent ast.Node, dependency *ast.Ident) bool {
 		return dependency.Name == dependent.Name
 	case *ast.StarExpr:
 		return dependent.X != nil && doesDependOn(dependent.X, dependency)
+	case *ast.SelectorExpr:
+		return false // caused by 'replace' directive
 
 	// both for structs and functions (recv & arg list)
 	case *ast.Field:

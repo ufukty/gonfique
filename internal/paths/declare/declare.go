@@ -22,7 +22,7 @@ func (a *Agent) Declare(holder ast.Node, last string, tn config.Typename, rp res
 		return nil, fmt.Errorf("replacing type expression with declared type: %w", err)
 	}
 
-	a.exprs[rp] = expr
+	a.exprs[rp] = clone.Expr(expr)
 
 	_, declared := a.users[tn]
 	if declared {
@@ -31,7 +31,7 @@ func (a *Agent) Declare(holder ast.Node, last string, tn config.Typename, rp res
 
 	} else {
 		a.users[tn] = []resolve.Path{rp}
-		ts := &ast.TypeSpec{Name: tn.Ident(), Type: clone.Expr(expr)}
+		ts := &ast.TypeSpec{Name: tn.Ident(), Type: expr}
 		a.Decls = append(a.Decls, &ast.GenDecl{
 			Tok:   token.TYPE,
 			Specs: []ast.Spec{ts},
