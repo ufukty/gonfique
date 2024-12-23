@@ -28,7 +28,7 @@ func areMergeable(a, b *ast.FieldList) error {
 		}
 	}
 	if len(conflicts) > 0 {
-		return fmt.Errorf(strings.Join(conflicts, ", "))
+		return fmt.Errorf("%s", strings.Join(conflicts, ", "))
 	}
 	return nil
 }
@@ -43,21 +43,4 @@ func sort(fl *ast.FieldList) {
 			return 0
 		}
 	})
-}
-
-// merges 2 FieldList assumed do not contain same field with different types
-func combine(a, b *ast.FieldList) *ast.FieldList {
-	m := &ast.FieldList{}
-	addedIdents := map[string]bool{}
-	for _, f := range a.List {
-		m.List = append(m.List, f)
-		addedIdents[f.Names[0].Name] = true
-	}
-	for _, f := range b.List {
-		if _, ok := addedIdents[f.Names[0].Name]; !ok {
-			m.List = append(m.List, f)
-			addedIdents[f.Names[0].Name] = true
-		}
-	}
-	return m
 }

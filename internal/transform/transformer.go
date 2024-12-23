@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"github.com/ufukty/gonfique/internal/files/input"
+	"github.com/ufukty/gonfique/internal/transform/combine"
 )
 
 // func (tn FieldName) Capitilized() FieldName {
@@ -50,7 +51,7 @@ func (tr *transformer) arrayType(v reflect.Value) ast.Expr {
 				log.Println(fmt.Errorf("assigning 'any' to array type because of at least 2 items' type are different: %w", err))
 				return &ast.ArrayType{Elt: ast.NewIdent("any")}
 			} else {
-				m = &ast.StructType{Fields: combine(stM.Fields, stT.Fields)}
+				m = &ast.StructType{Fields: combine.FieldLists(stM.Fields, stT.Fields)}
 			}
 		}
 	}
