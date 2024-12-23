@@ -109,14 +109,15 @@ This one was an easy one. No one have enough time to deal with this in repeat. Y
 - [Features](#features)
 - [Gonfique config puns&funs](#gonfique-config-punsfuns)
   - [Rules](#rules)
-    - [Paths](#paths)
+    - [Writing paths for value-targeting rules](#writing-paths-for-value-targeting-rules)
       - [Wildcards](#wildcards)
       - [Components](#components)
+    - [Writing typenames for type-targeting rules](#writing-typenames-for-type-targeting-rules)
     - [Directives](#directives)
       - [Creating named separate type declarations with auto generated names with export](#creating-named-separate-type-declarations-with-auto-generated-names-with-export)
       - [Creating named separate type declarations with declare](#creating-named-separate-type-declarations-with-declare)
       - [Assigning types manually with replace](#assigning-types-manually-with-replace)
-      - [Using maps for dicts with dict](#using-maps-for-dicts-with-dict)
+      - [Using Go maps for YAML dictionaries and JSON objects with dict](#using-go-maps-for-yaml-dictionaries-and-json-objects-with-dict)
       - [Implementing getters and setters with accessors](#implementing-getters-and-setters-with-accessors)
       - [Making the hierarchy of types explicit with embed](#making-the-hierarchy-of-types-explicit-with-embed)
       - [Making structs iterable with iterator](#making-structs-iterable-with-iterator)
@@ -248,6 +249,7 @@ rules:
     export: <bool>
     replace: <typename> <import-path>
 
+  <Typename>:
     # customizations for type-targeting rules:
     accessors: <keys...>
     embed: <typename>
@@ -261,9 +263,21 @@ rules:
 
 Rules section is where all the customizations are described in the Gonfique config. The whole section is a dict where the keys are individual targets and the values are sequence of one directive and its arguments.
 
-##### Paths
+As can be seen in the file above, directives can be set either on a type of a value that strictly corresponds to a certain point in the YAML/JSON file, or a typename that is declared by the former. You use paths to point Gonfique to a certain point in the YAML/JSON file. Then, Gonfique applies the directives in that rule to the type corresponds to that point of YAML/JSON file. At the other hand, you use typenames to point Go types previously declared by value targeting paths.
 
-Paths are written in a special yet simple syntax in the form of dot-separated sequence of 'terms'. Those terms can be in variety of kinds.
+So, the rules target either **a value in the YAML/JSON file** or **a Go type** previously declared by former. Understanding the distinction between value and type targeting paths is crucial to write proper Gonfique configs.
+
+### Paths
+
+When you want to customize a value's type:
+
+- to overwrite the type expression with a custom typename,
+- to create a named type declaration and replace with the type expression,
+- to convert the resolved type for a dict to `map` form `struct`,
+
+those manipulations performed per target. Thus, those rules need to be defined with **value-targeting paths**.
+
+Paths are how you describe a target you want to apply directives, when the directives are one of those that works on resolved or assigned types such as `dict`, `replace`, `declare` or `export`. Paths are consist of dot-separated terms. Order of terms follows the file hierarchy between dictionaries, lists and values. There are 4 kind of terms: `key`, `wildcard`, `component` and `type`.
 
 | Term kind   | Description                                                                                                                             | Examples                  |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
@@ -540,11 +554,11 @@ rules:
 
 Assign specified type name instead resolving from source file. For example: `replace: int` or `replace: models.Employee acme/models`.
 
-##### Using maps for dicts with `dict`
+##### Using Go maps for YAML dictionaries and JSON objects with `dict`
 
 ```yaml
 rules:
-  <direct-path>:
+  <path>:
     dict: [ struct | map ]
 .
 ```
@@ -562,6 +576,21 @@ Use a Go `map` instead of a `struct` to represent a dict. This might be useful w
 If you want to get a standard map type such as a `map[string]any`, you might as well use `replace: map[string]any` at the dict's path instead. `dict` directive suits better when only the keys are map and values are fixed in build time. The advantage of using `dict: map` over `replace: map[K]V` is when you also want to customize resolved key and value types through `[map]` and `[value]`.
 
 Note that Gonfique will use `any` value type if any two of dict key's type conflict when the dict is requested to be defined as `map`. If your key types conflict but you need to keep the type safety without making the dict iterable; you might as well use [iterator](#making-structs-iterable-with-iterator) on a struct representation.
+
+### Types
+
+#### Writing typenames for type-targeting rules
+
+When you want to manipulate a previously declared "Go type" to:
+
+- add fields to assign parent refs,
+- redefine it by embedding another type,
+- implementing getters, setters on it,
+- implementing iterator on it
+
+those manipulations performed independently than the how many places the type you manipulate mentioned in the main mapping type. Because of multiple fields can use same type, editing a type declaration once effects all usages in the main mapping type. Thus, you need to write those rules with **type-targeting paths** rather than value-targeting paths.
+
+#### Directives
 
 ##### Implementing getters and setters with `accessors`
 
@@ -604,17 +633,12 @@ where the employees were originally a dict and represented with a struct in Go. 
 ##### Adding a field for parent access with `parent`
 
 ```yaml
-<typename>:
-  parent: Fieldname
+rules:
+  <Typename>:
+    parent: <Fieldname>
 ```
 
-Using `parent` adds a field to generated type. The field name will be `fieldname` and its value will be the reference of its `level`th level of parent. Adding refs may be useful when the data defines an hierarchy a traceback from a child to root is needed.
-
-###### Notes
-
-- Adding parent refs to structs as fields requires the type of parent to be mentioned in type definition; so type's reusability gets limited to targets with same type parents.
-- Combining `parent` and `declare` may result with failure when parent types differ.
-- Adding parent refs alters the body of ReadConfig function, as the refs need to be assigned after initialization.
+Using `parent` adds a field to a declared type. The field name will be `<Fieldname>`. The `ReadConfig` function will be added necessary assignment statements to perform reference assignment after decoding completed and before function returns. Adding refs might be useful when the data defines an hierarchy where a traceback from a child to root is needed. The type of parent field will be assigned as `any` to eliminate type conflicts might raise from different users of the type have different type of parents.
 
 ## Full examples
 
@@ -1033,8 +1057,8 @@ When both directives set together on a group of matches, make sure parents of ma
 
 ## Considerations
 
-- Multidocument YAML files are not supported.
-- Gonfique assigns `any` when sees `null` values.
+- Multidocument YAML files are not supported, caused by the decoder.
+- Gonfique assigns `any` when sees `null` values. Consider use of `replace` directive in such targets.
 
 ## Contribution
 
