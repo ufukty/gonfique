@@ -11,5 +11,9 @@ func TestConfig(t *testing.T) {
 		t.Fatal(fmt.Errorf("reading config: %w", err))
 	}
 
-	fmt.Println(cfg.Gateways.Public.Services.Tags.Endpoints.Assign)
+	fmt.Println(cfg.Gateways.Public.Services.Objectives.Endpoints.Create)
+
+	for ep, details := range cfg.Gateways.Public.Services.Tags.Endpoints {
+		fmt.Printf("%s => %s\n", ep, details)
+	}
 }

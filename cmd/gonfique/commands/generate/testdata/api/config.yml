@@ -3,6 +3,8 @@ meta:
 
 rules:
   "**": { export: true }
+  "**.tags.endpoints": { dict: map }
+  "**.tags.endpoints.[value]": { declare: TagEndpoint }
   gateways.**.endpoints.*: { declare: Endpoint }
 
   <Endpoint>.method: { replace: http.Method test/http }

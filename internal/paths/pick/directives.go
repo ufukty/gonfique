@@ -19,8 +19,8 @@ func value[C comparable](paths []config.Path, value func(cp config.Path) C) (C, 
 
 func Dict(cps []config.Path, paths map[config.Path]config.Directives) (config.Dict, bool) {
 	return value(cps, func(cp config.Path) config.Dict {
-		if v := paths[cp].Dict; v != config.Struct {
-			return v
+		if paths[cp].Dict == config.Map {
+			return config.Map
 		}
 		return ""
 	})

@@ -9,6 +9,7 @@ import (
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/paths/conflicts"
 	"github.com/ufukty/gonfique/internal/paths/declare"
+	"github.com/ufukty/gonfique/internal/paths/dict"
 	"github.com/ufukty/gonfique/internal/paths/export"
 	"github.com/ufukty/gonfique/internal/paths/match"
 	"github.com/ufukty/gonfique/internal/paths/pick"
@@ -53,7 +54,11 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 			}
 
 			if _, ok := pick.Dict(cps, c.Rules); ok {
-				panic("to implement") // TODO:
+				mt, err := dict.ConvertToMap(holder, path[len(path)-1], ti)
+				if err != nil {
+					return nil, fmt.Errorf("converting dict to map: %w", err)
+				}
+				node = mt
 			}
 
 			if repl, ok := pick.Replace(cps, c.Rules); ok {
@@ -71,9 +76,7 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 					return nil, fmt.Errorf("declaring: %w", err)
 				}
 				if ts != nil {
-					later = append(later, args{
-						ts.Type, ts, []string{fmt.Sprintf("<%s>", decl)},
-					})
+					later = append(later, args{ts.Type, ts, []string{fmt.Sprintf("<%s>", decl)}})
 				}
 				recursion = false // manually perform traversal later once per declared type (not as many as its users)
 			}
