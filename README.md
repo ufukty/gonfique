@@ -1,12 +1,26 @@
-# `gonfique` - Type checked configs for Go programs
+# Gonfique
 
 <img src="assets/Gonfique.png" alt="Gonfique logo" height="300px">
 
-`gonfique` is a CLI tool for Go developers to automatically build exact **struct definitions** in Go that will match the provided YAML or JSON config. Makes instant to notice **when and where a breaking change** occurs. Since compiler warns whenever it happens by type-checking, and source control shows where the change exactly is.
+Gonfique is a CLI tool for Go developers to automatically build exact **struct definitions** in Go that will match the provided YAML or JSON config. Makes instant to notice **when and where a breaking change** occurs. Since compiler warns whenever it happens by type-checking, and source control shows where the change exactly is.
 
-## Example
+## TOC
 
-Input:
+- [Full example](#full-example)
+  - [Output with nested declarations](#output-with-nested-declarations)
+  - [Creating separate (named) type declarations](#creating-separate-named-type-declarations)
+- [Install](#install)
+- [Usage](#usage)
+- [Features](#features)
+- [Docs](#docs)
+- [Limitations](#limitations)
+- [Contribution](#contribution)
+- [Stargazers-over-time](#stargazers-over-time)
+- [License](#license)
+
+## Full example
+
+Say this file is your input:
 
 ```yaml
 apiVersion: apps/v1
@@ -55,7 +69,9 @@ spec:
                 name: my-secret
 ```
 
-Output:
+### Output with nested declarations
+
+Gonfique creates the most compact type declaration for the provided file when it's not supplied a mapping file or the flag `--organize`. The file will contain only one declaration with all sub-structs defined inlined. Such as:
 
 ```go
 package config
@@ -150,9 +166,107 @@ func ReadConfig(path string) (Config, error) {
 }
 ```
 
+### Creating separate (named) type declarations
+
+You can create named declarations for types you want. Just provide a mapping file that contains the "paths" of targets and the typename you pick. Pass the path of this file as an argument (via `--mappings <path>`) to gonfique. See docs: [Mapping file](docs/mapping.md)
+
+```yml
+apiVersion: ApiVersion
+metadata.name: Name
+spec.rules.[]: Rule
+spec.rules.[].http.paths.[]: Path
+spec.ports.[]: Port
+spec.**.containers: SpecContainers
+spec.**.containers.[]: SpecContainer
+spec.**.containers.[].name: ContainerName
+```
+
+This time the generated file would contain additional types as the mappings file directs. The main type declaration refers to those type in related substructures.
+
+```go
+// ...
+
+type ApiVersion string
+type ContainerName string
+type Name string
+type Path struct {
+  Backend struct {
+    Service struct {
+      Name string `yaml:"name"`
+      Port struct {
+        Number int `yaml:"number"`
+      } `yaml:"port"`
+    } `yaml:"service"`
+  } `yaml:"backend"`
+  Path     string `yaml:"path"`
+  PathType string `yaml:"pathType"`
+}
+type Port struct {
+  Port       int    `yaml:"port"`
+  Protocol   string `yaml:"protocol"`
+  TargetPort int    `yaml:"targetPort"`
+}
+type Rule struct {
+  Host string `yaml:"host"`
+  Http struct {
+    Paths []Path `yaml:"paths"`
+  } `yaml:"http"`
+}
+type SpecContainer struct {
+  EnvFrom []struct {
+    ConfigMapRef struct {
+      Name string `yaml:"name"`
+    } `yaml:"configMapRef"`
+    SecretRef struct {
+      Name string `yaml:"name"`
+    } `yaml:"secretRef"`
+  } `yaml:"envFrom"`
+  Image string        `yaml:"image"`
+  Name  ContainerName `yaml:"name"`
+  Ports []struct {
+    ContainerPort int `yaml:"containerPort"`
+  } `yaml:"ports"`
+}
+type SpecContainers []SpecContainer
+type Config struct {
+  ApiVersion ApiVersion `yaml:"apiVersion"`
+  Data       struct {
+    MyKey    string `yaml:"my-key"`
+    Password string `yaml:"password"`
+  } `yaml:"data"`
+  Kind     string `yaml:"kind"`
+  Metadata struct {
+    Name      Name   `yaml:"name"`
+    Namespace string `yaml:"namespace"`
+  } `yaml:"metadata"`
+  Spec struct {
+    Ports    []Port `yaml:"ports"`
+    Replicas int    `yaml:"replicas"`
+    Rules    []Rule `yaml:"rules"`
+    Selector struct {
+      MatchLabels struct {
+        App string `yaml:"app"`
+      } `yaml:"matchLabels"`
+    } `yaml:"selector"`
+    Template struct {
+      Metadata struct {
+        Labels struct {
+          App string `yaml:"app"`
+        } `yaml:"labels"`
+      } `yaml:"metadata"`
+      Spec struct {
+        Containers SpecContainers `yaml:"containers"`
+      } `yaml:"spec"`
+    } `yaml:"template"`
+  } `yaml:"spec"`
+  Type string `yaml:"type"`
+}
+
+// ...
+```
+
 See outputs for different flag combinations:
 
-- [`-mapping`](/examples/k8s/map/output.go)
 - [`-organize`](/examples/k8s/organized/output.go)
 - [`-organize`, `-use`](/examples/k8s/organized-used/output.go)
 
@@ -174,9 +288,10 @@ Run `gonfique --help` for [parameter details](docs/parameter-details.txt).
 
 ## Features
 
+- Works offline
 - Specify names for detected types via `-mapping` flag to export safely. [More](docs/mapping.md)
 - Defines named or inline types depending on user choice (`-organize` flag).
-- Reuses user-defined types defined provided in a file when schemas match via `-use` flag
+- Reuses user-defined types provided in a file when schemas match via `-use` flag
 - Supports arrays:
   - When all array items share same schema; array types are generated as `[]<item type>`.
   - When all array items don't share same schema, but all items are compatible; array types are generated as `[]<combined item types>`.
@@ -187,7 +302,7 @@ Run `gonfique --help` for [parameter details](docs/parameter-details.txt).
 
 ## Docs
 
-- [Why gonfique?](docs/why-gonfique.md)
+- [Why Gonfique?](docs/why-gonfique.md)
 - [Arrays](docs/arrays.md)
 - [Mapping file](docs/mapping.md)
 - [Suggestions](docs/suggestions.md)
@@ -203,6 +318,10 @@ Run `gonfique --help` for [parameter details](docs/parameter-details.txt).
 Issues are open for discussions and rest.
 
 - [How it works?](docs/how-it-works.md)
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/ufukty/gonfique.svg?variant=adaptive)](https://starchart.cc/ufukty/gonfique)
 
 ## License
 
