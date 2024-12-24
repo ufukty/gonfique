@@ -12,11 +12,11 @@ import (
 	"slices"
 
 	"github.com/ufukty/gonfique/cmd/gonfique/commands/version"
-	"github.com/ufukty/gonfique/internal/datas"
 	"github.com/ufukty/gonfique/internal/files/coder/sort"
 	"github.com/ufukty/gonfique/internal/files/config/meta"
 	"github.com/ufukty/gonfique/internal/files/input"
 	"github.com/ufukty/gonfique/internal/namings"
+	"golang.org/x/exp/maps"
 )
 
 type Coder struct {
@@ -38,6 +38,14 @@ func quotes(s string) string {
 	return fmt.Sprintf("%q", s)
 }
 
+func uniq[K comparable](ss []K) []K {
+	m := make(map[K]any, len(ss))
+	for _, s := range ss {
+		m[s] = nil
+	}
+	return maps.Keys(m)
+}
+
 func (c Coder) addImports(dst *ast.File) {
 	imports := slices.Clone(c.Imports)
 
@@ -50,7 +58,7 @@ func (c Coder) addImports(dst *ast.File) {
 	}
 
 	slices.Sort(imports)
-	imports = datas.Uniq(imports)
+	imports = uniq(imports)
 
 	specs := []ast.Spec{}
 	for _, imp := range imports {
