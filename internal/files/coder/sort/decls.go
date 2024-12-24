@@ -141,16 +141,8 @@ func depgraph(decls []ast.Decl) (f, r map[ast.Decl][]ast.Decl) {
 				if doesDependOn(d1, symbolname(d2)) {
 					mik(vertices, d1)
 					vertices[d1] = append(vertices[d1], d2)
-
 					mik(rvertices, d2)
 					rvertices[d2] = append(rvertices[d2], d1)
-
-				} else if doesDependOn(d2, symbolname(d1)) {
-					mik(vertices, d2)
-					vertices[d2] = append(vertices[d2], d1)
-
-					mik(rvertices, d1)
-					rvertices[d1] = append(rvertices[d1], d2)
 				}
 			}
 		}
