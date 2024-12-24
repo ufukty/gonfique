@@ -1,11 +1,15 @@
-package transform
+package safe
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/ufukty/gonfique/internal/files/config"
+)
 
 func TestFieldnameFromUppercase(t *testing.T) {
 	tcs := []struct {
 		input string
-		want  FieldName
+		want  config.FieldName
 	}{
 		{"TITLE", "Title"},
 		{"TOKEN", "Token"},
@@ -25,7 +29,7 @@ func TestFieldnameFromUppercase(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			if got := safeFieldName(tc.input); tc.want != got {
+			if got := FieldName(tc.input); tc.want != got {
 				t.Errorf("titleCase(%q) got %q, want %q", tc.input, got, tc.want)
 			}
 		})
@@ -35,7 +39,7 @@ func TestFieldnameFromUppercase(t *testing.T) {
 func TestFieldnameFromLowercase(t *testing.T) {
 	tcs := []struct {
 		input string
-		want  FieldName
+		want  config.FieldName
 	}{
 		{"address", "Address"},
 		{"age", "Age"},
@@ -160,7 +164,7 @@ func TestFieldnameFromLowercase(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			if got := safeFieldName(tc.input); tc.want != got {
+			if got := FieldName(tc.input); tc.want != got {
 				t.Errorf("titleCase(%q) got %q, want %q", tc.input, got, tc.want)
 			}
 		})
@@ -170,7 +174,7 @@ func TestFieldnameFromLowercase(t *testing.T) {
 func TestFieldnameFromCamelCase(t *testing.T) {
 	tcs := []struct {
 		input string
-		want  FieldName
+		want  config.FieldName
 	}{
 		{"webSocket", "WebSocket"},
 		{"accessToken", "AccessToken"},
@@ -187,7 +191,7 @@ func TestFieldnameFromCamelCase(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			if got := safeFieldName(tc.input); tc.want != got {
+			if got := FieldName(tc.input); tc.want != got {
 				t.Errorf("titleCase(%q) got %q, want %q", tc.input, got, tc.want)
 			}
 		})
@@ -197,7 +201,7 @@ func TestFieldnameFromCamelCase(t *testing.T) {
 func TestFieldnameFromSnakeCase(t *testing.T) {
 	tcs := []struct {
 		input string
-		want  FieldName
+		want  config.FieldName
 	}{
 		{"conn_max_lifetime", "ConnMaxLifetime"},
 		{"db_driver", "DbDriver"},
@@ -217,7 +221,7 @@ func TestFieldnameFromSnakeCase(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			if got := safeFieldName(tc.input); tc.want != got {
+			if got := FieldName(tc.input); tc.want != got {
 				t.Errorf("titleCase(%q) got %q, want %q", tc.input, got, tc.want)
 			}
 		})
@@ -227,7 +231,7 @@ func TestFieldnameFromSnakeCase(t *testing.T) {
 func TestFieldnameFromKebabCase(t *testing.T) {
 	tcs := []struct {
 		input string
-		want  FieldName
+		want  config.FieldName
 	}{
 		{"max-open-conns", "MaxOpenConns"},
 		{"password-policy", "PasswordPolicy"},
@@ -242,7 +246,7 @@ func TestFieldnameFromKebabCase(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			if got := safeFieldName(tc.input); tc.want != got {
+			if got := FieldName(tc.input); tc.want != got {
 				t.Errorf("titleCase(%q) got %q, want %q", tc.input, got, tc.want)
 			}
 		})
@@ -252,7 +256,7 @@ func TestFieldnameFromKebabCase(t *testing.T) {
 func TestFieldnameFromKubernetesConfig(t *testing.T) {
 	tcs := []struct {
 		input string
-		want  FieldName
+		want  config.FieldName
 	}{
 		{"apiVersion", "ApiVersion"},
 		{"app", "App"},
@@ -293,7 +297,7 @@ func TestFieldnameFromKubernetesConfig(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.input, func(t *testing.T) {
-			if got := safeFieldName(tc.input); tc.want != got {
+			if got := FieldName(tc.input); tc.want != got {
 				t.Errorf("titleCase(%q) got %q, want %q", tc.input, got, tc.want)
 			}
 		})

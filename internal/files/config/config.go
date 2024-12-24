@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/ufukty/gonfique/internal/files/config/meta"
-	"github.com/ufukty/gonfique/internal/transform"
 	"gopkg.in/yaml.v3"
 )
 
@@ -48,7 +47,7 @@ func (p Path) Segments() []string {
 	return strings.Split(string(p), ".")
 }
 
-func (p Path) WithField(f transform.FieldName) Path {
+func (p Path) WithField(f FieldName) Path {
 	return Path(fmt.Sprintf("%s.%s", p, f))
 }
 
@@ -56,6 +55,12 @@ type Typename string
 
 func (t Typename) Ident() *ast.Ident {
 	return ast.NewIdent(string(t))
+}
+
+type FieldName string
+
+func (fn FieldName) Ident() *ast.Ident {
+	return ast.NewIdent(string(fn))
 }
 
 type File struct {

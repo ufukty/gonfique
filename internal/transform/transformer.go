@@ -8,29 +8,21 @@ import (
 	"os"
 	"reflect"
 
+	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/files/input"
 	"github.com/ufukty/gonfique/internal/transform/combine"
+	"github.com/ufukty/gonfique/internal/transform/safe"
 )
-
-// func (tn FieldName) Capitilized() FieldName {
-// 	return FieldName(cases.Title(language.English, cases.NoLower).String(string(tn)))
-// }
-
-type FieldName string
-
-func (fn FieldName) Ident() *ast.Ident {
-	return ast.NewIdent(string(fn))
-}
 
 type Info struct {
 	Type       ast.Expr
 	Keys       map[ast.Node]string
-	Fieldnames map[ast.Node]FieldName
+	Fieldnames map[ast.Node]config.FieldName
 }
 
 type transformer struct {
 	keys       map[ast.Node]string // corresponding keys for ASTs
-	fieldnames map[ast.Node]FieldName
+	fieldnames map[ast.Node]config.FieldName
 	tagname    string
 }
 
@@ -71,7 +63,7 @@ func (tr *transformer) structType(v reflect.Value) *ast.StructType {
 	for iter.Next() {
 		ik := iter.Key()
 		iv := iter.Value()
-		fieldname := safeFieldName(ik.String())
+		fieldname := safe.FieldName(ik.String())
 		f := &ast.Field{
 			Names: []*ast.Ident{fieldname.Ident()},
 			Type:  tr.transform(iv),
@@ -132,7 +124,7 @@ func (tr *transformer) transform(v reflect.Value) ast.Expr {
 func Transform(d any, encoding input.Encoding) Info {
 	tr := transformer{
 		keys:       map[ast.Node]string{},
-		fieldnames: map[ast.Node]FieldName{},
+		fieldnames: map[ast.Node]config.FieldName{},
 		tagname:    string(encoding),
 	}
 	ty := tr.transform(reflect.ValueOf(d))

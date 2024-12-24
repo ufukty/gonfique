@@ -1,21 +1,23 @@
-package transform
+package safe
 
 import (
 	"regexp"
 	"strings"
 	"unicode"
+
+	"github.com/ufukty/gonfique/internal/files/config"
 )
 
 var smallcaps = regexp.MustCompile("[a-z]+")
 
 // Best effort on creating Go var/field names out of YAML keys idiomatically
-func safeFieldName(keyname string) FieldName {
-	if smallcaps.Find([]byte(keyname)) == nil {
-		keyname = strings.ToLower(keyname)
+func FieldName(key string) config.FieldName {
+	if !smallcaps.MatchString(key) {
+		key = strings.ToLower(key)
 	}
 	n := ""
 	newSegment := false
-	for i, r := range keyname {
+	for i, r := range key {
 		if i == 0 || newSegment {
 			n += strings.ToUpper(string(r))
 			newSegment = false
@@ -25,5 +27,5 @@ func safeFieldName(keyname string) FieldName {
 			n += string(r)
 		}
 	}
-	return FieldName(n)
+	return config.FieldName(n)
 }
