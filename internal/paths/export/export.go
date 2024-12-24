@@ -32,7 +32,7 @@ func (a *Agent) Type(rp resolve.Path, reserved []config.Typename, holder ast.Nod
 		Specs: []ast.Spec{&ast.TypeSpec{Name: tn.Ident(), Type: expr}},
 	}
 
-	a.Decls = append(a.Decls, gd)
+	a.Decls[tn] = gd
 	a.typenames = append(a.typenames, tn)
 	return nil
 }

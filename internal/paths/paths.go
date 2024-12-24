@@ -21,7 +21,7 @@ import (
 
 type products struct {
 	Imports       []string
-	Declare, Auto []*ast.GenDecl
+	Declare, Auto map[config.Typename]*ast.GenDecl
 }
 
 type args struct {

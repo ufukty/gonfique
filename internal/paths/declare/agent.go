@@ -11,14 +11,14 @@ import (
 // keeps track of type expression and typename conflicts.
 // provides troubleshoot information back to user.
 type Agent struct {
-	Decls []*ast.GenDecl
+	Decls map[config.Typename]*ast.GenDecl
 	exprs map[resolve.Path]ast.Expr
 	users map[config.Typename][]resolve.Path
 }
 
 func New() *Agent {
 	return &Agent{
-		Decls: []*ast.GenDecl{},
+		Decls: map[config.Typename]*ast.GenDecl{},
 		exprs: map[resolve.Path]ast.Expr{},
 		users: map[config.Typename][]resolve.Path{},
 	}

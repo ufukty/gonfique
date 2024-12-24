@@ -8,3 +8,4 @@ rules:
   gateways.**.endpoints.*: { declare: Endpoint }
 
   <Endpoint>.method: { replace: http.Method test/http }
+  <Endpoint>: { accessors: ["method", "path"] }

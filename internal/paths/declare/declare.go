@@ -32,10 +32,10 @@ func (a *Agent) Declare(holder ast.Node, last string, tn config.Typename, rp res
 	} else {
 		a.users[tn] = []resolve.Path{rp}
 		ts := &ast.TypeSpec{Name: tn.Ident(), Type: expr}
-		a.Decls = append(a.Decls, &ast.GenDecl{
+		a.Decls[tn] = &ast.GenDecl{
 			Tok:   token.TYPE,
 			Specs: []ast.Spec{ts},
-		})
+		}
 		return ts, nil
 	}
 }

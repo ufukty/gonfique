@@ -8,12 +8,12 @@ import (
 
 type Agent struct {
 	typenames []config.Typename
-	Decls     []*ast.GenDecl
+	Decls     map[config.Typename]*ast.GenDecl
 }
 
 func New() *Agent {
 	return &Agent{
 		typenames: []config.Typename{},
-		Decls:     []*ast.GenDecl{},
+		Decls:     map[config.Typename]*ast.GenDecl{},
 	}
 }
