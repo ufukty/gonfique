@@ -485,7 +485,7 @@ rules:
 
 Use `declare` directive to generate named type declaration(s) for matching targets. This directive merges the types of all matches, and requires them to share same schema.
 
-> ![TIP]
+> [!TIP]
 >
 > Examples with paths and `declare` directive:
 >
