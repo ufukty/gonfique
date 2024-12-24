@@ -11,7 +11,7 @@ import (
 )
 
 type aux struct {
-	Accessors []*ast.FuncDecl
+	Accessors map[config.Typename][]*ast.FuncDecl
 }
 
 // TODO: apply parent directive

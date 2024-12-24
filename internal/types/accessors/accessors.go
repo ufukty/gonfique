@@ -9,12 +9,12 @@ import (
 )
 
 type Agent struct {
-	Decls []*ast.FuncDecl
+	Decls map[config.Typename][]*ast.FuncDecl
 }
 
 func New() *Agent {
 	return &Agent{
-		Decls: []*ast.FuncDecl{},
+		Decls: map[config.Typename][]*ast.FuncDecl{},
 	}
 }
 
@@ -47,8 +47,9 @@ func (a *Agent) Implement(ti *transform.Info, tn config.Typename, t *ast.GenDecl
 		types[ti.Fieldnames[f]] = f.Type
 	}
 
+	a.Decls[tn] = []*ast.FuncDecl{}
 	for fn, ft := range types {
-		a.Decls = append(a.Decls, get(tn, fn, ft), set(tn, fn, ft))
+		a.Decls[tn] = append(a.Decls[tn], get(tn, fn, ft), set(tn, fn, ft))
 	}
 
 	return nil

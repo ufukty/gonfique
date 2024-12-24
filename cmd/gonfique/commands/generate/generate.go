@@ -11,7 +11,6 @@ import (
 	"github.com/ufukty/gonfique/internal/paths"
 	"github.com/ufukty/gonfique/internal/transform"
 	"github.com/ufukty/gonfique/internal/types"
-	"golang.org/x/exp/maps"
 )
 
 func simple(in, out string) error {
@@ -75,8 +74,8 @@ func withconfig(in, conf, out string, verbose bool) error {
 		Encoding:  enc,
 		Config:    ti.Type,
 		Imports:   aux.Imports,
-		Named:     maps.Values(aux.Declare),
-		Auto:      maps.Values(aux.Auto),
+		Named:     aux.Declare,
+		Auto:      aux.Auto,
 		Accessors: auxT.Accessors,
 	}
 	err = coder.Write(out)
