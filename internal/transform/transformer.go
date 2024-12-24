@@ -17,12 +17,12 @@ import (
 type Info struct {
 	Type       ast.Expr
 	Keys       map[ast.Node]string
-	Fieldnames map[ast.Node]config.FieldName
+	Fieldnames map[ast.Node]config.Fieldname
 }
 
 type transformer struct {
 	keys       map[ast.Node]string // corresponding keys for ASTs
-	fieldnames map[ast.Node]config.FieldName
+	fieldnames map[ast.Node]config.Fieldname
 	tagname    string
 }
 
@@ -124,7 +124,7 @@ func (tr *transformer) transform(v reflect.Value) ast.Expr {
 func Transform(d any, encoding input.Encoding) Info {
 	tr := transformer{
 		keys:       map[ast.Node]string{},
-		fieldnames: map[ast.Node]config.FieldName{},
+		fieldnames: map[ast.Node]config.Fieldname{},
 		tagname:    string(encoding),
 	}
 	ty := tr.transform(reflect.ValueOf(d))

@@ -9,7 +9,7 @@ import (
 func TestFieldnameFromUppercase(t *testing.T) {
 	tcs := []struct {
 		input string
-		want  config.FieldName
+		want  config.Fieldname
 	}{
 		{"TITLE", "Title"},
 		{"TOKEN", "Token"},
@@ -39,7 +39,7 @@ func TestFieldnameFromUppercase(t *testing.T) {
 func TestFieldnameFromLowercase(t *testing.T) {
 	tcs := []struct {
 		input string
-		want  config.FieldName
+		want  config.Fieldname
 	}{
 		{"address", "Address"},
 		{"age", "Age"},
@@ -174,7 +174,7 @@ func TestFieldnameFromLowercase(t *testing.T) {
 func TestFieldnameFromCamelCase(t *testing.T) {
 	tcs := []struct {
 		input string
-		want  config.FieldName
+		want  config.Fieldname
 	}{
 		{"webSocket", "WebSocket"},
 		{"accessToken", "AccessToken"},
@@ -201,7 +201,7 @@ func TestFieldnameFromCamelCase(t *testing.T) {
 func TestFieldnameFromSnakeCase(t *testing.T) {
 	tcs := []struct {
 		input string
-		want  config.FieldName
+		want  config.Fieldname
 	}{
 		{"conn_max_lifetime", "ConnMaxLifetime"},
 		{"db_driver", "DbDriver"},
@@ -231,7 +231,7 @@ func TestFieldnameFromSnakeCase(t *testing.T) {
 func TestFieldnameFromKebabCase(t *testing.T) {
 	tcs := []struct {
 		input string
-		want  config.FieldName
+		want  config.Fieldname
 	}{
 		{"max-open-conns", "MaxOpenConns"},
 		{"password-policy", "PasswordPolicy"},
@@ -256,7 +256,7 @@ func TestFieldnameFromKebabCase(t *testing.T) {
 func TestFieldnameFromKubernetesConfig(t *testing.T) {
 	tcs := []struct {
 		input string
-		want  config.FieldName
+		want  config.Fieldname
 	}{
 		{"apiVersion", "ApiVersion"},
 		{"app", "App"},

@@ -24,10 +24,10 @@ type Directives struct {
 	Dict    Dict     `yaml:"dict"`
 	Replace string   `yaml:"replace"`
 
-	Parent    string   `yaml:"parent"`
-	Embed     string   `yaml:"embed"`
-	Accessors []string `yaml:"accessors"`
-	Iterator  bool     `yaml:"iterator"`
+	Parent    string      `yaml:"parent"`
+	Embed     string      `yaml:"embed"`
+	Accessors []Fieldname `yaml:"accessors"`
+	Iterator  bool        `yaml:"iterator"`
 }
 
 func (d Directives) IsZero() bool {
@@ -47,7 +47,7 @@ func (p Path) Segments() []string {
 	return strings.Split(string(p), ".")
 }
 
-func (p Path) WithField(f FieldName) Path {
+func (p Path) WithField(f Fieldname) Path {
 	return Path(fmt.Sprintf("%s.%s", p, f))
 }
 
@@ -57,9 +57,9 @@ func (t Typename) Ident() *ast.Ident {
 	return ast.NewIdent(string(t))
 }
 
-type FieldName string
+type Fieldname string
 
-func (fn FieldName) Ident() *ast.Ident {
+func (fn Fieldname) Ident() *ast.Ident {
 	return ast.NewIdent(string(fn))
 }
 

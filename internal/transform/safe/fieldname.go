@@ -11,7 +11,7 @@ import (
 var smallcaps = regexp.MustCompile("[a-z]+")
 
 // Best effort on creating Go var/field names out of YAML keys idiomatically
-func FieldName(key string) config.FieldName {
+func FieldName(key string) config.Fieldname {
 	if !smallcaps.MatchString(key) {
 		key = strings.ToLower(key)
 	}
@@ -27,5 +27,5 @@ func FieldName(key string) config.FieldName {
 			n += string(r)
 		}
 	}
-	return config.FieldName(n)
+	return config.Fieldname(n)
 }
