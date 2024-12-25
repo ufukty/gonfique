@@ -625,12 +625,12 @@ Since the corresponding type for a struct-represented section of the input file 
 Combined with `iterator` directive, Gonfique let's you use your 'structs' in a previously unimagined way:
 
 ```go
-for name, details := range cfg.employees.Iter { /* */ }
+for name, details := range cfg.employees.Fields() { /* */ }
 ```
 
 where the employees were originally a dict and represented with a struct in Go. With iterator support on structs, you can keep your way to access values through fields like it is a `struct` and also have another way to iterate over them like it is a `map`.
 
-The declarations of both `Objectives` type and its `Iter` method can be seen in example below. Keys returned by iterator are actual values from YAML/JSON file that correspond to a field. Value type is coming from the all fields sharing same type.
+The declarations of both `Objectives` type and its `Fields` method can be seen in example below. Keys returned by iterator are actual values from YAML/JSON file that correspond to a field. Value type is coming from the all fields sharing same type.
 
 ```go
 type Objectives struct {
