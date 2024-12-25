@@ -7,19 +7,22 @@ import (
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/transform"
 	"github.com/ufukty/gonfique/internal/types/accessors"
+	"github.com/ufukty/gonfique/internal/types/iterator"
 	"github.com/ufukty/gonfique/internal/types/rules"
 )
 
 type aux struct {
 	Accessors map[config.Typename][]*ast.FuncDecl
+	Iterator  map[config.Typename]*ast.FuncDecl
 }
 
 // TODO: apply parent directive
 // TODO: apply embed directive
 // DONE: implement accessors
-// TODO: implement iterator
+// DONE: implement iterator
 func Apply(ti *transform.Info, c *config.File, decls map[config.Typename]*ast.GenDecl) (*aux, error) {
 	accessors := accessors.New()
+	iterator := iterator.New()
 
 	tts := rules.TypeTargeting(c)
 	rs := rules.Filter(c, tts)
@@ -37,14 +40,17 @@ func Apply(ti *transform.Info, c *config.File, decls map[config.Typename]*ast.Ge
 
 		// }
 
-		// if dirs.Iterator {
-
-		// }
+		if dirs.Iterator {
+			err := iterator.Implement(ti, tn, decls[tn])
+			if err != nil {
+				return nil, fmt.Errorf("iterator: %w", err)
+			}
+		}
 
 		// if dirs.Parent == "" {
 
 		// }
 	}
 
-	return &aux{Accessors: accessors.Decls}, nil
+	return &aux{Accessors: accessors.Decls, Iterator: iterator.Decls}, nil
 }

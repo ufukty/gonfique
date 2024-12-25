@@ -2,10 +2,17 @@ meta:
   type: Config
 
 rules:
-  "**": { export: true }
-  "**.tags.endpoints": { dict: map }
+  "**.objectives.endpoints": { declare: ObjectivesEndpoints }
+  "**.tags.endpoints": { declare: TagsEndpoints, dict: map }
   "**.tags.endpoints.[value]": { declare: TagEndpoint }
-  gateways.**.endpoints.*: { declare: Endpoint }
 
-  <Endpoint>.method: { replace: http.Method test/http }
-  <Endpoint>: { accessors: ["method", "path"] }
+  "**.endpoints.*": { declare: Endpoint }
+  "<ObjectivesEndpoints>.*": { declare: Endpoint }
+  "<TagsEndpoints>.*": { declare: Endpoint }
+
+  "**": { export: true }
+
+  "<Endpoint>": { accessors: ["method", "path"] }
+  "<Endpoint>.method": { replace: http.Method test/http }
+
+  "<ObjectivesEndpoints>": { iterator: true }

@@ -77,6 +77,7 @@ func withconfig(in, conf, out string, verbose bool) error {
 		Named:     aux.Declare,
 		Auto:      aux.Auto,
 		Accessors: auxT.Accessors,
+		Iterators: auxT.Iterator,
 	}
 	err = coder.Write(out)
 	if err != nil {

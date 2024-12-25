@@ -13,7 +13,7 @@ func TestConfig(t *testing.T) {
 
 	fmt.Println(cfg.Gateways.Public.Services.Objectives.Endpoints.Create)
 
-	for ep, details := range cfg.Gateways.Public.Services.Tags.Endpoints {
+	for ep, details := range ObjectivesEndpoints(cfg.Gateways.Public.Services.Objectives.Endpoints).Fields() {
 		fmt.Printf("%s => %s\n", ep, details)
 	}
 }

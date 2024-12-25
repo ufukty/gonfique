@@ -19,7 +19,7 @@ func New() *Agent {
 }
 
 func (a *Agent) Implement(ti *transform.Info, tn config.Typename, t *ast.GenDecl, fields []config.Fieldname) error {
-	if len(t.Specs) == 0 {
+	if t == nil || len(t.Specs) == 0 {
 		return fmt.Errorf("specs are empty")
 	}
 	ts, ok := t.Specs[0].(*ast.TypeSpec)

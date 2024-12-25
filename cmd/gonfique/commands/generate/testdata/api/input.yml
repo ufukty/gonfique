@@ -6,14 +6,24 @@ gateways:
       document:
         path: document
         endpoints:
-          list: { method: "GET", path: "list/{root}" }
+          get: { method: "GET", path: "/" }
+          create: { method: "POST", path: "/" }
+          delete: { method: "DELETE", path: "/" }
+          patch: { method: "PATCH", path: "/" }
+          put: { method: "PUT", path: "/" }
       objectives:
         path: tasks
         endpoints:
-          create: { method: "POST", path: "task" }
-          getPlacement: { method: "GET", path: "placement/{root}" }
+          get: { method: "GET", path: "/" }
+          create: { method: "POST", path: "/" }
+          delete: { method: "DELETE", path: "/" }
+          patch: { method: "PATCH", path: "/" }
+          put: { method: "PUT", path: "/" }
       tags:
         path: tags
         endpoints:
-          creation: { method: "POST", path: "" }
-          assign: { method: "POST", path: "assign" }
+          get: { method: "GET", path: "/" }
+          create: { method: "POST", path: "/" }
+          delete: { method: "DELETE", path: "/" }
+          patch: { method: "PATCH", path: "/" }
+          put: { method: "PUT", path: "/" }

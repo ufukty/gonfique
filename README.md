@@ -625,10 +625,39 @@ Since the corresponding type for a struct-represented section of the input file 
 Combined with `iterator` directive, Gonfique let's you use your 'structs' in a previously unimagined way:
 
 ```go
-for name, details := range cfg.employees { /* */ }
+for name, details := range cfg.employees.Iter { /* */ }
 ```
 
 where the employees were originally a dict and represented with a struct in Go. With iterator support on structs, you can keep your way to access values through fields like it is a `struct` and also have another way to iterate over them like it is a `map`.
+
+The declarations of both `Objectives` type and its `Iter` method can be seen in example below. Keys returned by iterator are actual values from YAML/JSON file that correspond to a field. Value type is coming from the all fields sharing same type.
+
+```go
+type Objectives struct {
+	Create Endpoint `yaml:"create"`
+	Delete Endpoint `yaml:"delete"`
+	Get    Endpoint `yaml:"get"`
+	Patch  Endpoint `yaml:"patch"`
+	Put    Endpoint `yaml:"put"`
+}
+
+func (o Objectives) Fields() iter.Seq2[string, Endpoint] {
+	return func(yield func(string, Endpoint) bool) {
+		mp := map[string]Endpoint{
+			"create": o.Create,
+			"delete": o.Delete,
+			"get":    o.Get,
+			"patch":  o.Patch,
+			"put":    o.Put,
+		}
+		for k, v := range mp {
+			if !yield(k, v) {
+				return
+			}
+		}
+	}
+}
+```
 
 ##### Adding a field for parent access with `parent`
 

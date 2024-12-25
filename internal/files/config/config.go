@@ -57,6 +57,10 @@ func (t Typename) Ident() *ast.Ident {
 	return ast.NewIdent(string(t))
 }
 
+func (t Typename) RecvName() *ast.Ident {
+	return ast.NewIdent(strings.ToLower(string(([]rune(t))[0])))
+}
+
 type Fieldname string
 
 func (fn Fieldname) Ident() *ast.Ident {

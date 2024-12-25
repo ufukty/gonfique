@@ -10,6 +10,7 @@ import (
 	"os"
 	"regexp"
 	"slices"
+	"strings"
 
 	"github.com/ufukty/gonfique/cmd/gonfique/commands/version"
 	"github.com/ufukty/gonfique/internal/files/coder/sort"
@@ -31,7 +32,8 @@ type Coder struct {
 	Imports     []string
 	Named, Auto map[config.Typename]*ast.GenDecl
 
-	Accessors, Iterators map[config.Typename][]*ast.FuncDecl
+	Accessors            map[config.Typename][]*ast.FuncDecl
+	Iterators            map[config.Typename]*ast.FuncDecl
 	ParentRefAssignments []ast.Stmt
 }
 
@@ -57,6 +59,9 @@ func (c Coder) addImports(dst *ast.File) {
 	case input.Json:
 		imports = append(imports, "encoding/json")
 	}
+	if len(c.Iterators) > 0 {
+		imports = append(imports, "iter")
+	}
 
 	slices.Sort(imports)
 	imports = uniq(imports)
@@ -73,6 +78,27 @@ func (c Coder) addImports(dst *ast.File) {
 		Tok:   token.IMPORT,
 		Specs: specs,
 	})
+}
+
+func concat[K comparable, V any](ms ...map[K]V) map[K]V {
+	t := 0
+	for _, m := range ms {
+		t += len(m)
+	}
+	m2 := make(map[K]V, t)
+	for _, m := range ms {
+		for k, v := range m {
+			m2[k] = v
+		}
+	}
+	return m2
+}
+
+func mki[K comparable, V any](m map[K]V, k K) {
+	_, ok := m[k]
+	if !ok {
+		m[k] = *new(V)
+	}
 }
 
 func (c Coder) createGenDecls(dst *ast.File) {
@@ -98,36 +124,34 @@ func (c Coder) createGenDecls(dst *ast.File) {
 	}
 	decls = sort.Decls(decls)
 
-	// if c.Iterators != nil {
-	// 	for _, fd := range c.Iterators {
-	// 		decls = append(decls, fd)
-	// 	}
-	// }
-
+	ds := concat(c.Auto, c.Named)
+	methods := map[*ast.GenDecl][]ast.Decl{}
+	if c.Iterators != nil {
+		for tn, iterator := range c.Iterators {
+			if gd, ok := ds[tn]; ok {
+				mki(methods, gd)
+				methods[gd] = append(methods[gd], iterator)
+			}
+		}
+	}
 	if c.Accessors != nil {
-		shortcuts := map[*ast.GenDecl][]ast.Decl{}
 		for tn, accessors := range c.Accessors {
-			if gd, ok := c.Named[tn]; ok {
-				shortcuts[gd] = []ast.Decl{}
+			if gd, ok := ds[tn]; ok {
+				mki(methods, gd)
 				for _, a := range accessors {
-					shortcuts[gd] = append(shortcuts[gd], a)
-				}
-			} else if gd, ok := c.Auto[tn]; ok {
-				shortcuts[gd] = []ast.Decl{}
-				for _, a := range accessors {
-					shortcuts[gd] = append(shortcuts[gd], a)
+					methods[gd] = append(methods[gd], a)
 				}
 			}
 		}
+	}
 
-		l := len(decls)
-		for i, e := 0, 0; i < l; i++ {
-			d := decls[i+e]
-			if gd, ok := d.(*ast.GenDecl); ok {
-				if accessors, ok := shortcuts[gd]; ok {
-					decls = slices.Insert(decls, i+e+1, accessors...)
-					e += len(accessors)
-				}
+	l := len(decls)
+	for i, e := 0, 0; i < l; i++ {
+		d := decls[i+e]
+		if gd, ok := d.(*ast.GenDecl); ok {
+			if ms, ok := methods[gd]; ok {
+				decls = slices.Insert(decls, i+e+1, ms...)
+				e += len(ms)
 			}
 		}
 	}
@@ -144,6 +168,10 @@ func post(s string) string {
 	s = typedecls.ReplaceAllString(s, "\n$1")
 	s = funcdecls.ReplaceAllString(s, "\n$1")
 	s = imports.ReplaceAllString(s, "import ($1\n$2)") // split packages starts with domains
+	// 3 lines are for iterators
+	s = strings.ReplaceAll(s, "{\"", "{\n\"")
+	s = strings.ReplaceAll(s, ", \"", ",\n\"")
+	s = strings.ReplaceAll(s, "}\n\t\tfor", ",\n}\n\t\tfor")
 	return s
 }
 
