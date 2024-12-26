@@ -40,6 +40,6 @@ func Declare(cps []config.Path, paths map[config.Path]config.Directives) (config
 
 func Export(cps []config.Path, paths map[config.Path]config.Directives) (bool, bool) {
 	return value(cps, func(cp config.Path) bool {
-		return paths[cp].Export && paths[cp].Declare == "" && paths[cp].Replace == ""
+		return paths[cp].Export
 	})
 }

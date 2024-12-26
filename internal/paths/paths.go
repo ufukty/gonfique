@@ -53,6 +53,8 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 				return nil, fmt.Errorf("checking conflicts: %w", err)
 			}
 
+			exportable := true
+
 			if _, ok := pick.Dict(cps, c.Rules); ok {
 				mt, err := dict.ConvertToMap(holder, path[len(path)-1], ti)
 				if err != nil {
@@ -79,9 +81,10 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 					later = append(later, args{ts.Type, ts, []string{fmt.Sprintf("<%s>", decl)}})
 				}
 				recursion = false // manually perform traversal later once per declared type (not as many as its users)
+				exportable = false
 			}
 
-			if _, ok := pick.Export(cps, c.Rules); ok {
+			if _, ok := pick.Export(cps, c.Rules); ok && exportable {
 				if err := export.Type(rp, declare.Typenames(), holder, path[len(path)-1]); err != nil {
 					return nil, fmt.Errorf("exporting: %w", err)
 				}
