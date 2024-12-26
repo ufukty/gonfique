@@ -41,6 +41,7 @@ Icon
 Network Trash Folder
 Temporary Items
 todo.md
+README.toc.md
 
 !.vscode/*.code-snippets
 !.vscode/extensions.json

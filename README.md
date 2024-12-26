@@ -107,34 +107,37 @@ This one was an easy one. No one have enough time to deal with this in repeat. Y
   - [Version](#version)
   - [Help](#help)
 - [Features](#features)
-- [Gonfique config puns&funs](#gonfique-config-punsfuns)
+- [Gonfique config (puns&funs)](#gonfique-config-punsfuns)
   - [Rules](#rules)
-    - [Writing paths for value-targeting rules](#writing-paths-for-value-targeting-rules)
+  - [Paths](#paths)
+    - [Targeting resolved types](#targeting-resolved-types)
       - [Wildcards](#wildcards)
-      - [Components](#components)
-    - [Writing typenames for type-targeting rules](#writing-typenames-for-type-targeting-rules)
-    - [Directives](#directives)
-      - [Creating named separate type declarations with auto generated names with export](#creating-named-separate-type-declarations-with-auto-generated-names-with-export)
-      - [Creating named separate type declarations with declare](#creating-named-separate-type-declarations-with-declare)
-      - [Assigning types manually with replace](#assigning-types-manually-with-replace)
-      - [Using Go maps for YAML dictionaries and JSON objects with dict](#using-go-maps-for-yaml-dictionaries-and-json-objects-with-dict)
-      - [Implementing getters and setters with accessors](#implementing-getters-and-setters-with-accessors)
-      - [Making the hierarchy of types explicit with embed](#making-the-hierarchy-of-types-explicit-with-embed)
-      - [Making structs iterable with iterator](#making-structs-iterable-with-iterator)
-      - [Adding a field for parent access with parent](#adding-a-field-for-parent-access-with-parent)
-        - [Notes](#notes)
+      - [Array and map types](#array-and-map-types)
+    - [Targeting declared types](#targeting-declared-types)
+  - [Directives](#directives)
+    - [Directives applied on resolved types](#directives-applied-on-resolved-types)
+      - [Creating auto-named type declarations with `export`](#creating-auto-named-type-declarations-with-export)
+      - [Creating named type declarations with `declare`](#creating-named-type-declarations-with-declare)
+      - [Overwriting resolved types with `replace`](#overwriting-resolved-types-with-replace)
+      - [Using Go maps for dictionaries with `dict`](#using-go-maps-for-dictionaries-with-dict)
+    - [Directives applied on declared types](#directives-applied-on-declared-types)
+      - [Implementing getters and setters with `accessors`](#implementing-getters-and-setters-with-accessors)
+      - [Making the hierarchy of types explicit with `embed`](#making-the-hierarchy-of-types-explicit-with-embed)
+      - [Making structs iterable with `iterator`](#making-structs-iterable-with-iterator)
+      - [Adding a field for parent access with `parent`](#adding-a-field-for-parent-access-with-parent)
 - [Full examples](#full-examples)
   - [With customization](#with-customization)
   - [Without customization](#without-customization)
 - [Internal Concepts](#internal-concepts)
   - [Pipeline](#pipeline)
-  - [Automatic type resolution vs. manual type assignment](#automatic-type-resolution-vs-manual-type-assignment)
+  - [Automatic type resolution vs. manual type assignment](#automatic-type-resolution-vs.-manual-type-assignment)
   - [Decision process to generate type declarations](#decision-process-to-generate-type-declarations)
   - [Automatic typename generation](#automatic-typename-generation)
   - [Decision process on array type](#decision-process-on-array-type)
+  - [Sorting declarations](#sorting-declarations)
 - [Serving suggestions](#serving-suggestions)
 - [Troubleshoot](#troubleshoot)
-  - [Combining parent and declare on a group of matches](#combining-parent-and-declare-on-a-group-of-matches)
+  - [Combining `parent` and `declare` on a group of matches](#combining-parent-and-declare-on-a-group-of-matches)
 - [Considerations](#considerations)
 - [Contribution](#contribution)
 - [License](#license)
@@ -242,14 +245,14 @@ meta:
   config-type: <typename>
 
 rules:
-  <path>:
+  <path-to-resolved-type>:
     # customizations for value-targeting rules:
     declare: <typename>
     dict: [ struct | map ]
     export: <bool>
     replace: <typename> <import-path>
 
-  <Typename>:
+  <declared-type>:
     # customizations for type-targeting rules:
     accessors: <keys...>
     embed: <typename>
@@ -261,23 +264,39 @@ rules:
 
 ### Rules
 
-Rules section is where all the customizations are described in the Gonfique config. The whole section is a dict where the keys are individual targets and the values are sequence of one directive and its arguments.
+The `rules` dictionary is where you put all the customizations you want to apply on resolved types of values in the file, and other types you declare in the process. The each key-value pair in `rules` dictionary is processed as target(s) and directive(s). Targets can either be a value described by its path, or a type declared by former.
 
-As can be seen in the file above, directives can be set either on a type of a value that strictly corresponds to a certain point in the YAML/JSON file, or a typename that is declared by the former. You use paths to point Gonfique to a certain point in the YAML/JSON file. Then, Gonfique applies the directives in that rule to the type corresponds to that point of YAML/JSON file. At the other hand, you use typenames to point Go types previously declared by value targeting paths.
+**Directives** can be set either on a value or type. In the case of value; the directives are applied on the resolved type of the value you describe its path. In case of type, the path is expected to describe a type that is declared by the former, during the generation process. There is one custom case, where the value you want to customize does directly or eventually belong to a previously declared type. In such case, the path is still categorized as value targeting, although its path expected to start with the name of containing type according to path syntax. Next section explains the terms and the syntax of paths.
 
-So, the rules target either **a value in the YAML/JSON file** or **a Go type** previously declared by former. Understanding the distinction between value and type targeting paths is crucial to write proper Gonfique configs.
+So, the rules **target** either a value in the YAML/JSON file or a Go type previously declared by former. Understanding the distinction between value and type targeting paths is crucial to write proper Gonfique configs.
+
+There are 4 types of **directives** that can be applied on resolved/assigned types of the input file values:
+
+- **export**  
+  Generate a separate type declaration with the resolved type (or the assigned type, if present)
+- **declare**  
+  Like `export` but you provide the typename
+- **dict**  
+  Use `map` instead of `struct` for a dictionary
+- **replace**  
+  Overwrites the resolved type definition with the provided typename
+
+There are also 4 types of directives that can be applied on types declared during the generation process to allow you further customize them:
+
+- **accessors**  
+  Implement getter and setter method for fields
+- **embed**  
+  Embed another type
+- **iterator**  
+  Make structs iterable
+- **parent**  
+  Add a field to struct and assign the ref of parent
 
 ### Paths
 
-When you want to customize a value's type:
+When you want to customize a value's resolved type to apply value targeting directives such as `declare`, `dict`, `export` or `replace`; those manipulations performed per target. Thus, those rules need to be defined with **value-targeting paths**. Paths are written as a sequence of dot-separated **terms**. Order of terms follows the file hierarchy between dictionaries, lists and values. There are 4 kind of terms: `key`, `wildcard`, `component` and `type` that needs to be combined in special way to create a value or type targeting path.
 
-- to overwrite the type expression with a custom typename,
-- to create a named type declaration and replace with the type expression,
-- to convert the resolved type for a dict to `map` form `struct`,
-
-those manipulations performed per target. Thus, those rules need to be defined with **value-targeting paths**.
-
-Paths are how you describe a target you want to apply directives, when the directives are one of those that works on resolved or assigned types such as `dict`, `replace`, `declare` or `export`. Paths are consist of dot-separated terms. Order of terms follows the file hierarchy between dictionaries, lists and values. There are 4 kind of terms: `key`, `wildcard`, `component` and `type`.
+#### Terms
 
 | Term kind   | Description                                                                                                                             | Examples                  |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
@@ -331,7 +350,9 @@ rules:
 
 After completing this section, look at the [examples](#creating-named-separate-type-declarations-with-declare) in `declare` section.
 
-###### Wildcards
+#### Targeting resolved types
+
+##### Wildcards
 
 Use wildcards to increase flexibility of paths against partial content shifts, changes in the input file's schema which are expected to happen over time as development continues. There are 2 wildcards: single `*` and double `**` wildcards. A wildcard containing path may match multiple targets. The directives on the rule will be applied to each target, individually. Gonfique will notify if a path doesn't get any match.
 
@@ -392,13 +413,17 @@ employees:
 </tbody>
 </table>
 
-###### Components
+##### Array and map types
 
-There are 3 component selectors. One of them is for narrowing down from array type to its element type `[]`. The other two selectors are `[key]` and `[value]`. Those are to narrow down from a map type to either of key type or value type. If Gonfique sees any of those selectors, it expects the container to not be a struct but a list for element type selector or a dict for key/value type selector.
+In Go, defining an arrays type need element type to be known, and defining a map type need the key and value types to be known. Gonfique, when it faces with a list, compares the all elements that present in the input file, to see if they have any conflicting component. If there is no conflift amongst all values, then Gonfique finds the element type by combining types of all items. This also applied on dictionaries when they are directed to be represented with a Go map instead of a Go struct (look `dict` directive). Gonfique checks all key's values for their types. If there is no conflicts, then the value type assigned as the combined type of all values. The key type is originally declared as `string`, although it can be customizable.
+
+Customizing element, key and value types are possible with special terms called component selectors. There are 3 component selectors. One of them is for narrowing down from array type to its element type `[]`.
 
 ```go
 type ArrayType []ItemType
 ```
+
+The other two selectors are `[key]` and `[value]`. They are to narrow down from a map type to either of key type or value type. If Gonfique sees any of those selectors, it expects the container to not be a struct but a list for element type selector or a dict for key/value type selector.
 
 Use `[key]` operator to target a key type and use `[value]` operator to target a value type.
 
@@ -437,49 +462,45 @@ Paths contain `[key]` and `[value]` are only read when the container set `dict: 
 > }
 > ```
 
-#### Directives
+Component terms can be used in termination of a path to select the component type; or anywhere after a collection type to narrow down the scope of rule.
 
-There are 4 types of directives that can be used within `value` and `type-value` targeting rules:
+#### Targeting declared types
 
-- **export**  
-  Generate a separate type declaration
-- **declare**  
-  Like `export` but you provide the typename
-- **dict**  
-  Use `map` instead of `struct` for a dictionary
-- **replace**  
-  Overwrites the resolved type definition with the provided typename
+When you want to manipulate a previously declared "Go type" to:
 
-There are 4 types of directives that can be used within `type` targeting rules:
+- add fields to assign parent refs,
+- redefine it by embedding another type,
+- implementing getters, setters on it,
+- implementing iterator on it
 
-- **accessors**  
-  Implement getter and setter method for fields
-- **embed**  
-  Embed another type
-- **iterator**  
-  Make structs iterable
-- **parent**  
-  Add a field to struct and assign the ref of parent
+those manipulations performed independently than the how many places the type you manipulate mentioned in the main mapping type. Because of multiple fields can use same type, editing a type declaration once effects all usages in the main mapping type. Thus, you need to write those rules with **type-targeting paths** rather than value-targeting paths.
 
-The directives `declare`, `explore`, `dict` and `replace` are applied on (resolved types of) dicts, lists and literal values in the input file. Other set of directives which consists by `accessors`, `embed`, `iterator` and `parent` target types. Those directives can further customize the types produced by `declare` directives. Since those directives target types rather than paths, they are expected in `types` section.
+### Directives
 
-It might be helpful imagining `type` targeting rules are processed after than the `value` and `type-value` section. Order is because of both reasons: types needed to be declared before implementing methods on them, and one type can be used for more than one target.
+The directives `declare`, `explore`, `dict` and `replace` are applied on resolved types of values of the input file. Other set of directives which consists by `accessors`, `embed`, `iterator` and `parent` target types. Those directives can further customize the types declared by `declare` directives.
 
-##### Creating named (separate) type declarations with auto generated names with `export`
+It might be helpful imagining rules that target declared types are processed after than the rules target resolved/assigned type of values in the input file. This ordering is because of both reasons:
+
+- Types needed to be declared before implementing methods on them,
+- One type can be used for more than one target.
+
+#### Directives applied on resolved types
+
+##### Creating auto-named type declarations with `export`
 
 ```yaml
 rules:
-  <path>:
+  <value-type-targeting-path>:
     export: true
 ```
 
 Exporting a path, will result every matching target's type to be declared as separate with an auto generated typename. The path match multiple target is completely fine and intended. If desired, the path could be `*` or `**` too. See also: [Automatic typename generation](#automatic-typename-generation). Note that auto generated typenames are dependent to each other because of collisions and readability. So, typenames' stability subject to schema stability. Thus, consecutive runs might produce different typename set. For the typenames stability matters prefer usage of `declare` directive.
 
-##### Creating named (separate) type declarations with `declare`
+##### Creating named type declarations with `declare`
 
 ```yaml
 rules:
-  <path>:
+  <value-type-targeting-path>:
     declare: <typename>
 ```
 
@@ -544,21 +565,21 @@ Use `declare` directive to generate named type declaration(s) for matching targe
 > func UtilityFunction(b config.B) { /* */ }
 > ```
 
-##### Assigning types manually with `replace`
+##### Overwriting resolved types with `replace`
 
 ```yaml
 rules:
-  <path>:
+  <value-type-targeting-path>:
     replace: <typename> <import-path>
 ```
 
 Assign specified type name instead resolving from source file. For example: `replace: int` or `replace: models.Employee acme/models`.
 
-##### Using Go maps for YAML dictionaries and JSON objects with `dict`
+##### Using Go maps for dictionaries with `dict`
 
 ```yaml
 rules:
-  <path>:
+  <value-type-targeting-path>:
     dict: [ struct | map ]
 .
 ```
@@ -577,26 +598,13 @@ If you want to get a standard map type such as a `map[string]any`, you might as 
 
 Note that Gonfique will use `any` value type if any two of dict key's type conflict when the dict is requested to be defined as `map`. If your key types conflict but you need to keep the type safety without making the dict iterable; you might as well use [iterator](#making-structs-iterable-with-iterator) on a struct representation.
 
-### Types
-
-#### Writing typenames for type-targeting rules
-
-When you want to manipulate a previously declared "Go type" to:
-
-- add fields to assign parent refs,
-- redefine it by embedding another type,
-- implementing getters, setters on it,
-- implementing iterator on it
-
-those manipulations performed independently than the how many places the type you manipulate mentioned in the main mapping type. Because of multiple fields can use same type, editing a type declaration once effects all usages in the main mapping type. Thus, you need to write those rules with **type-targeting paths** rather than value-targeting paths.
-
-#### Directives
+#### Directives applied on declared types
 
 ##### Implementing getters and setters with `accessors`
 
 ```yaml
 rules:
-  <Typename>:
+  <declared-type-targeting-path>:
     accessors: [<key-1>, <key-2>, ...]
 ```
 
@@ -606,7 +614,7 @@ Accessors are getters and setters for fields. Gonfique can implement getters and
 
 ```yaml
 rules:
-  <Typename>:
+  <declared-type-targeting-path>:
     embed: <typename>
 ```
 
@@ -616,7 +624,7 @@ Using `embed` directive will modify the generated type definition to make it loo
 
 ```yaml
 rules:
-  <Typename>:
+  <declared-type-targeting-path>:
     iterator: <bool>
 ```
 
@@ -663,7 +671,7 @@ func (o Objectives) Fields() iter.Seq2[string, Endpoint] {
 
 ```yaml
 rules:
-  <Typename>:
+  <declared-type-targeting-path>:
     parent: <Fieldname>
 ```
 
