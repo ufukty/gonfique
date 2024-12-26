@@ -610,6 +610,52 @@ rules:
 
 Accessors are getters and setters for fields. Gonfique can implement getters and setters on any field of a struct, any key of a dict. The code will contain input and output parameter types that is nicely matching the field type.
 
+<table>
+<thead>
+<tr>
+<td>Input</td>
+<td>Output</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+```yaml
+rules:
+  "**.endpoints.*":
+    declare: Endpoint
+  "<Endpoint>.method":
+    replace: http.Method module/http
+  "<Endpoint>":
+    accessors: ["method"]
+```
+
+</td>
+<td>
+
+```go
+import "module/http"
+
+type Endpoint struct {
+	Method http.Method `yaml:"method"`
+	Path   string      `yaml:"path"`
+}
+
+func (e Endpoint) GetMethod() http.Method {
+	return e.Method
+}
+
+func (e *Endpoint) SetMethod(v http.Method) {
+	e.Method = v
+}
+```
+
+</td>
+</tr>
+</tbody>
+</table>
+
 ##### Making the hierarchy of types explicit with `embed`
 
 ```yaml
