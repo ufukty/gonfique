@@ -638,16 +638,16 @@ rules:
 import "module/http"
 
 type Endpoint struct {
-	Method http.Method `yaml:"method"`
-	Path   string      `yaml:"path"`
+  Method http.Method `yaml:"method"`
+  Path   string      `yaml:"path"`
 }
 
 func (e Endpoint) GetMethod() http.Method {
-	return e.Method
+  return e.Method
 }
 
 func (e *Endpoint) SetMethod(v http.Method) {
-	e.Method = v
+  e.Method = v
 }
 ```
 
@@ -688,28 +688,28 @@ The declarations of both `Objectives` type and its `Fields` method can be seen i
 
 ```go
 type Objectives struct {
-	Create Endpoint `yaml:"create"`
-	Delete Endpoint `yaml:"delete"`
-	Get    Endpoint `yaml:"get"`
-	Patch  Endpoint `yaml:"patch"`
-	Put    Endpoint `yaml:"put"`
+  Create Endpoint `yaml:"create"`
+  Delete Endpoint `yaml:"delete"`
+  Get    Endpoint `yaml:"get"`
+  Patch  Endpoint `yaml:"patch"`
+  Put    Endpoint `yaml:"put"`
 }
 
 func (o Objectives) Fields() iter.Seq2[string, Endpoint] {
-	return func(yield func(string, Endpoint) bool) {
-		mp := map[string]Endpoint{
-			"create": o.Create,
-			"delete": o.Delete,
-			"get":    o.Get,
-			"patch":  o.Patch,
-			"put":    o.Put,
-		}
-		for k, v := range mp {
-			if !yield(k, v) {
-				return
-			}
-		}
-	}
+  return func(yield func(string, Endpoint) bool) {
+    mp := map[string]Endpoint{
+      "create": o.Create,
+      "delete": o.Delete,
+      "get":    o.Get,
+      "patch":  o.Patch,
+      "put":    o.Put,
+    }
+    for k, v := range mp {
+      if !yield(k, v) {
+        return
+      }
+    }
+  }
 }
 ```
 
