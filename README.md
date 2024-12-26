@@ -490,7 +490,7 @@ It might be helpful imagining rules that target declared types are processed aft
 
 ```yaml
 rules:
-  <value-type-targeting-path>:
+  <path-to-resolved-type>:
     export: true
 ```
 
@@ -500,7 +500,7 @@ Exporting a path, will result every matching target's type to be declared as sep
 
 ```yaml
 rules:
-  <value-type-targeting-path>:
+  <path-to-resolved-type>:
     declare: <typename>
 ```
 
@@ -569,7 +569,7 @@ Use `declare` directive to generate named type declaration(s) for matching targe
 
 ```yaml
 rules:
-  <value-type-targeting-path>:
+  <path-to-resolved-type>:
     replace: <typename> <import-path>
 ```
 
@@ -579,7 +579,7 @@ Assign specified type name instead resolving from source file. For example: `rep
 
 ```yaml
 rules:
-  <value-type-targeting-path>:
+  <path-to-resolved-type>:
     dict: [ struct | map ]
 .
 ```
@@ -604,7 +604,7 @@ Note that Gonfique will use `any` value type if any two of dict key's type confl
 
 ```yaml
 rules:
-  <declared-type-targeting-path>:
+  <declared-type>:
     accessors: [<key-1>, <key-2>, ...]
 ```
 
@@ -660,7 +660,7 @@ func (e *Endpoint) SetMethod(v http.Method) {
 
 ```yaml
 rules:
-  <declared-type-targeting-path>:
+  <declared-type>:
     embed: <typename>
 ```
 
@@ -670,7 +670,7 @@ Using `embed` directive will modify the generated type definition to make it loo
 
 ```yaml
 rules:
-  <declared-type-targeting-path>:
+  <declared-type>:
     iterator: <bool>
 ```
 
@@ -717,7 +717,7 @@ func (o Objectives) Fields() iter.Seq2[string, Endpoint] {
 
 ```yaml
 rules:
-  <declared-type-targeting-path>:
+  <declared-type>:
     parent: <Fieldname>
 ```
 
