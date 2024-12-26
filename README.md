@@ -790,12 +790,12 @@ Output:
 package config
 
 import (
-	"fmt"
-	"iter"
-	"os"
-	"test/http"
+  "fmt"
+  "iter"
+  "os"
+  "test/http"
 
-	"gopkg.in/yaml.v3"
+  "gopkg.in/yaml.v3"
 )
 
 // exported for domain
@@ -808,64 +808,64 @@ type Path string
 type DocumentPath string
 
 type Endpoint struct {
-	Method http.Method `yaml:"method"`
-	Path   string      `yaml:"path"`
+  Method http.Method `yaml:"method"`
+  Path   string      `yaml:"path"`
 }
 
 func (e Endpoint) GetMethod() http.Method {
-	return e.Method
+  return e.Method
 }
 
 func (e *Endpoint) SetMethod(v http.Method) {
-	e.Method = v
+  e.Method = v
 }
 
 func (e Endpoint) GetPath() string {
-	return e.Path
+  return e.Path
 }
 
 func (e *Endpoint) SetPath(v string) {
-	e.Path = v
+  e.Path = v
 }
 
 // exported for gateways.public.services.document.endpoints
 type Endpoints struct {
-	Create Endpoint `yaml:"create"`
-	Delete Endpoint `yaml:"delete"`
-	Get    Endpoint `yaml:"get"`
-	Patch  Endpoint `yaml:"patch"`
-	Put    Endpoint `yaml:"put"`
+  Create Endpoint `yaml:"create"`
+  Delete Endpoint `yaml:"delete"`
+  Get    Endpoint `yaml:"get"`
+  Patch  Endpoint `yaml:"patch"`
+  Put    Endpoint `yaml:"put"`
 }
 
 // exported for gateways.public.services.document
 type Document struct {
-	Endpoints Endpoints    `yaml:"endpoints"`
-	Path      DocumentPath `yaml:"path"`
+  Endpoints Endpoints    `yaml:"endpoints"`
+  Path      DocumentPath `yaml:"path"`
 }
 
 type ObjectivesEndpoints struct {
-	Create Endpoint `yaml:"create"`
-	Delete Endpoint `yaml:"delete"`
-	Get    Endpoint `yaml:"get"`
-	Patch  Endpoint `yaml:"patch"`
-	Put    Endpoint `yaml:"put"`
+  Create Endpoint `yaml:"create"`
+  Delete Endpoint `yaml:"delete"`
+  Get    Endpoint `yaml:"get"`
+  Patch  Endpoint `yaml:"patch"`
+  Put    Endpoint `yaml:"put"`
 }
 
 func (o ObjectivesEndpoints) Fields() iter.Seq2[string, Endpoint] {
-	return func(yield func(string, Endpoint) bool) {
-		mp := map[string]Endpoint{
-			"create": o.Create,
-			"delete": o.Delete,
-			"get":    o.Get,
-			"patch":  o.Patch,
-			"put":    o.Put,
-		}
-		for k, v := range mp {
-			if !yield(k, v) {
-				return
-			}
-		}
-	}
+  return func(yield func(string, Endpoint) bool) {
+    mp := map[string]Endpoint{
+      "create": o.Create,
+      "delete": o.Delete,
+      "get":    o.Get,
+      "patch":  o.Patch,
+      "put":    o.Put,
+    }
+    for k, v := range mp {
+      if !yield(k, v) {
+        return
+      }
+    }
+  }
 }
 
 // exported for gateways.public.services.objectives.path
@@ -873,8 +873,8 @@ type ObjectivesPath string
 
 // exported for gateways.public.services.objectives
 type Objectives struct {
-	Endpoints ObjectivesEndpoints `yaml:"endpoints"`
-	Path      ObjectivesPath      `yaml:"path"`
+  Endpoints ObjectivesEndpoints `yaml:"endpoints"`
+  Path      ObjectivesPath      `yaml:"path"`
 }
 
 type TagsEndpoints map[string]Endpoint
@@ -884,45 +884,45 @@ type TagsPath string
 
 // exported for gateways.public.services.tags
 type Tags struct {
-	Endpoints TagsEndpoints `yaml:"endpoints"`
-	Path      TagsPath      `yaml:"path"`
+  Endpoints TagsEndpoints `yaml:"endpoints"`
+  Path      TagsPath      `yaml:"path"`
 }
 
 // exported for gateways.public.services
 type Services struct {
-	Document   Document   `yaml:"document"`
-	Objectives Objectives `yaml:"objectives"`
-	Tags       Tags       `yaml:"tags"`
+  Document   Document   `yaml:"document"`
+  Objectives Objectives `yaml:"objectives"`
+  Tags       Tags       `yaml:"tags"`
 }
 
 // exported for gateways.public
 type Public struct {
-	Path     Path     `yaml:"path"`
-	Services Services `yaml:"services"`
+  Path     Path     `yaml:"path"`
+  Services Services `yaml:"services"`
 }
 
 // exported for gateways
 type Gateways struct {
-	Public Public `yaml:"public"`
+  Public Public `yaml:"public"`
 }
 
 type Config struct {
-	Domain   Domain   `yaml:"domain"`
-	Gateways Gateways `yaml:"gateways"`
+  Domain   Domain   `yaml:"domain"`
+  Gateways Gateways `yaml:"gateways"`
 }
 
 func ReadConfig(path string) (*Config, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, fmt.Errorf("opening config file: %w", err)
-	}
-	defer file.Close()
-	c := &Config{}
-	err = yaml.NewDecoder(file).Decode(c)
-	if err != nil {
-		return nil, fmt.Errorf("decoding config file: %w", err)
-	}
-	return c, nil
+  file, err := os.Open(path)
+  if err != nil {
+    return nil, fmt.Errorf("opening config file: %w", err)
+  }
+  defer file.Close()
+  c := &Config{}
+  err = yaml.NewDecoder(file).Decode(c)
+  if err != nil {
+    return nil, fmt.Errorf("decoding config file: %w", err)
+  }
+  return c, nil
 }
 ```
 
