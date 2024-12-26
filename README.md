@@ -1004,33 +1004,53 @@ func ReadConfig(path string) (Config, error) {
 
 ### Pipeline
 
-- Decide on language between JSON and YAML
-- Decode the file into a `map[string]any` with the language's decoder
-- Get the `reflect.Type` for `map`
-- Transform `reflect.Type` -> `ast.TypeSpec`
-- Traverse from top to children in DFS by keeping track of path:
-  - Check if `replace` set on path. If so, apply and skip.
-  - Check if `dict: dynamic-keys` set on path. If so, apply and skip.
-  - Check if `declare` is
-- Substitude: replace types matching with user provided types
-- Mapping: match user-provided paths and separate type expressions as type specs named as instructed by user
-- Organize: separate the type definitions as standalone type specs and reuse them when definitions match
-- Iterables: implements Range method on those dictionaries that all items are in same type
+Reading input file
 
-### Automatic type resolution vs. manual type assignment
+- Decide between the YAML/JSON decoder by looking to the file extension
+- Decode the file into a `any` type variable.
 
-Gonfique can resolve any key/list/value's type by simply looking to it. While this behaviour is the default, Gonfique users can choose to opt-out automatic type resolution for any dict/list/value in the config file.
+The value would be in either type `map[string]any` or `[]any`.
 
-When type resolution disabled by using `replace` directive on any dict/list, Gonfique won't apply any directives for their "children" (that is all dicts, lists and values eventually belong to that object, subtree).
+Transforming to AST
 
-### Decision process to generate type declarations
+- Get the `reflect.Type` for the variable.
+- Transform `reflect.Type` into a `ast.Expr` with DFS.
 
-Gonfique needs to generate named type declarations in order to implement methods on them, or refer to them in other contexts in general.
+This returns a type expression represented with a tree of `*ast.StructType`, `*ast.ArrayType`, and `*ast.Ident`s. Notice there is no map type mentioned in this step.
 
-Structs matching any criteria below will get its type declared automatically, if not already requested with `declare`:
+Processing Gonfique config
 
-- Contains a field directed to implement accessors on,
-- Contains a field which needs a `parent` ref in its type definition.
+- Read the config
+- Validate rules based only on the information present in the config file with `config/validate` package
+- Apply value targeting rules:
+  - Create a queue to perform BFS on type expression starting from root, with keeping track of if the visit is in forward movement or backward (backtracing).
+  - In forward phase:
+    - Match the value's path with rule paths (they contain wildcards)
+    - If export enabled, reserve typename for path
+    -
+- Apply type targeting rules
+
+Writing to file
+
+- Collect information:
+  - the type expression created from reflect type in AST,
+  - named type declarations created by `declare` and `export`,
+  - function declarations created by `accessors` and `iterator`
+- Sort the type declarations in [dependency order](#Sorting-declarations).
+- Insert function declarations in the order they will follow their receiver's type declaration.
+- Use printer to print the file into memory for the first time
+- Perform post process to adjust whitespaces
+- Use formatter to print it to output file.
+
+### Applying Gonfique config rules in BFS order with backtracing
+
+Gonfique allows users to declare customizations on every node of example file. This results with some rules rely on others to be done its job in ancestor, or grandchildrens. Such as; choosing the map representation for a dictionary changes the path to children's type, and there might be occurrences where declaring multiple nodes with same typename only work without type conflicts amongst them, if the rules on one's grandchildren alter its type with another rule before declare directive has been started to process.
+
+To address those complicated needs, Gonfique travels on the type expression (AST) with BFS; first forward than backward. Some directives, such as `dict` and `replace` applied in forward phase in this traversal, while other directives such as `declare` and `export` are applied in backward phase, named backtracing.
+
+The choice of BFS over DFS is made because of the `export` directive. Applying of this directive requires generating typenames automatically, based on the value's path. Since choosing more-generic typenames for values closer to root aligns better with what developers would do when they write mapping type manually.
+
+As a design goal; a typical user should not be able to tell the existance of either BFS or forward/backward separation by observing Gonfique's behavior, unless they try.
 
 ### Automatic typename generation
 
@@ -1053,9 +1073,9 @@ lorem:
 | `lorem.ipsum`       | `ipsum`            |
 | `lorem.sit`         | `sit`              |
 
-### Decision process on array type
+### Combining element and value types
 
-`gonfique` assignes the necessary slice type to arrays. It works best when all items of an array possess the same schema or at least compatible schemas. Type assignment occurs as below when items have not same but compatible schemas:
+`gonfique` is able to assign one combined type for array element and map value types. It works best when all items of an collection possess the same schema in input file, but still works when they have combinable schemas. Type assignment occurs as below when items have not same but compatible schemas:
 
 <table>
 <thead>
@@ -1087,8 +1107,52 @@ lorem:
 <tr>
 <table>
 
+Gonfique's type combination works on multiple levels. Look at the example below. The global array's elements have different type of values assigned to `details` keys. This doesn't stop Gonfique to combine values assigned to `details` than combine the type of global array's elements. Thus, the array type assigned successfully.
+
+<table>
+<thead>
+<tr>
+<td>Input</td>
+<td>Output</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+```yaml:
+- name: ""
+  details:
+    color: ""
+- name: ""
+  details:
+    shape: ""
+```
+
+</td>
+<td>
+
+```go
+type Details struct {
+  Color string `yaml:"color"`
+  Shape string `yaml:"shape"`
+}
+
+type Item struct {
+  Name    string  `yaml:"name"`
+  Details Details `yaml:"details"`
+}
+
+type Config []Item
+```
+
+</td>
+</tr>
+</tbody>
+</table>
+
 > [!IMPORTANT]
-> Slice type gets defined as `[]any` if shared keys have different type values. Like `detail` has given `int` and `string` values below:
+> Element and value types are assigned as `any`, if the types of example values are not combinable. Here is an example where the array elements have uncompatible types, due to the `b` is `int` in one, and `string` in another.
 >
 > ```yaml
 > - a: ""
@@ -1129,14 +1193,6 @@ For existing Visual Studio Code users:
   ]
 }
 ```
-
-## Troubleshoot
-
-### Combining `parent` and `declare` on a group of matches
-
-It might not be obvious to everyone at first thought; but when parent and named is set together on a group of target, parents of those targets need to be in the same type. Otherwise, you want Gonfique to produce invalid Go code. Because adding parent fields to struct definitions alter their types in a way they end-up being exclusive to one parent type.
-
-When both directives set together on a group of matches, make sure parents of matches are in same type. If they are not; either use separate rules to define different names for conflicting matches. Or, let Gonfique to generate unique typenames by **not using** `declare` directive. See `exported` directive if all is needed is to access type name from outside package and the typename itself is arbitrary.
 
 ## Considerations
 
