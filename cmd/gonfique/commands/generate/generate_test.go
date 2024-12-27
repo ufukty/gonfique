@@ -20,7 +20,7 @@ func TestWithConfig(t *testing.T) {
 			folder: "api",
 			files: []string{
 				"config_test.go",
-				"extend.go",
+				"extend.go",	
 				"go.mod",
 				"go.sum",
 				"http/methods.go",

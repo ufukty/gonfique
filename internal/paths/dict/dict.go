@@ -9,8 +9,8 @@ import (
 	"github.com/ufukty/gonfique/internal/transform"
 )
 
-func ConvertToMap(holder ast.Node, last string, ti *transform.Info) (*ast.MapType, error) {
-	t, err := holders.Get(holder, last)
+func ConvertToMap(h holders.Node, ti *transform.Info) (*ast.MapType, error) {
+	t, err := h.Get()
 	if err != nil {
 		return nil, fmt.Errorf("getting type expression: %w", err)
 	}
@@ -29,7 +29,7 @@ func ConvertToMap(holder ast.Node, last string, ti *transform.Info) (*ast.MapTyp
 		}
 	}
 	if len(types) == 0 {
-		holders.Set(holder, last, ast.NewIdent("any"))
+		h.Set(ast.NewIdent("any"))
 	}
 	mv, err := combine.Combine(ti, types...)
 	if err != nil {
@@ -41,7 +41,7 @@ func ConvertToMap(holder ast.Node, last string, ti *transform.Info) (*ast.MapTyp
 		Value: mv,
 	}
 
-	err = holders.Set(holder, last, mt)
+	err = h.Set(mt)
 	if err != nil {
 		return nil, fmt.Errorf("assigning generated map type: %w", err)
 	}

@@ -11,13 +11,13 @@ import (
 	"github.com/ufukty/gonfique/internal/paths/resolve"
 )
 
-func (a *Agent) Declare(holder ast.Node, last string, tn config.Typename, rp resolve.Path) (*ast.TypeSpec, error) {
-	expr, err := holders.Get(holder, last)
+func (a *Agent) Declare(h holders.Node, tn config.Typename, rp resolve.Path) (*ast.TypeSpec, error) {
+	expr, err := h.Get()
 	if err != nil {
 		return nil, fmt.Errorf("checking existing type: %w", err)
 	}
 
-	err = holders.Set(holder, last, tn.Ident())
+	err = h.Set(tn.Ident())
 	if err != nil {
 		return nil, fmt.Errorf("replacing type expression with declared type: %w", err)
 	}

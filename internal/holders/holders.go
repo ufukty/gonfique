@@ -5,14 +5,19 @@ import (
 	"go/ast"
 )
 
-func Get(holder ast.Node, termination string) (ast.Expr, error) {
-	switch h := holder.(type) {
+type Node struct {
+	Holder      ast.Node
+	Termination string
+}
+
+func (n *Node) Get() (ast.Expr, error) {
+	switch h := n.Holder.(type) {
 	case *ast.Field:
 		return h.Type, nil
 	case *ast.ArrayType:
 		return h.Elt, nil
 	case *ast.MapType:
-		switch termination {
+		switch n.Termination {
 		case "[key]":
 			return h.Key, nil
 		case "[value]":
@@ -21,11 +26,11 @@ func Get(holder ast.Node, termination string) (ast.Expr, error) {
 	case *ast.TypeSpec:
 		return h.Type, nil
 	}
-	return nil, fmt.Errorf("unknown holder type (%T) or path termination (%s)", holder, termination)
+	return nil, fmt.Errorf("unknown holder type (%T) or path termination (%s)", n.Holder, n.Termination)
 }
 
-func Set(holder ast.Node, termination string, expr ast.Expr) error {
-	switch h := holder.(type) {
+func (n *Node) Set(expr ast.Expr) error {
+	switch h := n.Holder.(type) {
 	case *ast.Field:
 		h.Type = expr
 		return nil
@@ -33,7 +38,7 @@ func Set(holder ast.Node, termination string, expr ast.Expr) error {
 		h.Elt = expr
 		return nil
 	case *ast.MapType:
-		switch termination {
+		switch n.Termination {
 		case "[key]":
 			h.Key = expr
 			return nil
@@ -45,5 +50,5 @@ func Set(holder ast.Node, termination string, expr ast.Expr) error {
 		h.Type = expr
 		return nil
 	}
-	return fmt.Errorf("unknown holder type (%T) or path termination (%s)", holder, termination)
+	return fmt.Errorf("unknown holder type (%T) or path termination (%s)", n.Holder, n.Termination)
 }

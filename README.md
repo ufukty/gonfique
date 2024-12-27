@@ -766,20 +766,18 @@ meta:
   type: Config
 
 rules:
-  "**.objectives.endpoints": { declare: ObjectivesEndpoints }
-  "**.tags.endpoints": { declare: TagsEndpoints, dict: map }
-  "**.tags.endpoints.[value]": { declare: TagEndpoint }
-
-  "**.endpoints.*": { declare: Endpoint }
-  "<ObjectivesEndpoints>.*": { declare: Endpoint }
-  "<TagsEndpoints>.*": { declare: Endpoint }
-
   "**": { export: true }
 
+  "**.objectives.endpoints": { declare: ObjectivesEndpoints }
+  "<ObjectivesEndpoints>": { iterator: true }
+  "<ObjectivesEndpoints>.*": { declare: Endpoint }
+
+  "**.tags.endpoints": { declare: TagsEndpoints, dict: map }
+  "<TagsEndpoints>.[value]": { declare: Endpoint }
+
+  "**.endpoints.*": { declare: Endpoint }
   "<Endpoint>": { accessors: ["method", "path"] }
   "<Endpoint>.method": { replace: http.Method test/http }
-
-  "<ObjectivesEndpoints>": { iterator: true }
 ```
 
 Output:
@@ -1131,13 +1129,13 @@ Writing to file
 - Perform post process to adjust whitespaces
 - Use formatter to print it to output file.
 
-### Applying Gonfique config rules in BFS order with backtracing
+### Applying rules in BFS
 
 Gonfique allows users to declare customizations on every node of example file. This results with some rules rely on others to be done its job in ancestor, or grandchildrens. Such as; choosing the map representation for a dictionary changes the path to children's type, and there might be occurrences where declaring multiple nodes with same typename only work without type conflicts amongst them, if the rules on one's grandchildren alter its type with another rule before declare directive has been started to process.
 
-To address those complicated needs, Gonfique travels on the type expression (AST) with BFS; first forward than backward. Some directives, such as `replace` is applied in forward phase in this traversal, while other directives such as `declare`, `dict` and `export` are applied in backward phase, named backtracing. One note that those directives needs some logic related to them to run in forward phase.
+To address those needs, Gonfique finds the actual paths to nodes in BFS first then, applies directives in DFS backtracing. Finding actual paths with BFS starts on the root of type expression. Actual paths are what will be used for matching paths written in Gonfique config with actual nodes. This traversal also contains typename reservation step. In fact, the choice of BFS for finding paths is made because of the `export` directive. Applying of this directive requires generating typenames automatically, based on the value's path. Since choosing more-generic typenames for values closer to root aligns better with what developers would do when they write mapping type manually, the traversal performed in BFS order.
 
-The choice of BFS over DFS is made because of the `export` directive. Applying of this directive requires generating typenames automatically, based on the value's path. Since choosing more-generic typenames for values closer to root aligns better with what developers would do when they write mapping type manually.
+After the BFS travel lists the paths and nodes; Gonfique performs a DFS backtracing. This is a traversal in AST that starts from the leaves and progress toward the root. At each visit, the directives `declare`, `dict`, `export` and `replace` are applied.
 
 As a design goal; a typical user should not be able to tell the existance of either BFS or forward/backward separation by observing Gonfique's behavior, unless they try.
 
