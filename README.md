@@ -984,52 +984,6 @@ spec:
                 name: my-config
             - secretRef:
                 name: my-secret
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.
 ```
 
 </td>
