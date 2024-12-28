@@ -10,7 +10,6 @@ gateways:
           create: { method: "POST", path: "/" }
           delete: { method: "DELETE", path: "/" }
           patch: { method: "PATCH", path: "/" }
-          put: { method: "PUT", path: "/" }
       objectives:
         path: tasks
         endpoints:
@@ -25,5 +24,3 @@ gateways:
           get: { method: "GET", path: "/" }
           create: { method: "POST", path: "/" }
           delete: { method: "DELETE", path: "/" }
-          patch: { method: "PATCH", path: "/" }
-          put: { method: "PUT", path: "/" }

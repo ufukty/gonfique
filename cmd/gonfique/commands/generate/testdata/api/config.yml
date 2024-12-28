@@ -8,9 +8,13 @@ rules:
   "<ObjectivesEndpoints>": { iterator: true }
   "<ObjectivesEndpoints>.*": { declare: Endpoint }
 
-  "**.tags.endpoints": { declare: TagsEndpoints, dict: map }
-  "<TagsEndpoints>.[value]": { declare: Endpoint }
+  "**.tags.endpoints": { declare: TagsEndpoints }
+  "<TagsEndpoints>": { iterator: true }
+  "<TagsEndpoints>.*": { declare: Endpoint }
 
-  "**.endpoints.*": { declare: Endpoint }
+  "**.document.endpoints": { declare: DocumentEndpoints }
+  "<DocumentEndpoints>": { iterator: true }
+  "<DocumentEndpoints>.*": { declare: Endpoint }
+
   "<Endpoint>": { accessors: ["method", "path"] }
   "<Endpoint>.method": { replace: http.Method test/http }
