@@ -35,14 +35,16 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 		return nil, fmt.Errorf("traversing the type expression for first time to list the node paths: %w", err)
 	}
 
-	b := bucket.New("resolved path :=> holders")
-	for rp, users := range sortby.KeyFunc(hs, resolve.DependencyFirst) {
-		b := b.Sub(string(rp))
-		for path := range sortby.KeyFunc(users, resolve.DependencyFirst) {
-			b.Add(string(path))
+	if verbose {
+		b := bucket.New("dumping every node match with resolved paths")
+		for rp, users := range sortby.KeyFunc(hs, resolve.DependencyFirst) {
+			b := b.Sub(string(rp))
+			for path := range sortby.KeyFunc(users, resolve.DependencyFirst) {
+				b.Add(string(path))
+			}
 		}
+		fmt.Println(b)
 	}
-	fmt.Println(b)
 
 	for rp, users := range sortby.KeyFunc(hs, resolve.DependencyFirst) {
 		for _, user := range users {
