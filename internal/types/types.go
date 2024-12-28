@@ -16,6 +16,11 @@ type aux struct {
 	Iterator  map[config.Typename]*ast.FuncDecl
 }
 
+func has[K comparable, V any](m map[K]V, k K) bool {
+	_, ok := m[k]
+	return ok
+}
+
 // TODO: apply parent directive
 // TODO: apply embed directive
 // DONE: implement accessors
@@ -28,6 +33,9 @@ func Apply(ti *transform.Info, c *config.File, decls map[config.Typename]*ast.Ge
 	rs := rules.Filter(c, tts)
 
 	for tn, dirs := range rs {
+		if !has(decls, tn) {
+			return nil, fmt.Errorf("declaration for typename (%s) not found. has any value directed to declare this type?", tn)
+		}
 		fmt.Println(tn)
 
 		if len(dirs.Accessors) > 0 {
