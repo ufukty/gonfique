@@ -47,40 +47,37 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 	}
 
 	for rp, users := range sortby.KeyFunc(hs, resolve.DependencyFirst) {
+		cps := match.Matches(paths, rp.Segments()) // TODO: store the results of search in bfs?
+		err := conflicts.Check(c.Rules, cps)
+		if err != nil {
+			return nil, fmt.Errorf("checking conflicts: %w", err)
+		}
+
+		var (
+			_, okDict       = pick.Dict(cps, c.Rules)
+			_, okExport     = pick.Export(cps, c.Rules)
+			decl, okDeclare = pick.Declare(cps, c.Rules)
+			repl, okReplace = pick.Replace(cps, c.Rules)
+		)
+
 		for _, user := range users {
-			cps := match.Matches(paths, rp.Segments()) // TODO: store the results of search in bfs?
-			err := conflicts.Check(c.Rules, cps)
-			if err != nil {
-				return nil, fmt.Errorf("checking conflicts: %w", err)
-			}
-
-			exportable := true
-
-			if _, ok := pick.Dict(cps, c.Rules); ok {
+			if okDict {
 				_, err := dict.ConvertToMap(user, ti)
 				if err != nil {
 					return nil, fmt.Errorf("converting dict to map: %w", err)
 				}
 			}
-
-			if repl, ok := pick.Replace(cps, c.Rules); ok {
+			if okReplace {
 				if err := replace.Expression(user, repl); err != nil {
 					return nil, fmt.Errorf("replacing: %w", err)
 				}
 			}
-
-			if decl, ok := pick.Declare(cps, c.Rules); ok {
+			if okDeclare {
 				_, err := declare.Declare(user, decl, rp)
 				if err != nil {
 					return nil, fmt.Errorf("declaring: %w", err)
 				}
-				// if ts != nil {
-				// 	later = append(later, args{ts.Type, ts, []string{fmt.Sprintf("<%s>", decl)}})
-				// }
-				exportable = false
-			}
-
-			if _, ok := pick.Export(cps, c.Rules); ok && exportable {
+			} else if okExport {
 				if err := export.Type(user, rp, declare.Typenames()); err != nil {
 					return nil, fmt.Errorf("exporting: %w", err)
 				}
