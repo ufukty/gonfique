@@ -8,7 +8,7 @@ import (
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/holders"
 	"github.com/ufukty/gonfique/internal/paths/declare/clone"
-	"github.com/ufukty/gonfique/internal/paths/resolve"
+	"github.com/ufukty/gonfique/internal/paths/mapper/resolve"
 )
 
 func (a *Agent) Declare(h holders.Node, tn config.Typename, rp resolve.Path) (*ast.TypeSpec, error) {

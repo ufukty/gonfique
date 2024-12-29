@@ -7,8 +7,20 @@ import (
 
 type Path string
 
-func (p Path) Segments() []string {
+func (p Path) Terms() []string {
+	if p == "" {
+		return []string{}
+	}
 	return strings.Split(string(p), ".")
+}
+
+func (p Path) Termination() string {
+	ss := p.Terms()
+	return ss[len(ss)-1]
+}
+
+func (p Path) Sub(term string) Path {
+	return Path(strings.Join(append(p.Terms(), term), "."))
 }
 
 func DependencyFirst(a, b Path) int {

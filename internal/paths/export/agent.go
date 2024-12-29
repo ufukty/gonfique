@@ -7,7 +7,7 @@ import (
 
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/paths/export/auto"
-	"github.com/ufukty/gonfique/internal/paths/resolve"
+	"github.com/ufukty/gonfique/internal/paths/mapper/resolve"
 )
 
 type Agent struct {

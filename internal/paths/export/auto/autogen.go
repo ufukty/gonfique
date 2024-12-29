@@ -7,7 +7,7 @@ import (
 	"unicode"
 
 	"github.com/ufukty/gonfique/internal/files/config"
-	"github.com/ufukty/gonfique/internal/paths/resolve"
+	"github.com/ufukty/gonfique/internal/paths/mapper/resolve"
 )
 
 var smallcaps = regexp.MustCompile("[a-z]+")
@@ -94,7 +94,7 @@ func isKeyword(tn config.Typename) bool {
 // FIXME: consider [] containing keypaths
 // targets is map of keypaths and preference of exported typename
 func Typename(rp resolve.Path, reserved []config.Typename) (config.Typename, bool) {
-	segments := rp.Segments()
+	segments := rp.Terms()
 	for i := len(segments) - 1; i >= 0; i-- {
 		tn := typenameForSegments(segments[i:])
 		if !(isKeyword(tn) || slices.Contains(reserved, tn)) {

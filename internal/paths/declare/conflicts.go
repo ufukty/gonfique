@@ -8,7 +8,7 @@ import (
 
 	"github.com/ufukty/gonfique/internal/compares"
 	"github.com/ufukty/gonfique/internal/files/config"
-	"github.com/ufukty/gonfique/internal/paths/resolve"
+	"github.com/ufukty/gonfique/internal/paths/mapper/resolve"
 	"golang.org/x/exp/maps"
 )
 
