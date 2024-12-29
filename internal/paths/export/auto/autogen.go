@@ -8,7 +8,6 @@ import (
 
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/paths/resolve"
-	"golang.org/x/exp/maps"
 )
 
 var smallcaps = regexp.MustCompile("[a-z]+")
@@ -32,32 +31,6 @@ func safeTypeName(keyname string) string {
 		}
 	}
 	return n
-}
-
-func groupKeypathsByDepth(kps []resolve.Path) map[int][]resolve.Path {
-	groups := map[int][]resolve.Path{}
-	for _, kp := range kps {
-		depth := len(kp.Segments())
-		if _, ok := groups[depth]; !ok {
-			groups[depth] = []resolve.Path{}
-		}
-		groups[depth] = append(groups[depth], kp)
-	}
-	return groups
-}
-
-func orderKeypaths(kps []resolve.Path) []resolve.Path {
-	// 1. group by depth
-	// 2. order each group alphabetically
-	ordered := []resolve.Path{}
-	grouped := groupKeypathsByDepth(kps)
-	depths := maps.Keys(grouped)
-	slices.Sort(depths)
-	for _, depth := range depths {
-		slices.Sort(grouped[depth])
-		ordered = append(ordered, grouped[depth]...)
-	}
-	return ordered
 }
 
 var specials = []string{"[]", "[key]", "[value]"}
