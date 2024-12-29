@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/ufukty/gonfique/cmd/gonfique/commands/version"
+	"github.com/ufukty/gonfique/internal/datas/inits"
 	"github.com/ufukty/gonfique/internal/files/coder/sort"
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/files/config/meta"
@@ -94,13 +95,6 @@ func concat[K comparable, V any](ms ...map[K]V) map[K]V {
 	return m2
 }
 
-func mki[K comparable, V any](m map[K]V, k K) {
-	_, ok := m[k]
-	if !ok {
-		m[k] = *new(V)
-	}
-}
-
 func (c Coder) createGenDecls(dst *ast.File) {
 	decls := []ast.Decl{}
 	if c.Auto != nil {
@@ -129,7 +123,7 @@ func (c Coder) createGenDecls(dst *ast.File) {
 	if c.Iterators != nil {
 		for tn, iterator := range c.Iterators {
 			if gd, ok := ds[tn]; ok {
-				mki(methods, gd)
+				inits.Key(methods, gd)
 				methods[gd] = append(methods[gd], iterator)
 			}
 		}
@@ -137,7 +131,7 @@ func (c Coder) createGenDecls(dst *ast.File) {
 	if c.Accessors != nil {
 		for tn, accessors := range c.Accessors {
 			if gd, ok := ds[tn]; ok {
-				mki(methods, gd)
+				inits.Key(methods, gd)
 				for _, a := range accessors {
 					methods[gd] = append(methods[gd], a)
 				}

@@ -4,22 +4,13 @@ import (
 	"fmt"
 	"go/ast"
 
+	"github.com/ufukty/gonfique/internal/datas/inits"
 	"github.com/ufukty/gonfique/internal/transform"
 )
 
 func has[K comparable, V any](m map[K]V, k K) bool {
 	_, ok := m[k]
 	return ok
-}
-
-// map key init
-func mki2[K1, K2 comparable, V any](m *map[K1]map[K2]V, k1 K1, k2 K2) {
-	if !has((*m), k1) {
-		(*m)[k1] = make(map[K2]V)
-	}
-	if !has((*m)[k1], k2) {
-		(*m)[k1][k2] = *new(V)
-	}
 }
 
 func Combine(ti *transform.Info, types ...ast.Expr) (ast.Expr, error) {
@@ -52,7 +43,7 @@ func Combine(ti *transform.Info, types ...ast.Expr) (ast.Expr, error) {
 		sources := map[string]map[*ast.StructType]*ast.Field{} // field sources for keys
 		for st, fl := range fls {
 			for _, f := range fl {
-				mki2(&sources, ti.Keys[f], st)
+				inits.Key2(sources, ti.Keys[f], st)
 				sources[ti.Keys[f]][st] = f
 			}
 		}

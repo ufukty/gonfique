@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/ufukty/gonfique/internal/datas/inits"
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/holders"
 	"github.com/ufukty/gonfique/internal/paths/conflicts"
@@ -24,15 +25,6 @@ func has[K comparable, V any](m map[K]V, k K) bool {
 
 func with[E any](s []E, v E) []E {
 	return append(slices.Clone(s), v)
-}
-
-func mki2[K1, K2 comparable, V any](m map[K1]map[K2]V, k1 K1, k2 K2) {
-	if _, ok := m[k1]; !ok {
-		m[k1] = make(map[K2]V)
-	}
-	if _, ok := m[k1][k2]; !ok {
-		m[k1][k2] = *new(V)
-	}
 }
 
 func bfs(ti *transform.Info, c *config.File, paths []config.Path, ea *export.Agent) (map[resolve.Path]map[resolve.Path]holders.Node, []config.Path, error) {
@@ -59,7 +51,7 @@ func bfs(ti *transform.Info, c *config.File, paths []config.Path, ea *export.Age
 		recursion := true
 		if holder != nil { // not the root
 			mp := resolve.Path(strings.Join(mpath, "."))
-			mki2(hs, rp, mp)
+			inits.Key2(hs, rp, mp)
 			hs[rp][mp] = holders.Node{holder, path[len(path)-1]}
 
 			cps := match.Matches(paths, path)

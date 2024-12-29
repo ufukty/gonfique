@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"go/ast"
 	"slices"
+
+	"github.com/ufukty/gonfique/internal/datas/inits"
 )
 
 var basics = map[string]any{
@@ -125,13 +127,6 @@ func symbol(a, b ast.Decl) int {
 	return cmp.Compare(symbolname(a).Name, symbolname(b).Name)
 }
 
-// map init key
-func mik(m map[ast.Decl][]ast.Decl, k ast.Decl) {
-	if _, ok := m[k]; !ok {
-		m[k] = []ast.Decl{}
-	}
-}
-
 func depgraph(decls []ast.Decl) (f, r map[ast.Decl][]ast.Decl) {
 	vertices := map[ast.Decl][]ast.Decl{}
 	rvertices := map[ast.Decl][]ast.Decl{}
@@ -139,9 +134,9 @@ func depgraph(decls []ast.Decl) (f, r map[ast.Decl][]ast.Decl) {
 		for _, d2 := range decls {
 			if d1 != d2 {
 				if doesDependOn(d1, symbolname(d2)) {
-					mik(vertices, d1)
+					inits.Key(vertices, d1)
 					vertices[d1] = append(vertices[d1], d2)
-					mik(rvertices, d2)
+					inits.Key(rvertices, d2)
 					rvertices[d2] = append(rvertices[d2], d1)
 				}
 			}
