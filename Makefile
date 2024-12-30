@@ -7,7 +7,7 @@ VERSION := $(shell git describe --tags --always --dirty)
 LDFLAGS := -ldflags "-X 'github.com/ufukty/gonfique/cmd/gonfique/commands/version.Version=$(VERSION)'"
 LDFLAGS_WASM := -ldflags "-X 'github.com/ufukty/gonfique/cmd/wasm.Version=$(VERSION)'"
 
-build:
+build-gonfique:
 	@echo "Version $(VERSION)..."
 	
 	mkdir -p "build/gonfique/$(VERSION)"
@@ -20,9 +20,12 @@ build:
 	GOOS=freebsd GOARCH=amd64 go build -trimpath $(LDFLAGS) -o build/gonfique/$(VERSION)/gonfique-$(VERSION)-freebsd-amd64 ./cmd/gonfique
 	GOOS=freebsd GOARCH=386   go build -trimpath $(LDFLAGS) -o build/gonfique/$(VERSION)/gonfique-$(VERSION)-freebsd-386   ./cmd/gonfique
 	GOOS=freebsd GOARCH=arm   go build -trimpath $(LDFLAGS) -o build/gonfique/$(VERSION)/gonfique-$(VERSION)-freebsd-arm   ./cmd/gonfique
-	
+
+build-wasm:
 	mkdir -p "build/wasm/$(VERSION)"
 	GOOS=js GOARCH=wasm go build -trimpath $(LDFLAGS_WASM) -o build/wasm/$(VERSION)/gonfique-$(VERSION)-js-wasm ./cmd/wasm
+
+build: build-gonfique build-wasm
 
 .PHONY: install
 

@@ -48,8 +48,8 @@ func Convert(this js.Value, args []js.Value) (string, error) {
 	return o.String(), nil
 }
 
-func lrp2[R1 any](f func(this js.Value, args []js.Value) (R1, error)) func(this js.Value, args []js.Value) js.Value {
-	return func(this js.Value, args []js.Value) js.Value {
+func lrp2[R1 any](f func(this js.Value, args []js.Value) (R1, error)) func(this js.Value, args []js.Value) any {
+	return func(this js.Value, args []js.Value) any {
 		r1, e := f(this, args)
 		return js.ValueOf([]any{r1, e.Error()})
 	}
@@ -57,6 +57,6 @@ func lrp2[R1 any](f func(this js.Value, args []js.Value) (R1, error)) func(this 
 
 func main() {
 	// Make the Convert function available in JS
-	js.Global().Set("Convert", lrp2(Convert))
+	js.Global().Set("Convert", js.FuncOf(lrp2(Convert)))
 	select {}
 }
