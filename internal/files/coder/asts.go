@@ -5,7 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 
-	"github.com/ufukty/gonfique/internal/files/input"
+	"github.com/ufukty/gonfique/internal/files/input/encoders"
 )
 
 func (c Coder) addParentRefAssignmentsFunction(dst *ast.File) {
@@ -28,12 +28,12 @@ func (c Coder) addParentRefAssignmentsFunction(dst *ast.File) {
 func (c Coder) addReaderFunction(dst *ast.File) error {
 	var decoder *ast.SelectorExpr
 	switch c.Encoding {
-	case input.Json:
+	case encoders.Json:
 		decoder = &ast.SelectorExpr{
 			X:   &ast.Ident{Name: "json"},
 			Sel: &ast.Ident{Name: "NewDecoder"},
 		}
-	case input.Yaml:
+	case encoders.Yaml:
 		decoder = &ast.SelectorExpr{
 			X:   &ast.Ident{Name: "yaml"},
 			Sel: &ast.Ident{Name: "NewDecoder"},

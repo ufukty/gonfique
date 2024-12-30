@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 	"go/ast"
-	"os"
+	"io"
 	"strings"
 
 	"github.com/ufukty/gonfique/internal/files/config/meta"
@@ -72,14 +72,9 @@ type File struct {
 	Rules map[Path]Directives `yaml:"rules"`
 }
 
-func Read(src string) (*File, error) {
-	f, err := os.Open(src)
-	if err != nil {
-		return nil, fmt.Errorf("opening: %w", err)
-	}
-	defer f.Close()
+func Read(src io.Reader) (*File, error) {
 	n := &File{}
-	err = yaml.NewDecoder(f).Decode(n)
+	err := yaml.NewDecoder(src).Decode(n)
 	if err != nil {
 		return nil, fmt.Errorf("decoding: %w", err)
 	}

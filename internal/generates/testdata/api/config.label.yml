@@ -1,0 +1,13 @@
+meta:
+  type: Config
+
+rules:
+  "**": { export: true }
+
+  "**.endpoints": { export: true, label: Endpoints }
+  "{Endpoints}": { iterator: true }
+  "{Endpoints}.*": { declare: Endpoint }
+
+  "<Endpoint>": { accessors: ["method", "path"] }
+  "<Endpoint>.method": { replace: http.Method test/http }
+  "<Endpoint>.path": { declare: Path }

@@ -35,7 +35,7 @@
 *.test
 *.vsix
 assets/*.sketch
-build
+/build
 go.work
 Icon
 Network Trash Folder

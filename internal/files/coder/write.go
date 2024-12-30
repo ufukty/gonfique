@@ -7,7 +7,7 @@ import (
 	"go/format"
 	"go/printer"
 	"go/token"
-	"os"
+	"io"
 	"regexp"
 	"slices"
 	"strings"
@@ -17,7 +17,7 @@ import (
 	"github.com/ufukty/gonfique/internal/files/coder/sort"
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/files/config/meta"
-	"github.com/ufukty/gonfique/internal/files/input"
+	"github.com/ufukty/gonfique/internal/files/input/encoders"
 	"github.com/ufukty/gonfique/internal/namings"
 	"golang.org/x/exp/maps"
 )
@@ -26,7 +26,7 @@ type Coder struct {
 	ti *ast.Ident
 
 	Meta     meta.Meta
-	Encoding input.Encoding
+	Encoding encoders.Encoding
 
 	Config ast.Expr
 
@@ -55,9 +55,9 @@ func (c Coder) addImports(dst *ast.File) {
 
 	imports = append(imports, "fmt", "os") // ReadConfig
 	switch c.Encoding {
-	case input.Yaml:
+	case encoders.Yaml:
 		imports = append(imports, "gopkg.in/yaml.v3")
-	case input.Json:
+	case encoders.Json:
 		imports = append(imports, "encoding/json")
 	}
 	if len(c.Iterators) > 0 {
@@ -169,7 +169,7 @@ func post(s string) string {
 	return s
 }
 
-func (c Coder) Write(dst string) error {
+func (c Coder) Write(dst io.Writer) error {
 	c.ti = ast.NewIdent(namings.Initial(c.Meta.Type))
 
 	f := &ast.File{
@@ -196,12 +196,10 @@ func (c Coder) Write(dst string) error {
 		return fmt.Errorf("format: %w", err)
 	}
 
-	o, err := os.Create(dst)
+	_, err = dst.Write(fs)
 	if err != nil {
-		return fmt.Errorf("create: %w", err)
+		return fmt.Errorf("write: %w", err)
 	}
-	defer o.Close()
-	fmt.Fprintf(o, "%s", fs)
 
 	return nil
 }

@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+
+	"github.com/ufukty/gonfique/internal/generates"
 )
 
 type Args struct {
@@ -42,10 +44,5 @@ func Run() error {
 	if err := missing(args); err != nil {
 		return fmt.Errorf("checking args: %w", err)
 	}
-
-	if args.Config == "" {
-		return simple(args.In, args.Out)
-	} else {
-		return withconfig(args.In, args.Config, args.Out, args.Verbose)
-	}
+	return generates.FromPaths(args.In, args.Config, args.Out, args.Verbose)
 }

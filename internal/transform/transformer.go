@@ -9,7 +9,7 @@ import (
 	"reflect"
 
 	"github.com/ufukty/gonfique/internal/files/config"
-	"github.com/ufukty/gonfique/internal/files/input"
+	"github.com/ufukty/gonfique/internal/files/input/encoders"
 	"github.com/ufukty/gonfique/internal/transform/combine"
 	"github.com/ufukty/gonfique/internal/transform/safe"
 )
@@ -121,7 +121,7 @@ func (tr *transformer) transform(v reflect.Value) ast.Expr {
 
 // reconstructs a reflect-value's type in ast.TypeSpec.
 // limited with types used by YAML decoder.
-func Transform(d any, encoding input.Encoding) *Info {
+func Transform(d any, encoding encoders.Encoding) *Info {
 	tr := transformer{
 		keys:       map[ast.Node]string{},
 		fieldnames: map[ast.Node]config.Fieldname{},

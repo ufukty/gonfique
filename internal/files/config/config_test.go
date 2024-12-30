@@ -2,11 +2,17 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"testing"
 )
 
 func TestConfig(t *testing.T) {
-	f, err := Read("testdata/config.yml")
+	h, err := os.Open("testdata/config.yml")
+	if err != nil {
+		t.Fatal(fmt.Errorf("prep, read file: %w", err))
+	}
+	defer h.Close()
+	f, err := Read(h)
 	if err != nil {
 		t.Fatal(fmt.Errorf("read: %w", err))
 	}

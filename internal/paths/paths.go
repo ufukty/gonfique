@@ -89,10 +89,10 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 		}
 	}
 
-	err = declare.Conflicts()
-	if err != nil {
-		return nil, fmt.Errorf("checking conflicts on declare directives:\n%w", err)
-	}
+	// err = declare.Conflicts()
+	// if err != nil {
+	// 	return nil, fmt.Errorf("checking conflicts on declare directives:\n%w", err)
+	// }
 
 	return &products{
 		Imports: replace.Imports,

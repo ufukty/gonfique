@@ -1,20 +1,23 @@
-package generate
+package generates
 
 import (
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/ufukty/gonfique/internal/files/coder"
 	"github.com/ufukty/gonfique/internal/files/config"
 	"github.com/ufukty/gonfique/internal/files/config/meta"
 	"github.com/ufukty/gonfique/internal/files/config/validate"
 	"github.com/ufukty/gonfique/internal/files/input"
+	"github.com/ufukty/gonfique/internal/files/input/encoders"
 	"github.com/ufukty/gonfique/internal/paths"
 	"github.com/ufukty/gonfique/internal/transform"
 	"github.com/ufukty/gonfique/internal/types"
 )
 
-func simple(in, out string) error {
-	i, enc, err := input.Read(in)
+func simple(in io.Reader, enc encoders.Encoding, out io.Writer) error {
+	i, err := input.Read(in, enc)
 	if err != nil {
 		return fmt.Errorf("read: %w", err)
 	}
@@ -44,10 +47,10 @@ func concat[K comparable, V any](ms ...map[K]V) map[K]V {
 	return n
 }
 
-func withconfig(in, conf, out string, verbose bool) error {
-	i, enc, err := input.Read(in)
+func withConfig(in io.Reader, enc encoders.Encoding, conf io.Reader, out io.Writer, verbose bool) error {
+	i, err := input.Read(in, enc)
 	if err != nil {
-		return fmt.Errorf("read: %w", err)
+		return fmt.Errorf("input file: %w", err)
 	}
 	ti := transform.Transform(i, enc)
 
@@ -79,9 +82,47 @@ func withconfig(in, conf, out string, verbose bool) error {
 		Accessors: auxT.Accessors,
 		Iterators: auxT.Iterator,
 	}
+
 	err = coder.Write(out)
 	if err != nil {
 		return fmt.Errorf("write: %w", err)
 	}
 	return nil
+}
+
+func FromReaders(in io.Reader, enc encoders.Encoding, conf io.Reader, out io.Writer, verbose bool) error {
+	if conf == nil {
+		return simple(in, enc, out)
+	}
+	return withConfig(in, enc, conf, out, verbose)
+}
+
+func FromPaths(in, conf, out string, verbose bool) error {
+	enc, err := encoders.FromExtension(in)
+	if err != nil {
+		return fmt.Errorf(": %w", err)
+	}
+	i, err := os.Open(in)
+	if err != nil {
+		return fmt.Errorf("input: %w", err)
+	}
+	defer i.Close()
+
+	o, err := os.Create(out)
+	if err != nil {
+		return fmt.Errorf("create output file: %w", err)
+	}
+	defer o.Close()
+
+	if conf == "" {
+		return FromReaders(i, enc, nil, o, verbose)
+	}
+
+	c, err := os.Open(conf)
+	if err != nil {
+		return fmt.Errorf("open config file: %w", err)
+	}
+	defer c.Close()
+	
+	return FromReaders(i, enc, c, o, verbose)
 }

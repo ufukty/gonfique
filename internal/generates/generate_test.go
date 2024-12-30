@@ -1,4 +1,4 @@
-package generate
+package generates
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ func TestWithConfig(t *testing.T) {
 			folder: "api",
 			files: []string{
 				"config_test.go",
-				"extend.go",	
+				"extend.go",
 				"go.mod",
 				"go.sum",
 				"http/methods.go",
@@ -45,7 +45,7 @@ func TestWithConfig(t *testing.T) {
 				t.Fatal(fmt.Errorf("prep, test folder: %w", err))
 			}
 
-			err = withconfig(
+			err = FromPaths(
 				filepath.Join(testloc, "input.yml"),
 				filepath.Join("testdata", tc.folder, "config.yml"),
 				filepath.Join(testloc, "config.go"),
