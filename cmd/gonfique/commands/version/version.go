@@ -1,10 +1,12 @@
 package version
 
-import "fmt"
+import (
+	"fmt"
 
-var Version = "test version"
+	"github.com/ufukty/gonfique/internal/version"
+)
 
 func Run() error {
-	fmt.Println(Version)
+	fmt.Println(version.Version)
 	return nil
 }

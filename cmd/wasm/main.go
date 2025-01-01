@@ -14,8 +14,6 @@ import (
 	"github.com/ufukty/gonfique/internal/generates"
 )
 
-var Version string
-
 //export Convert
 func Convert(this js.Value, args []js.Value) (string, error) {
 	if len(args) < 3 {

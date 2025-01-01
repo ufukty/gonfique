@@ -4,8 +4,7 @@ all:
 .PHONY: build
 
 VERSION := $(shell git describe --tags --always --dirty)
-LDFLAGS := -ldflags "-X 'github.com/ufukty/gonfique/cmd/gonfique/commands/version.Version=$(VERSION)'"
-LDFLAGS_WASM := -ldflags "-X 'github.com/ufukty/gonfique/cmd/wasm.Version=$(VERSION)'"
+LDFLAGS := -ldflags "-X 'github.com/ufukty/gonfique/internal/version.Version=$(VERSION)'"
 
 build-gonfique:
 	@echo "Version $(VERSION)..."
@@ -23,7 +22,7 @@ build-gonfique:
 
 build-wasm:
 	mkdir -p "build/wasm/$(VERSION)"
-	GOOS=js GOARCH=wasm go build -trimpath $(LDFLAGS_WASM) -o build/wasm/$(VERSION)/gonfique-$(VERSION)-js-wasm ./cmd/wasm
+	GOOS=js GOARCH=wasm go build -trimpath $(LDFLAGS) -o build/wasm/$(VERSION)/gonfique-$(VERSION)-js-wasm ./cmd/wasm
 
 build: build-gonfique build-wasm
 
