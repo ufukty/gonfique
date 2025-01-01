@@ -51,7 +51,11 @@ func Convert(this js.Value, args []js.Value) (string, error) {
 func lrp2[R1 any](f func(this js.Value, args []js.Value) (R1, error)) func(this js.Value, args []js.Value) any {
 	return func(this js.Value, args []js.Value) any {
 		r1, e := f(this, args)
-		return js.ValueOf([]any{r1, e.Error()})
+		s := ""
+		if e != nil {
+			s = e.Error()
+		}
+		return js.ValueOf([]any{r1, s})
 	}
 }
 
