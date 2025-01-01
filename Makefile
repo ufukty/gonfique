@@ -21,8 +21,8 @@ build-gonfique:
 	GOOS=freebsd GOARCH=arm   go build -trimpath $(LDFLAGS) -o build/gonfique/$(VERSION)/gonfique-$(VERSION)-freebsd-arm   ./cmd/gonfique
 
 build-wasm:
-	mkdir -p "build/wasm/$(VERSION)"
-	GOOS=js GOARCH=wasm go build -trimpath $(LDFLAGS) -o build/wasm/$(VERSION)/gonfique-$(VERSION)-js-wasm ./cmd/wasm
+	mkdir -p "build/gonfique-wasm"
+	GOOS=js GOARCH=wasm go build -trimpath $(LDFLAGS) -o build/gonfique-wasm/$(VERSION).wasm ./cmd/wasm
 
 build: build-gonfique build-wasm
 
