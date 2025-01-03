@@ -1,3 +1,4 @@
+> [!IMPORTANT]  
 > Check docs for upcoming Gonfique 2 in [dev branch](https://github.com/ufukty/gonfique/tree/dev) and go to [Gonfique Playground](https://gonfique-playground.pages.dev/) to try pre-alpha in your browser
 
 # Gonfique
