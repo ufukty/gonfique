@@ -2,10 +2,9 @@ package tree
 
 import (
 	"fmt"
-	"testing"
 )
 
-func TestList(t *testing.T) {
+func ExampleList_single() {
 	lines := []string{"Lorem", "Ipsum", "Dolor", "Sit", "Amet"}
 	fmt.Println(List("Placeholders", lines))
 	// Output:
@@ -17,11 +16,10 @@ func TestList(t *testing.T) {
 	// ╰─ Amet
 }
 
-func TestListSecondLevel(t *testing.T) {
-	lines := []string{"Lorem", "Ipsum", "Dolor", "Sit", "Amet"}
-	m := List("Placeholders", lines)
-	lines2 := []string{m, m, m}
-	fmt.Println(List("Sets of placeholders", lines2))
+func ExampleList_multiple() {
+	m := List("Placeholders", []string{"Lorem", "Ipsum", "Dolor", "Sit", "Amet"})
+	m = List("Sets of placeholders", []string{m, m, m})
+	fmt.Println(m)
 	// Output:
 	// Sets of placeholders
 	// ├─ Placeholders
