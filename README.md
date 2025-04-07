@@ -1290,6 +1290,10 @@ For existing Visual Studio Code users:
 
 Issues are open for discussions and rest.
 
+## Stargazers over time
+
+![Stargazers over time](https://starchart.cc/ufukty/gonfique.svg?variant=adaptive)
+
 ## License
 
 Apache2. See LICENSE file.
