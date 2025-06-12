@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ufukty/gonfique/internal/coder"
+	"github.com/ufukty/gonfique/internal/files/coder"
 	"github.com/ufukty/gonfique/internal/files/input"
 	"github.com/ufukty/gonfique/internal/testutils"
 	"github.com/ufukty/gonfique/internal/transform"
