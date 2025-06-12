@@ -1,0 +1,6 @@
+rules:
+  b: { export: true }
+  c: { declare: Employee }
+  e: { dict: struct }
+  g: { dict: map }
+  d: { replace: Date time }

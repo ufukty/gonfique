@@ -1,0 +1,10 @@
+rules:
+  apiVersion: { declare: ApiVersion }
+  metadata.name: { declare: Name }
+  spec.**.containers: { declare: SpecContainers }
+  spec.ports.[]: { declare: Port }
+  spec.rules.[]: { declare: Rule }
+
+  <Rule>.http.paths.[]: { declare: Path }
+  <SpecContainer>.name: { declare: ContainerName }
+  <SpecContainers>.[]: { declare: SpecContainer }

@@ -1,0 +1,26 @@
+domain: localhost
+gateways:
+  public:
+    path: /api/v1.0.0
+    services:
+      document:
+        path: document
+        endpoints:
+          get: { method: "GET", path: "/" }
+          create: { method: "POST", path: "/" }
+          delete: { method: "DELETE", path: "/" }
+          patch: { method: "PATCH", path: "/" }
+      objectives:
+        path: tasks
+        endpoints:
+          get: { method: "GET", path: "/" }
+          create: { method: "POST", path: "/" }
+          delete: { method: "DELETE", path: "/" }
+          patch: { method: "PATCH", path: "/" }
+          put: { method: "PUT", path: "/" }
+      tags:
+        path: tags
+        endpoints:
+          get: { method: "GET", path: "/" }
+          create: { method: "POST", path: "/" }
+          delete: { method: "DELETE", path: "/" }

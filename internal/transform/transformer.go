@@ -7,14 +7,22 @@ import (
 	"log"
 	"os"
 	"reflect"
-	"time"
 
-	"github.com/ufukty/gonfique/internal/transform/namings"
+	"github.com/ufukty/gonfique/internal/files/config"
+	"github.com/ufukty/gonfique/internal/files/input/encoders"
+	"github.com/ufukty/gonfique/internal/transform/combine"
+	"github.com/ufukty/gonfique/internal/transform/safe"
 )
 
+type Info struct {
+	Type       ast.Expr
+	Keys       map[ast.Node]string
+	Fieldnames map[ast.Node]config.Fieldname
+}
+
 type transformer struct {
-	isTimeUsed bool
 	keys       map[ast.Node]string // corresponding keys for ASTs
+	fieldnames map[ast.Node]config.Fieldname
 	tagname    string
 }
 
@@ -35,7 +43,7 @@ func (tr *transformer) arrayType(v reflect.Value) ast.Expr {
 				log.Println(fmt.Errorf("assigning 'any' to array type because of at least 2 items' type are different: %w", err))
 				return &ast.ArrayType{Elt: ast.NewIdent("any")}
 			} else {
-				m = &ast.StructType{Fields: combine(stM.Fields, stT.Fields)}
+				m = &ast.StructType{Fields: combine.FieldLists(stM.Fields, stT.Fields)}
 			}
 		}
 	}
@@ -55,8 +63,9 @@ func (tr *transformer) structType(v reflect.Value) *ast.StructType {
 	for iter.Next() {
 		ik := iter.Key()
 		iv := iter.Value()
+		fieldname := safe.FieldName(ik.String())
 		f := &ast.Field{
-			Names: []*ast.Ident{ast.NewIdent(namings.SafeFieldName(ik.String()))},
+			Names: []*ast.Ident{fieldname.Ident()},
 			Type:  tr.transform(iv),
 			Tag: &ast.BasicLit{
 				Kind:  token.STRING,
@@ -65,24 +74,10 @@ func (tr *transformer) structType(v reflect.Value) *ast.StructType {
 		}
 		st.Fields.List = append(st.Fields.List, f)
 		tr.keys[f] = ik.String()
+		tr.fieldnames[f] = fieldname
 	}
 	sort(st.Fields)
 	return st
-}
-
-func (tr *transformer) stringType(v reflect.Value) ast.Expr {
-	s := v.Interface().(string)
-	if s == "0" { // BECAUSE: time.ParseDuration("0") doesn't return error
-		return ast.NewIdent("string")
-	}
-	if _, err := time.ParseDuration(s); err == nil {
-		tr.isTimeUsed = true
-		return &ast.SelectorExpr{
-			X:   ast.NewIdent("time"),
-			Sel: ast.NewIdent("Duration"),
-		}
-	}
-	return ast.NewIdent("string") // generic string
 }
 
 func (tr *transformer) transform(v reflect.Value) ast.Expr {
@@ -101,7 +96,7 @@ func (tr *transformer) transform(v reflect.Value) ast.Expr {
 	case reflect.Bool:
 		return ast.NewIdent("bool")
 	case reflect.String:
-		return tr.stringType(v)
+		return ast.NewIdent("string")
 	case reflect.Int:
 		return ast.NewIdent("int")
 	case reflect.Int32:
@@ -126,16 +121,16 @@ func (tr *transformer) transform(v reflect.Value) ast.Expr {
 
 // reconstructs a reflect-value's type in ast.TypeSpec.
 // limited with types used by YAML decoder.
-func Transform(cfgcontent any, encoding Encoding) (ast.Expr, []string, map[ast.Node]string) {
-	t := &transformer{
-		isTimeUsed: false,
+func Transform(d any, encoding encoders.Encoding) *Info {
+	tr := transformer{
 		keys:       map[ast.Node]string{},
+		fieldnames: map[ast.Node]config.Fieldname{},
 		tagname:    string(encoding),
 	}
-	cfg := t.transform(reflect.ValueOf(cfgcontent))
-	imports := []string{}
-	if t.isTimeUsed {
-		imports = append(imports, "time")
+	ty := tr.transform(reflect.ValueOf(d))
+	return &Info{
+		Type:       ty,
+		Keys:       tr.keys,
+		Fieldnames: tr.fieldnames,
 	}
-	return cfg, imports, t.keys
 }
