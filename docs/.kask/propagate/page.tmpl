@@ -1,0 +1,112 @@
+{{define "sitemap-item"}}
+{{with .}}
+<ul>
+  {{if ne .Href ""}}
+  <a href="{{.Href}}">{{.Title}}</a>
+  {{else}}
+  <span>{{.Title}}</span>
+  {{end}}
+  {{range .Children}}
+  <li>{{template "sitemap-item" .}}</li>{{end}}
+</ul>
+{{end}}
+{{end}}
+
+{{define "toc-item"}}
+{{if gt .Level 0}}<a href="#{{.ID}}" class="toc{{.Level}}">{{.Title}}</a>{{end}}
+{{with .Children}}
+<ul>
+  {{range .}}
+  <li>{{template "toc-item" .}}</li>{{end}}
+</ul>{{end}}
+{{end}}
+
+{{define "markdown-page"}}
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Node.Title}} — Gonfique Docs</title>
+
+    <meta property="og:image" content="https://gohandlers.pages.dev/.assets/github-social-preview.png">
+
+    <link rel="icon" type="image/png" sizes="16x16" href="/.assets/favicon@1x.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/.assets/favicon@2x.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/.assets/favicon@3x.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="/.assets/favicon@4x.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/.assets/favicon@180w.png">
+
+    {{range .Stylesheets}}
+    <link rel="stylesheet" href="{{.}}">{{end}}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <div id="markdown-page-column-layout">
+
+      <div id="navs">
+        <nav id="sitemap">
+          <details open>
+            <summary>Site map</summary>
+            <div class="summarized">
+              {{template "sitemap-item" .Root}}
+            </div>
+          </details>
+        </nav>
+
+        {{with .Markdown.Toc}}
+        <nav id="toc">
+          <details open>
+            <summary>In this page</summary>
+            <div class="summarized">
+              {{template "toc-item" .}}
+            </div>
+          </details>
+        </nav>{{end}}
+      </div>
+
+      <script>
+        function onChange(eval, callback) {
+          let last;
+          return () => {
+            let next = eval()
+            if (last != next) {
+              last = next
+              callback()
+            }
+          }
+        }
+        function detailsElemStateAdjuster() {
+          let elems = document.querySelectorAll("nav>details")
+          let summaries = document.querySelectorAll("nav>details>summary")
+          return () => {
+            elems.forEach(e => {
+              e.open = window.innerWidth >= 700
+            })
+            summaries.forEach(e => {
+              e.style.display = window.innerWidth >= 700 ? "none" : "block"
+              e.onclick = window.innerWidth >= 700 ? (e) => { e.preventDefault() } : undefined
+            })
+          }
+        }
+        let adjuster = detailsElemStateAdjuster()
+        adjuster()
+        window.addEventListener("resize", onChange(() => { return window.innerWidth >= 700 }, adjuster, 100))
+      </script>
+
+      <main class="markdown">
+        {{.Markdown.Content}}
+      </main>
+
+    </div>
+  </body>
+
+</html>
+{{end}}
