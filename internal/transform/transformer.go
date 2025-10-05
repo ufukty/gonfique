@@ -8,10 +8,10 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/ufukty/gonfique/internal/files/config"
-	"github.com/ufukty/gonfique/internal/files/input/encoders"
-	"github.com/ufukty/gonfique/internal/transform/combine"
-	"github.com/ufukty/gonfique/internal/transform/safe"
+	"go.ufukty.com/gonfique/internal/files/config"
+	"go.ufukty.com/gonfique/internal/files/input/encoders"
+	"go.ufukty.com/gonfique/internal/transform/combine"
+	"go.ufukty.com/gonfique/internal/transform/safe"
 )
 
 type Info struct {

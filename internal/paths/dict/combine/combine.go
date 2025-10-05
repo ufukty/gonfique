@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"go/ast"
 
-	"github.com/ufukty/gonfique/internal/datas/inits"
-	"github.com/ufukty/gonfique/internal/transform"
+	"go.ufukty.com/gonfique/internal/datas/inits"
+	"go.ufukty.com/gonfique/internal/transform"
 )
 
 func has[K comparable, V any](m map[K]V, k K) bool {

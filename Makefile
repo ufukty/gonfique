@@ -4,7 +4,7 @@ all:
 .PHONY: build
 
 VERSION := $(shell git describe --tags --always --dirty)
-LDFLAGS := -ldflags "-X 'github.com/ufukty/gonfique/internal/version.Version=$(VERSION)'"
+LDFLAGS := -ldflags "-X 'go.ufukty.com/gonfique/internal/version.Version=$(VERSION)'"
 
 build-gonfique:
 	@echo "Version $(VERSION)..."

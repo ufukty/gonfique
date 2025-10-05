@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ufukty/gonfique/internal/files/config"
+	"go.ufukty.com/gonfique/internal/files/config"
 )
 
 type valueSources[C comparable] map[C][]config.Path

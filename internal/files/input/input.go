@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/ufukty/gonfique/internal/files/input/encoders"
+	"go.ufukty.com/gonfique/internal/files/input/encoders"
 	"gopkg.in/yaml.v3"
 )
 

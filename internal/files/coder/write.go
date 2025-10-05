@@ -12,13 +12,13 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/ufukty/gonfique/internal/datas/inits"
-	"github.com/ufukty/gonfique/internal/files/coder/sort"
-	"github.com/ufukty/gonfique/internal/files/config"
-	"github.com/ufukty/gonfique/internal/files/config/meta"
-	"github.com/ufukty/gonfique/internal/files/input/encoders"
-	"github.com/ufukty/gonfique/internal/namings"
-	"github.com/ufukty/gonfique/internal/version"
+	"go.ufukty.com/gonfique/internal/datas/inits"
+	"go.ufukty.com/gonfique/internal/files/coder/sort"
+	"go.ufukty.com/gonfique/internal/files/config"
+	"go.ufukty.com/gonfique/internal/files/config/meta"
+	"go.ufukty.com/gonfique/internal/files/input/encoders"
+	"go.ufukty.com/gonfique/internal/namings"
+	"go.ufukty.com/gonfique/internal/version"
 	"golang.org/x/exp/maps"
 )
 
