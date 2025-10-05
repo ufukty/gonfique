@@ -1,6 +1,6 @@
 # Gonfique
 
-<img src="assets/Gonfique.png" alt="Gonfique logo" height="300px">
+<img src="assets/card-github.png" alt="Gonfique logo" height="300px">
 
 Gonfique is a special kind of YAML-to-Go and JSON-to-Go that has the **customization options** developers need when they create mappings for config files. Gonfique also **works offline**. Unlike online services Gonfique is easier to integrate into build pipeline which makes effortless to keep mapping types always up-to-date.
 
