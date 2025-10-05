@@ -23,7 +23,7 @@ If there is no output, then check if the directory is in `$PATH`. If the path is
 You need to clone repository and to run the Make recipe installs the binary after compiling with correct version information:
 
 ```sh
-git clone github.com/ufukty/gonfique
+git clone go.ufukty.com/gonfique
 cd gonfique
 make install
 ```
@@ -33,7 +33,7 @@ make install
 You can build the Gonfique binaries for all architectures and operating systems at once. Clone the repository and run the Makefile recipe installs the binary after compiling with correct version information:
 
 ```sh
-git clone github.com/ufukty/gonfique
+git clone go.ufukty.com/gonfique
 cd gonfique
 make build
 ```
