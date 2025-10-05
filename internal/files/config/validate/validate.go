@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/ufukty/gonfique/internal/datas/sortby"
-	"github.com/ufukty/gonfique/internal/files/config"
-	"github.com/ufukty/gonfique/internal/tree/bucket"
+	"go.ufukty.com/gonfique/internal/datas/sortby"
+	"go.ufukty.com/gonfique/internal/files/config"
+	"go.ufukty.com/gonfique/internal/tree/bucket"
 )
 
 var typenames = regexp.MustCompile(`<\w+>`)

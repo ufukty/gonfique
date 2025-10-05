@@ -5,7 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 
-	"github.com/ufukty/gonfique/internal/files/input/encoders"
+	"go.ufukty.com/gonfique/internal/files/input/encoders"
 )
 
 func (c Coder) addParentRefAssignmentsFunction(dst *ast.File) {

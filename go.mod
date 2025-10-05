@@ -1,4 +1,4 @@
-module github.com/ufukty/gonfique
+module go.ufukty.com/gonfique
 
 go 1.23
 

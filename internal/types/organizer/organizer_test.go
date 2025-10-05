@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ufukty/gonfique/internal/coder"
-	"github.com/ufukty/gonfique/internal/files/input"
-	"github.com/ufukty/gonfique/internal/testutils"
-	"github.com/ufukty/gonfique/internal/transform"
+	"go.ufukty.com/gonfique/internal/coder"
+	"go.ufukty.com/gonfique/internal/files/input"
+	"go.ufukty.com/gonfique/internal/testutils"
+	"go.ufukty.com/gonfique/internal/transform"
 )
 
 func TestOrganizer(t *testing.T) {

@@ -3,7 +3,7 @@ package version
 import (
 	"fmt"
 
-	"github.com/ufukty/gonfique/internal/version"
+	"go.ufukty.com/gonfique/internal/version"
 )
 
 func Run() error {

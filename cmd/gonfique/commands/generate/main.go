@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ufukty/gonfique/internal/generates"
+	"go.ufukty.com/gonfique/internal/generates"
 )
 
 type Args struct {

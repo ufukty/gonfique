@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ufukty/gonfique/internal/files/config"
-	"github.com/ufukty/gonfique/internal/paths/mapper/resolve"
+	"go.ufukty.com/gonfique/internal/files/config"
+	"go.ufukty.com/gonfique/internal/paths/mapper/resolve"
 	"golang.org/x/exp/maps"
 )
 

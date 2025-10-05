@@ -3,7 +3,7 @@ package embeds
 // import (
 // 	"go/ast"
 
-// 	"github.com/ufukty/gonfique/internal/paths/models"
+// 	"go.ufukty.com/gonfique/internal/paths/models"
 // )
 
 // type embeddingDetails struct {

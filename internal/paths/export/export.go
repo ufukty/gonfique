@@ -5,9 +5,9 @@ import (
 	"go/ast"
 	"go/token"
 
-	"github.com/ufukty/gonfique/internal/files/config"
-	"github.com/ufukty/gonfique/internal/holders"
-	"github.com/ufukty/gonfique/internal/paths/mapper/resolve"
+	"go.ufukty.com/gonfique/internal/files/config"
+	"go.ufukty.com/gonfique/internal/holders"
+	"go.ufukty.com/gonfique/internal/paths/mapper/resolve"
 )
 
 func (a *Agent) Type(h holders.Node, rp resolve.Path, reserved []config.Typename) error {
