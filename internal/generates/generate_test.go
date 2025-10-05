@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ufukty/gonfique/internal/testutils"
+	"go.ufukty.com/gonfique/internal/testutils"
 )
 
 func TestWithConfig(t *testing.T) {

@@ -5,8 +5,8 @@ import (
 	"go/token"
 	"slices"
 
-	"github.com/ufukty/gonfique/internal/compares"
-	"github.com/ufukty/gonfique/internal/namings"
+	"go.ufukty.com/gonfique/internal/compares"
+	"go.ufukty.com/gonfique/internal/namings"
 	"golang.org/x/tools/go/ast/astutil"
 )
 

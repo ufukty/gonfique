@@ -5,15 +5,15 @@ import (
 	"io"
 	"os"
 
-	"github.com/ufukty/gonfique/internal/files/coder"
-	"github.com/ufukty/gonfique/internal/files/config"
-	"github.com/ufukty/gonfique/internal/files/config/meta"
-	"github.com/ufukty/gonfique/internal/files/config/validate"
-	"github.com/ufukty/gonfique/internal/files/input"
-	"github.com/ufukty/gonfique/internal/files/input/encoders"
-	"github.com/ufukty/gonfique/internal/paths"
-	"github.com/ufukty/gonfique/internal/transform"
-	"github.com/ufukty/gonfique/internal/types"
+	"go.ufukty.com/gonfique/internal/files/coder"
+	"go.ufukty.com/gonfique/internal/files/config"
+	"go.ufukty.com/gonfique/internal/files/config/meta"
+	"go.ufukty.com/gonfique/internal/files/config/validate"
+	"go.ufukty.com/gonfique/internal/files/input"
+	"go.ufukty.com/gonfique/internal/files/input/encoders"
+	"go.ufukty.com/gonfique/internal/paths"
+	"go.ufukty.com/gonfique/internal/transform"
+	"go.ufukty.com/gonfique/internal/types"
 )
 
 func simple(in io.Reader, enc encoders.Encoding, out io.Writer) error {
@@ -123,6 +123,6 @@ func FromPaths(in, conf, out string, verbose bool) error {
 		return fmt.Errorf("open config file: %w", err)
 	}
 	defer c.Close()
-	
+
 	return FromReaders(i, enc, c, o, verbose)
 }

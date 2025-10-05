@@ -6,7 +6,7 @@ import (
 	"go/ast"
 	"slices"
 
-	"github.com/ufukty/gonfique/internal/datas/inits"
+	"go.ufukty.com/gonfique/internal/datas/inits"
 )
 
 var basics = map[string]any{

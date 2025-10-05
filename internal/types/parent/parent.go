@@ -6,11 +6,11 @@ import (
 	"go/token"
 	"slices"
 
-	"github.com/ufukty/gonfique/internal/datas/collects"
-	"github.com/ufukty/gonfique/internal/files/config"
-	"github.com/ufukty/gonfique/internal/namings"
-	"github.com/ufukty/gonfique/internal/paths/models"
-	"github.com/ufukty/gonfique/internal/transform"
+	"go.ufukty.com/gonfique/internal/datas/collects"
+	"go.ufukty.com/gonfique/internal/files/config"
+	"go.ufukty.com/gonfique/internal/namings"
+	"go.ufukty.com/gonfique/internal/paths/models"
+	"go.ufukty.com/gonfique/internal/transform"
 )
 
 type parentRefDetails struct {

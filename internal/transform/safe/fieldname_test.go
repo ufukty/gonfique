@@ -3,7 +3,7 @@ package safe
 import (
 	"testing"
 
-	"github.com/ufukty/gonfique/internal/files/config"
+	"go.ufukty.com/gonfique/internal/files/config"
 )
 
 func TestFieldnameFromUppercase(t *testing.T) {

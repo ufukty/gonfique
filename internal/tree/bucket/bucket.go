@@ -1,6 +1,6 @@
 package bucket
 
-import "github.com/ufukty/gonfique/internal/tree"
+import "go.ufukty.com/gonfique/internal/tree"
 
 type Bucket struct {
 	heading string

@@ -1,7 +1,7 @@
 package pick
 
 import (
-	"github.com/ufukty/gonfique/internal/files/config"
+	"go.ufukty.com/gonfique/internal/files/config"
 )
 
 // it returns the first directive value
