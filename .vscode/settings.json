@@ -1,0 +1,5 @@
+{
+  "[markdown]": {
+    "prettier.tabWidth": 2,
+  },
+}
