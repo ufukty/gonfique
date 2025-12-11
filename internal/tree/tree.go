@@ -15,14 +15,14 @@ func indent(s string, last bool) string {
 
 // use in recursion
 func List(heading string, items []string) string {
-	msg := fmt.Sprintf("%s\n", heading)
+	msg := heading
 	for i, item := range items {
 		last := i == len(items)-1
 		if !last {
-			msg += fmt.Sprintf("├─ %s\n", indent(item, false))
+			msg += fmt.Sprintf("\n├─ %s", indent(item, false))
 
 		} else {
-			msg += fmt.Sprintf("╰─ %s", indent(item, true))
+			msg += fmt.Sprintf("\n╰─ %s", indent(item, true))
 
 		}
 	}
