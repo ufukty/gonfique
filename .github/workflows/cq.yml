@@ -1,0 +1,27 @@
+name: Code Quality
+
+on:
+  workflow_dispatch:
+  schedule: [cron: "30 4 * * *"]
+
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: read-all
+
+jobs:
+  CodeQL:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions: { security-events: write }
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with: { go-version-file: go.mod, cache: true }
+      - run: go mod download
+      - run: go build ./...
+      - uses: github/codeql-action/init@v4
+        with: { languages: go, queries: security-and-quality }
+      - uses: github/codeql-action/analyze@v4
+        with: { category: "/language:go" }

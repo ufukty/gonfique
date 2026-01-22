@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: read-all
+
+jobs:
+  Go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with: { go-version-file: go.mod, cache: true }
+      - run: go fmt ./...
+      - run: go mod download
+      - run: go mod verify
+      - run: go mod tidy; git diff --exit-code go.mod go.sum
+      - uses: golangci/golangci-lint-action@v9
+      - run: go test -race -v ./...
