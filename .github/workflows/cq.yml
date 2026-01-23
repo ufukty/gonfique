@@ -11,6 +11,17 @@ concurrency:
 permissions: read-all
 
 jobs:
+  Actions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions: { security-events: write }
+    steps:
+      - uses: actions/checkout@v6
+      - uses: github/codeql-action/init@v4
+        with: { languages: actions, build-mode: none, queries: security-and-quality }
+      - uses: github/codeql-action/analyze@v4
+        with: { category: "/language:actions" }
+
   Go:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -25,14 +36,3 @@ jobs:
         with: { languages: go, queries: security-and-quality }
       - uses: github/codeql-action/analyze@v4
         with: { category: "/language:go" }
-
-  Actions:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions: { security-events: write }
-    steps:
-      - uses: actions/checkout@v6
-      - uses: github/codeql-action/init@v4
-        with: { languages: actions, build-mode: none, queries: security-and-quality }
-      - uses: github/codeql-action/analyze@v4
-        with: { category: "/language:actions" }
