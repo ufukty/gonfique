@@ -3,7 +3,7 @@ all:
 
 build-wasm:
 	mkdir -p "build/gonfique-wasm"
-	GOOS=js GOARCH=wasm go build -trimpath $(LDFLAGS) -o build/gonfique-wasm/$(VERSION).wasm ./cmd/wasm
+	GOOS=js GOARCH=wasm go build -o build/gonfique-wasm/$(VERSION).wasm ./cmd/wasm
 
 build: build-wasm
 
