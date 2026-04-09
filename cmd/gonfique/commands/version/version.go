@@ -7,6 +7,10 @@ import (
 )
 
 func Run() error {
-	fmt.Println(version.Version)
+	v, err := version.OfBuild()
+	if err != nil {
+		return fmt.Errorf("digging build details: %w", err)
+	}
+	fmt.Println(v)
 	return nil
 }
