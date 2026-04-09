@@ -51,7 +51,7 @@ func Bfs(ti *transform.Info, c *config.File, paths []config.Path, ea *export.Age
 		if holder != nil { // not the root
 			inits.Key(p.Nodes, rp)
 			p.Nodes[rp] = append(p.Nodes[rp], mp)
-			p.Holders[mp] = holders.Node{holder, rp.Termination()}
+			p.Holders[mp] = holders.Node{Holder: holder, Termination: rp.Termination()}
 
 			cps := match.Matches(paths, rp.Terms())
 			err := conflicts.Check(c.Rules, cps)

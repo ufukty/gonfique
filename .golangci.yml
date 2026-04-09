@@ -2,3 +2,7 @@ version: "2"
 linters:
   disable:
     - errcheck
+  settings:
+    staticcheck:
+      checks:
+        - "-QF1001"
