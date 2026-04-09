@@ -5,9 +5,9 @@ import (
 	"go/ast"
 	"slices"
 
-	"go.ufukty.com/gonfique/internal/files/config"
-	"go.ufukty.com/gonfique/internal/paths/export/auto"
-	"go.ufukty.com/gonfique/internal/paths/mapper/resolve"
+	"go.ufukty.com/gonfique/v2/internal/files/config"
+	"go.ufukty.com/gonfique/v2/internal/paths/export/auto"
+	"go.ufukty.com/gonfique/v2/internal/paths/mapper/resolve"
 )
 
 type Agent struct {

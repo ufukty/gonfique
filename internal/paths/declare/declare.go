@@ -5,10 +5,10 @@ import (
 	"go/ast"
 	"go/token"
 
-	"go.ufukty.com/gonfique/internal/files/config"
-	"go.ufukty.com/gonfique/internal/holders"
-	"go.ufukty.com/gonfique/internal/paths/declare/clone"
-	"go.ufukty.com/gonfique/internal/paths/mapper/resolve"
+	"go.ufukty.com/gonfique/v2/internal/files/config"
+	"go.ufukty.com/gonfique/v2/internal/holders"
+	"go.ufukty.com/gonfique/v2/internal/paths/declare/clone"
+	"go.ufukty.com/gonfique/v2/internal/paths/mapper/resolve"
 )
 
 func (a *Agent) Declare(h holders.Node, tn config.Typename, rp resolve.Path) (*ast.TypeSpec, error) {

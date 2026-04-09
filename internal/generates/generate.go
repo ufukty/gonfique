@@ -5,15 +5,15 @@ import (
 	"io"
 	"os"
 
-	"go.ufukty.com/gonfique/internal/files/coder"
-	"go.ufukty.com/gonfique/internal/files/config"
-	"go.ufukty.com/gonfique/internal/files/config/meta"
-	"go.ufukty.com/gonfique/internal/files/config/validate"
-	"go.ufukty.com/gonfique/internal/files/input"
-	"go.ufukty.com/gonfique/internal/files/input/encoders"
-	"go.ufukty.com/gonfique/internal/paths"
-	"go.ufukty.com/gonfique/internal/transform"
-	"go.ufukty.com/gonfique/internal/types"
+	"go.ufukty.com/gonfique/v2/internal/files/coder"
+	"go.ufukty.com/gonfique/v2/internal/files/config"
+	"go.ufukty.com/gonfique/v2/internal/files/config/meta"
+	"go.ufukty.com/gonfique/v2/internal/files/config/validate"
+	"go.ufukty.com/gonfique/v2/internal/files/input"
+	"go.ufukty.com/gonfique/v2/internal/files/input/encoders"
+	"go.ufukty.com/gonfique/v2/internal/paths"
+	"go.ufukty.com/gonfique/v2/internal/transform"
+	"go.ufukty.com/gonfique/v2/internal/types"
 )
 
 func simple(in io.Reader, enc encoders.Encoding, out io.Writer) error {

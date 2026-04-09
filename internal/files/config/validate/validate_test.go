@@ -3,8 +3,8 @@ package validate
 import (
 	"fmt"
 
-	"go.ufukty.com/gonfique/internal/files/config"
-	"go.ufukty.com/gonfique/internal/files/config/meta"
+	"go.ufukty.com/gonfique/v2/internal/files/config"
+	"go.ufukty.com/gonfique/v2/internal/files/config/meta"
 )
 
 func ExampleFile() {

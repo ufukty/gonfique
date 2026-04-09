@@ -6,8 +6,8 @@ import (
 	"strings"
 	"unicode"
 
-	"go.ufukty.com/gonfique/internal/files/config"
-	"go.ufukty.com/gonfique/internal/paths/mapper/resolve"
+	"go.ufukty.com/gonfique/v2/internal/files/config"
+	"go.ufukty.com/gonfique/v2/internal/paths/mapper/resolve"
 )
 
 var smallcaps = regexp.MustCompile("[a-z]+")
@@ -54,7 +54,6 @@ func typenameForSegments(segments []string) config.Typename {
 		}
 	}
 	return config.Typename(tn)
-
 }
 
 var keywords = map[config.Typename]bool{

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"go/ast"
 
-	"go.ufukty.com/gonfique/internal/files/config"
-	"go.ufukty.com/gonfique/internal/transform"
-	"go.ufukty.com/gonfique/internal/types/accessors"
-	"go.ufukty.com/gonfique/internal/types/iterator"
-	"go.ufukty.com/gonfique/internal/types/rules"
+	"go.ufukty.com/gonfique/v2/internal/files/config"
+	"go.ufukty.com/gonfique/v2/internal/transform"
+	"go.ufukty.com/gonfique/v2/internal/types/accessors"
+	"go.ufukty.com/gonfique/v2/internal/types/iterator"
+	"go.ufukty.com/gonfique/v2/internal/types/rules"
 )
 
 type aux struct {

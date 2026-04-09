@@ -5,7 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 
-	"go.ufukty.com/gonfique/internal/files/config"
+	"go.ufukty.com/gonfique/v2/internal/files/config"
 )
 
 func quotes(s string) string {

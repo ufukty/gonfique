@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"go.ufukty.com/gonfique/internal/files/config/meta"
+	"go.ufukty.com/gonfique/v2/internal/files/config/meta"
 	"gopkg.in/yaml.v3"
 )
 

@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"go.ufukty.com/gonfique/internal/holders"
+	"go.ufukty.com/gonfique/v2/internal/holders"
 )
 
 type value struct {

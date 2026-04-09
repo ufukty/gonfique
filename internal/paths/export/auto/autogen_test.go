@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"go.ufukty.com/gonfique/internal/files/config"
-	"go.ufukty.com/gonfique/internal/paths/mapper/resolve"
+	"go.ufukty.com/gonfique/v2/internal/files/config"
+	"go.ufukty.com/gonfique/v2/internal/paths/mapper/resolve"
 	"golang.org/x/exp/maps"
 )
 
@@ -161,7 +161,6 @@ func TestAutogen(t *testing.T) {
 					t.Errorf("assert 3, value. want %q got %q", tn, got[kp])
 				}
 			}
-
 		})
 	}
 }

@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"go/ast"
 
-	"go.ufukty.com/gonfique/internal/datas/inits"
-	"go.ufukty.com/gonfique/internal/files/config"
-	"go.ufukty.com/gonfique/internal/holders"
-	"go.ufukty.com/gonfique/internal/paths/conflicts"
-	"go.ufukty.com/gonfique/internal/paths/export"
-	"go.ufukty.com/gonfique/internal/paths/mapper/absolute"
-	"go.ufukty.com/gonfique/internal/paths/mapper/resolve"
-	"go.ufukty.com/gonfique/internal/paths/match"
-	"go.ufukty.com/gonfique/internal/paths/pick"
-	"go.ufukty.com/gonfique/internal/transform"
+	"go.ufukty.com/gonfique/v2/internal/datas/inits"
+	"go.ufukty.com/gonfique/v2/internal/files/config"
+	"go.ufukty.com/gonfique/v2/internal/holders"
+	"go.ufukty.com/gonfique/v2/internal/paths/conflicts"
+	"go.ufukty.com/gonfique/v2/internal/paths/export"
+	"go.ufukty.com/gonfique/v2/internal/paths/mapper/absolute"
+	"go.ufukty.com/gonfique/v2/internal/paths/mapper/resolve"
+	"go.ufukty.com/gonfique/v2/internal/paths/match"
+	"go.ufukty.com/gonfique/v2/internal/paths/pick"
+	"go.ufukty.com/gonfique/v2/internal/transform"
 )
 
 func has[K comparable, V any](m map[K]V, k K) bool {

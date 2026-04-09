@@ -6,9 +6,9 @@ import (
 	"go/ast"
 	"slices"
 
-	"go.ufukty.com/gonfique/internal/compares"
-	"go.ufukty.com/gonfique/internal/files/config"
-	"go.ufukty.com/gonfique/internal/paths/mapper/resolve"
+	"go.ufukty.com/gonfique/v2/internal/compares"
+	"go.ufukty.com/gonfique/v2/internal/files/config"
+	"go.ufukty.com/gonfique/v2/internal/paths/mapper/resolve"
 	"golang.org/x/exp/maps"
 )
 

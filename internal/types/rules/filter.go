@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"go.ufukty.com/gonfique/internal/files/config"
+	"go.ufukty.com/gonfique/v2/internal/files/config"
 )
 
 func TypeTargeting(c *config.File) map[config.Path]config.Typename {

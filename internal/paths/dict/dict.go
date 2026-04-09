@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"go/ast"
 
-	"go.ufukty.com/gonfique/internal/holders"
-	"go.ufukty.com/gonfique/internal/paths/dict/combine"
-	"go.ufukty.com/gonfique/internal/transform"
+	"go.ufukty.com/gonfique/v2/internal/holders"
+	"go.ufukty.com/gonfique/v2/internal/paths/dict/combine"
+	"go.ufukty.com/gonfique/v2/internal/transform"
 )
 
 func ConvertToMap(h holders.Node, ti *transform.Info) (*ast.MapType, error) {
