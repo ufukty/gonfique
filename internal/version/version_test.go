@@ -10,6 +10,6 @@ func TestOfBuild(t *testing.T) {
 		t.Errorf("act, unexpected error: %v", err)
 	}
 	if v != "(devel)" {
-		t.Errorf("assert, unexpected empty value")
+		t.Errorf("assert, expected %q got %q", "(devel)", v)
 	}
 }
