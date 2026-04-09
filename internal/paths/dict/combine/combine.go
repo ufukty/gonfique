@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"go/ast"
 
-	"go.ufukty.com/gonfique/internal/datas/inits"
-	"go.ufukty.com/gonfique/internal/transform"
+	"go.ufukty.com/gonfique/v2/internal/datas/inits"
+	"go.ufukty.com/gonfique/v2/internal/transform"
 )
 
 func Combine(ti *transform.Info, types ...ast.Expr) (ast.Expr, error) {

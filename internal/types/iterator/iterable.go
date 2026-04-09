@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"go/ast"
 
-	"go.ufukty.com/gonfique/internal/files/config"
-	"go.ufukty.com/gonfique/internal/transform"
+	"go.ufukty.com/gonfique/v2/internal/files/config"
+	"go.ufukty.com/gonfique/v2/internal/transform"
 )
 
 type Agent struct {

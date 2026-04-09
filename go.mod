@@ -1,4 +1,4 @@
-module go.ufukty.com/gonfique
+module go.ufukty.com/gonfique/v2
 
 go 1.26
 

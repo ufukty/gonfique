@@ -10,8 +10,8 @@ import (
 	"strings"
 	"syscall/js"
 
-	"go.ufukty.com/gonfique/internal/files/input/encoders"
-	"go.ufukty.com/gonfique/internal/generates"
+	"go.ufukty.com/gonfique/v2/internal/files/input/encoders"
+	"go.ufukty.com/gonfique/v2/internal/generates"
 )
 
 //export Convert

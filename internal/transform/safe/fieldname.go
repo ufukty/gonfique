@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode"
 
-	"go.ufukty.com/gonfique/internal/files/config"
+	"go.ufukty.com/gonfique/v2/internal/files/config"
 )
 
 var smallcaps = regexp.MustCompile("[a-z]+")

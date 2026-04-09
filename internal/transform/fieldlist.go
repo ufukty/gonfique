@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strings"
 
-	"go.ufukty.com/gonfique/internal/compares"
+	"go.ufukty.com/gonfique/v2/internal/compares"
 )
 
 func fieldsByTags(fl *ast.FieldList) map[string]*ast.Field {
