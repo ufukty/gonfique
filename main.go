@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"go.ufukty.com/gonfique/cmd/gonfique/commands/generate"
-	"go.ufukty.com/gonfique/cmd/gonfique/commands/help"
-	"go.ufukty.com/gonfique/cmd/gonfique/commands/version"
+	"go.ufukty.com/gonfique/internal/commands/generate"
+	"go.ufukty.com/gonfique/internal/commands/help"
+	"go.ufukty.com/gonfique/internal/commands/version"
 )
 
 type Run func() error
