@@ -8,11 +8,6 @@ import (
 	"go.ufukty.com/gonfique/internal/transform"
 )
 
-func has[K comparable, V any](m map[K]V, k K) bool {
-	_, ok := m[k]
-	return ok
-}
-
 func Combine(ti *transform.Info, types ...ast.Expr) (ast.Expr, error) {
 	if len(types) == 0 {
 		return nil, fmt.Errorf("no argument")
