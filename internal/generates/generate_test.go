@@ -55,7 +55,7 @@ func TestWithConfig(t *testing.T) {
 				t.Fatal(fmt.Errorf("act: %w", err))
 			}
 
-			cmd := exec.Command("/usr/local/go/bin/go", "test",
+			cmd := exec.Command("go", "test",
 				"-timeout", "10s",
 				"-run", "^TestConfig$",
 				"test",
