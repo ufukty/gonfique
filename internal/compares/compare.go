@@ -2,9 +2,8 @@ package compares
 
 import (
 	"go/ast"
+	"maps"
 	"slices"
-
-	"golang.org/x/exp/maps"
 )
 
 func sort(idts []*ast.Ident) {
@@ -50,14 +49,14 @@ func Compare(a, b any) bool {
 			}
 			af := linearizeFieldList(a)
 			bf := linearizeFieldList(b)
-			afk := maps.Keys(af)
-			bfk := maps.Keys(bf)
+			afk := slices.Collect(maps.Keys(af))
+			bfk := slices.Collect(maps.Keys(bf))
 			if len(afk) != len(bfk) {
 				return false
 			}
 			sort(afk)
 			sort(bfk)
-			for i := 0; i < len(afk); i++ {
+			for i := range afk {
 				if !Compare(afk[i], bfk[i]) || !Compare(af[afk[i]], bf[bfk[i]]) {
 					return false
 				}
