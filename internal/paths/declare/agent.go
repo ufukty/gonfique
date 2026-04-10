@@ -2,10 +2,11 @@ package declare
 
 import (
 	"go/ast"
+	"maps"
+	"slices"
 
 	"go.ufukty.com/gonfique/v2/internal/files/config"
 	"go.ufukty.com/gonfique/v2/internal/paths/mapper/resolve"
-	"golang.org/x/exp/maps"
 )
 
 // keeps track of type expression and typename conflicts.
@@ -25,5 +26,5 @@ func New() *Agent {
 }
 
 func (a *Agent) Typenames() []config.Typename {
-	return maps.Keys(a.users)
+	return slices.Collect(maps.Keys(a.users))
 }
