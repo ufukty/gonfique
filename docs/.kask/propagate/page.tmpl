@@ -2,9 +2,9 @@
 {{with .}}
 <ul>
   {{if ne .Href ""}}
-  <a href="{{.Href}}">{{.Title}}</a>
+  <a href="{{.Href}}">{{trustedHtml .Title}}</a>
   {{else}}
-  <span>{{.Title}}</span>
+  <span>{{trustedHtml .Title}}</span>
   {{end}}
   {{range .Children}}
   <li>{{template "sitemap-item" .}}</li>{{end}}
@@ -13,7 +13,7 @@
 {{end}}
 
 {{define "toc-item"}}
-{{if gt .Level 0}}<a href="#{{.ID}}" class="toc{{.Level}}">{{.Title}}</a>{{end}}
+{{if gt .Level 0}}<a href="#{{.ID}}" class="toc{{.Level}}">{{trustedHtml .Title}}</a>{{end}}
 {{with .Children}}
 <ul>
   {{range .}}
@@ -32,12 +32,6 @@
     <title>{{.Node.Title}} — Gonfique Docs</title>
 
     <meta property="og:image" content="https://gohandlers.pages.dev/.assets/github-social-preview.png">
-
-    <link rel="icon" type="image/png" sizes="16x16" href="/.assets/favicon@1x.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/.assets/favicon@2x.png">
-    <link rel="icon" type="image/png" sizes="48x48" href="/.assets/favicon@3x.png">
-    <link rel="icon" type="image/png" sizes="64x64" href="/.assets/favicon@4x.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/.assets/favicon@180w.png">
 
     {{range .Stylesheets}}
     <link rel="stylesheet" href="{{.}}">{{end}}
@@ -73,10 +67,10 @@
       </div>
 
       <script>
-        function onChange(eval, callback) {
+        function onChange(evaluator, callback) {
           let last;
           return () => {
-            let next = eval()
+            let next = evaluator()
             if (last != next) {
               last = next
               callback()
@@ -102,7 +96,7 @@
       </script>
 
       <main class="markdown">
-        {{.Markdown.Content}}
+        {{trustedHtml .Markdown.Content}}
       </main>
 
     </div>
