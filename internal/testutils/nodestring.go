@@ -3,11 +3,10 @@ package testutils
 import (
 	"fmt"
 	"go/ast"
+	"maps"
 	"reflect"
 	"slices"
 	"strings"
-
-	"golang.org/x/exp/maps"
 )
 
 func PrintPathways(v reflect.Value, anc []string) {
@@ -26,7 +25,7 @@ func PrintPathways(v reflect.Value, anc []string) {
 		for iter.Next() {
 			m[iter.Key().String()] = iter.Value()
 		}
-		ks := maps.Keys(m)
+		ks := slices.Collect(maps.Keys(m))
 		slices.Sort(ks)
 		for _, k := range ks {
 			PrintPathways(m[k], append(slices.Clone(anc), k))

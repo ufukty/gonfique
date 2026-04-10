@@ -4,12 +4,12 @@ import (
 	"cmp"
 	"fmt"
 	"go/ast"
+	"maps"
 	"slices"
 
 	"go.ufukty.com/gonfique/v2/internal/compares"
 	"go.ufukty.com/gonfique/v2/internal/files/config"
 	"go.ufukty.com/gonfique/v2/internal/paths/mapper/resolve"
-	"golang.org/x/exp/maps"
 )
 
 func groupSchemas(users []resolve.Path, exprs map[resolve.Path]ast.Expr) map[ast.Expr][]resolve.Path {
@@ -94,7 +94,7 @@ func summarize(e ast.Expr) string {
 // in sorted order
 func format(cs map[config.Typename]map[ast.Expr][]resolve.Path) string {
 	msg := ""
-	tns := maps.Keys(cs)
+	tns := slices.Collect(maps.Keys(cs))
 	slices.Sort(tns)
 	for i := 0; i < len(tns); i++ {
 		heading := ternary(i != len(tns)-1, "├─ ", "╰─ ")
@@ -106,7 +106,7 @@ func format(cs map[config.Typename]map[ast.Expr][]resolve.Path) string {
 		for t := range users {
 			summaries[t] = summarize(t)
 		}
-		types := maps.Keys(users)
+		types := slices.Collect(maps.Keys(users))
 		slices.SortFunc(types, func(a, b ast.Expr) int {
 			return cmp.Compare(summaries[a], summaries[b])
 		})

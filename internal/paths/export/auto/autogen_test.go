@@ -3,13 +3,13 @@ package auto
 import (
 	"cmp"
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 	"testing"
 
 	"go.ufukty.com/gonfique/v2/internal/files/config"
 	"go.ufukty.com/gonfique/v2/internal/paths/mapper/resolve"
-	"golang.org/x/exp/maps"
 )
 
 func bfs(a, b resolve.Path) int {
@@ -31,7 +31,7 @@ func typenames(rps []resolve.Path) (map[resolve.Path]config.Typename, error) {
 	slices.SortFunc(rps, bfs)
 	tns := map[resolve.Path]config.Typename{}
 	for _, rp := range rps {
-		tn, ok := Typename(rp, maps.Values(tns))
+		tn, ok := Typename(rp, slices.Collect(maps.Values(tns)))
 		if !ok {
 			return nil, fmt.Errorf("could not produce typename for %s", rp)
 		}
@@ -139,7 +139,7 @@ func TestAutogen(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.testname, func(t *testing.T) {
-			got, err := typenames(maps.Keys(tc.output))
+			got, err := typenames(slices.Collect(maps.Keys(tc.output)))
 			if err != nil {
 				t.Fatal(fmt.Errorf("act: %w", err))
 			}

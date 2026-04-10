@@ -3,6 +3,7 @@ package paths
 import (
 	"fmt"
 	"go/ast"
+	"maps"
 	"slices"
 
 	"go.ufukty.com/gonfique/v2/internal/datas/sortby"
@@ -19,7 +20,6 @@ import (
 	"go.ufukty.com/gonfique/v2/internal/paths/replace"
 	"go.ufukty.com/gonfique/v2/internal/transform"
 	"go.ufukty.com/gonfique/v2/internal/tree/bucket"
-	"golang.org/x/exp/maps"
 )
 
 type products struct {
@@ -31,7 +31,7 @@ func Process(ti *transform.Info, c *config.File, verbose bool) (*products, error
 	declare := declare.New()
 	export := export.New([]config.Typename{}) // FIXME:
 	replace := replace.New()
-	paths := maps.Keys(c.Rules)
+	paths := slices.Collect(maps.Keys(c.Rules))
 
 	mps, err := mapper.Bfs(ti, c, paths, export)
 	if err != nil {

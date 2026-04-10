@@ -8,6 +8,7 @@ import (
 	"go/printer"
 	"go/token"
 	"io"
+	"maps"
 	"regexp"
 	"slices"
 	"strings"
@@ -19,7 +20,6 @@ import (
 	"go.ufukty.com/gonfique/v2/internal/files/input/encoders"
 	"go.ufukty.com/gonfique/v2/internal/namings"
 	"go.ufukty.com/gonfique/v2/internal/version"
-	"golang.org/x/exp/maps"
 )
 
 type Coder struct {
@@ -47,7 +47,7 @@ func uniq[K comparable](ss []K) []K {
 	for _, s := range ss {
 		m[s] = nil
 	}
-	return maps.Keys(m)
+	return slices.Collect(maps.Keys(m))
 }
 
 func (c Coder) addImports(dst *ast.File) {
