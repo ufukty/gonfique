@@ -144,7 +144,7 @@ This one was an easy one. No one have enough time to deal with this in repeat. Y
 Download, compile and install the latest release of Gonfique:
 
 ```sh
-go install go.ufukty.com/gonfique@v2.0.0-alpha.5
+go install go.ufukty.com/gonfique/v2@v2.0.0-alpha.6
 ```
 
 Validate installation:
