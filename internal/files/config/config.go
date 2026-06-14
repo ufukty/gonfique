@@ -6,9 +6,13 @@ import (
 	"io"
 	"strings"
 
-	"go.ufukty.com/gonfique/v2/internal/files/config/meta"
 	"gopkg.in/yaml.v3"
 )
+
+type Meta struct {
+	Type    string `yaml:"type"`
+	Package string `yaml:"package"`
+}
 
 type Dict string
 
@@ -68,7 +72,7 @@ func (fn Fieldname) Ident() *ast.Ident {
 }
 
 type File struct {
-	Meta  meta.Meta           `yaml:"meta"`
+	Meta  Meta                `yaml:"meta"`
 	Rules map[Path]Directives `yaml:"rules"`
 }
 

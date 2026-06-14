@@ -1,13 +1,13 @@
 package generates
 
 import (
+	"cmp"
 	"fmt"
 	"io"
 	"os"
 
 	"go.ufukty.com/gonfique/v2/internal/files/coder"
 	"go.ufukty.com/gonfique/v2/internal/files/config"
-	"go.ufukty.com/gonfique/v2/internal/files/config/meta"
 	"go.ufukty.com/gonfique/v2/internal/files/config/validate"
 	"go.ufukty.com/gonfique/v2/internal/files/input"
 	"go.ufukty.com/gonfique/v2/internal/files/input/encoders"
@@ -22,7 +22,7 @@ func simple(in io.Reader, enc encoders.Encoding, out io.Writer) error {
 		return fmt.Errorf("read: %w", err)
 	}
 	c := coder.Coder{
-		Meta:     meta.Default,
+		Meta:     config.Meta{Package: "config", Type: "Config"},
 		Encoding: enc,
 		Config:   transform.Transform(i, enc).Type,
 	}
@@ -71,9 +71,12 @@ func withConfig(in io.Reader, enc encoders.Encoding, conf io.Reader, out io.Writ
 	if err != nil {
 		return fmt.Errorf("applying type targeting rules: %w", err)
 	}
-
+	m := config.Meta{
+		Package: cmp.Or(c.Meta.Package, "config"),
+		Type:    cmp.Or(c.Meta.Type, "Config"),
+	}
 	coder := coder.Coder{
-		Meta:      meta.Default,
+		Meta:      m,
 		Encoding:  enc,
 		Config:    ti.Type,
 		Imports:   aux.Imports,
