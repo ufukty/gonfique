@@ -4,12 +4,11 @@ import (
 	"fmt"
 
 	"go.ufukty.com/gonfique/v2/internal/files/config"
-	"go.ufukty.com/gonfique/v2/internal/files/config/meta"
 )
 
 func ExampleFile() {
 	f := &config.File{
-		Meta: meta.Meta{},
+		Meta: config.Meta{},
 		Rules: map[config.Path]config.Directives{
 			"<A>":       {Dict: "hello world"},
 			"<A>.<B>":   {},
