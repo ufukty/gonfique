@@ -9,7 +9,7 @@ import (
 
 func ExampleFile() {
 	f := &config.File{
-		Meta: meta.Default,
+		Meta: meta.Meta{},
 		Rules: map[config.Path]config.Directives{
 			"<A>":       {Dict: "hello world"},
 			"<A>.<B>":   {},
