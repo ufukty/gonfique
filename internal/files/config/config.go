@@ -22,6 +22,18 @@ const (
 	Map      Dict = "map"
 )
 
+func (d Dict) Validate() error {
+	switch d {
+	case Map:
+		return nil
+	case Struct:
+		return nil
+	case ZeroDict:
+		return nil
+	}
+	return fmt.Errorf("invalid value: %q", d)
+}
+
 type Directives struct {
 	Export  bool     `yaml:"export"`
 	Declare Typename `yaml:"declare"`
