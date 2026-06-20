@@ -1,0 +1,175 @@
+:root {
+  color-scheme: light dark;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: inherit;
+  font-family: inherit;
+  color: inherit;
+  font-weight: inherit;
+  scroll-margin-top: 20px;
+}
+
+html {
+  font-size: 16px;
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: light-dark(#444, #aaa);
+  background-color: light-dark(#fff, #171717);
+  line-height: 2;
+  font-weight: 400;
+  scroll-behavior: smooth;
+  scroll-margin-top: 70px;
+}
+
+a {
+  text-decoration: none;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+h1 {
+  --heading-order: 6;
+  font-size: 2em;
+}
+
+h2 {
+  --heading-order: 5;
+  font-size: 1.7em;
+}
+
+h3 {
+  --heading-order: 4;
+  font-size: 1.3em;
+}
+
+h4 {
+  --heading-order: 3;
+  font-size: 1.2em;
+}
+
+h5 {
+  --heading-order: 2;
+}
+
+h6 {
+  --heading-order: 1;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 500;
+}
+
+:not(:is(h1, h2, h3, h4, h5, h6)) + :is(h1, h2, h3, h4, h5, h6) {
+  margin-top: calc(((7 - var(--heading-order)) / 6 + 1) * 30px);
+}
+
+p {
+  margin: 10px 0;
+}
+
+footer {
+  width: 100%;
+  padding: 20px 20px 100px;
+  border-top: 0.5px solid #eee;
+}
+
+html {
+  width: 100%;
+}
+
+body {
+  width: 100vw;
+  padding-bottom: 200px;
+
+  #markdown-page-column-layout {
+    width: 100vw;
+    padding: 20px;
+
+    @media screen and (width<700px) {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+
+      & > #navs {
+        display: contents;
+      }
+    }
+
+    @media screen and (700px<=width) and (width<1700px) {
+      display: grid;
+      grid-template-columns: min-content 1fr;
+      justify-content: left;
+      align-items: start;
+      gap: 20px;
+
+      position: relative;
+
+      & > #navs {
+        grid-column: 1 / 2;
+        grid-row: 1 / 2;
+
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      & > main {
+        grid-column: 2 / 3;
+        grid-row: 1 / 2;
+        overflow-x: hidden;
+      }
+    }
+
+    @media screen and (1700px<=width) {
+      display: grid;
+      grid-template-columns: 350px 1fr 350px;
+      justify-content: space-between;
+      align-items: start;
+      gap: 20px;
+
+      position: relative;
+
+      & > #navs {
+        display: contents;
+
+        & > nav#sitemap {
+          grid-column: 1 / 2;
+          grid-row: 1 / 2;
+          position: sticky;
+          top: 20px;
+        }
+
+        & > nav#toc {
+          grid-column: 3 / 4;
+          grid-row: 1 / 2;
+          position: sticky;
+          top: 20px;
+        }
+      }
+
+      & > main {
+        grid-column: 2 / 3;
+        grid-row: 1 / 2;
+        justify-self: center;
+        margin-bottom: 500px;
+        width: 100%;
+        overflow: hidden;
+      }
+    }
+  }
+}
+
+hr {
+  display: none;
+}

@@ -1,0 +1,65 @@
+#navs {
+  nav {
+    ul ul {
+      margin-left: 20px;
+    }
+
+    li {
+      list-style: none;
+      text-indent: 1.6em hanging;
+    }
+
+    a,
+    span {
+      display: block;
+      min-width: 200px;
+      padding: 0 5px;
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    span {
+      color: light-dark(#aaa, #444);
+    }
+
+    a {
+
+      &:hover,
+      &.active {
+        color: light-dark(black, white);
+      }
+    }
+  }
+
+  @media screen and (width<700px) {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    details {
+      border-radius: 8px;
+      overflow: hidden;
+
+      summary {
+        padding: 10px;
+        background-color: light-dark(#eee, #000);
+        cursor: pointer;
+      }
+
+      .summarized {
+        padding: 10px;
+        background-color: light-dark(#f8f8f8, #111);
+      }
+    }
+  }
+
+  @media screen and (700px<=width) {
+    &>nav>details {
+
+      &,
+      &>* {
+        display: block;
+      }
+    }
+  }
+}
